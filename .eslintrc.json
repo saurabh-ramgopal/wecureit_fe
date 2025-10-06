@@ -1,0 +1,17 @@
+// {
+//   "root": true,
+//   "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+//   "parser": "@typescript-eslint/parser",
+//   "plugins": ["@typescript-eslint"],
+//   "rules": {
+//     "@typescript-eslint/no-explicit-any": "off", // allow any for rapid prototyping
+//     "@typescript-eslint/explicit-module-boundary-types": "off", // optional, skip return type enforcement
+//     "@typescript-eslint/no-unused-vars": [
+//       "warn",
+//       { "argsIgnorePattern": "^_" }
+//     ], // warn for unused vars
+//     "react/react-in-jsx-scope": "off", // not needed for Next.js 13+
+//     "semi": ["error", "always"], // enforce semicolons
+//     "quotes": ["error", "double"] // enforce double quotes
+//   }
+// }
