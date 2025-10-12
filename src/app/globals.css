@@ -1,26 +1,80 @@
+/* Import fonts (you can adjust weights as needed) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-primary: 13, 148, 136   ;   /* teal-500 */
+   --color-secondary: 8, 145, 178  ;     /* cyan-500 */
+     --color-primary-100: 204 251 241;   /* teal-100 */
+     --color-secondary-100: 230 253 255; /* cyan-100 */
+   --color-primaryteal: 6 148 162;        /* #0694A2 - Tropical Teal */
+  --color-secondaryblue: 230 253 255;    /* #E6FDFF - Ice Blue */
+  --color-accent: 14 165 233;        /* #0EA5E9 - Sky Blue */
+  --color-dark: 8 116 128;           /* #087480 - Deep Turquoise */
+  --color-text: 33 33 33;            /* #212121 - Dark Gray */
+  --color-background: 255 255 255;   /* #FFFFFF - White */
+  --color-border: 125 211 252;       /* #7DD3FC - Light Sky */
+  --color-success: 6 182 212;        /* #06B6D4 - Cyan */
+  --color-light-hover: 3 105 161;    /* #0369A1 - Blue */
+  --color-muted: 103 232 249;        /* #67E8F9 - Aqua */
+  --color-offwhite: 252 254 255;     /* #FCFEFF - Fresh White */
+  --color-offwhitelight: 252 254 255; /* #FCFEFF with opacity */
+  
+    /* Font-size CSS variables used by Tailwind/plugins (define defaults) */
+    --text-xs: 0.75rem;
+    --text-xs--line-height: 1rem;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: 1.25rem;
+    --text-base: 1rem;
+    --text-base--line-height: 1.5rem;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: 1.75rem;
+    --text-xl: 1.25rem;
+    --text-xl--line-height: 1.75rem;
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: 2rem;
   }
 }
-
+/* Global text styling */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  color: #2D3748; /* Dark Slate for text */
+  background-color: #F7FAFC; /* Soft background */
+  margin: 0;
+  padding: 0;
 }
+
+/* Headings */
+h1, h2 {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  color: #087480;
+}
+
+/* Paragraphs */
+p {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+button {
+  font-size: inherit; /* make button inherit font-size */
+}
+
+/* Hide native browser password reveal / clear icons so only our custom toggle appears */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-textfield-decoration-container,
+input[type="password"]::-webkit-textfield-decoration-button {
+  display: none !important;
+}
+
+/* Safari/Chrome: hide the clear (x) and reveal icons */
+input[type="password"]::-webkit-textfield-decoration-container { display: none !important; }
+input[type="password"]::-webkit-credentials-auto-fill-button { display: none !important; }
+
