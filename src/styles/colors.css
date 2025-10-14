@@ -1,0 +1,19 @@
+/* src/styles/colors.css */
+
+/* Primary Colors */
+:root {
+  --primary-blue: #2B6CB0;      /* Deep Trust Blue */
+  --secondary-blue: #4299E1;    /* Calm Sky */
+  --accent-green: #48BB78;      /* Health/Success */
+  --background: #F7FAFC;        /* Soft Gray */
+  --text-dark: #2D3748;         /* Dark Slate */
+  --white: #FFFFFF;
+  --warning-red: #F56565;       /* Soft Red */
+}
+body {
+  background-color: var(--background);
+  color: var(--text-dark);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}

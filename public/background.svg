@@ -1,0 +1,63 @@
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base gradient background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FDFA;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ECFEFF;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Subtle pattern -->
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#5EEAD4" opacity="0.3"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)"/>
+  <rect width="1920" height="1080" fill="url(#dots)"/>
+  
+  <!-- Large decorative circles - top right -->
+  <circle cx="1600" cy="150" r="200" fill="#0D9488" opacity="0.05"/>
+  <circle cx="1650" cy="180" r="150" fill="#14B8A6" opacity="0.08"/>
+  
+  <!-- Large decorative circles - bottom left -->
+  <circle cx="250" cy="900" r="180" fill="#06B6D4" opacity="0.06"/>
+  <circle cx="300" cy="950" r="120" fill="#0891B2" opacity="0.05"/>
+  
+  <!-- Medical cross icons - subtle -->
+  <g opacity="0.04">
+    <path d="M 1400 800 L 1400 900 M 1350 850 L 1450 850" stroke="#0D9488" stroke-width="20" stroke-linecap="round"/>
+    <path d="M 400 200 L 400 280 M 360 240 L 440 240" stroke="#14B8A6" stroke-width="15" stroke-linecap="round"/>
+    <path d="M 1700 600 L 1700 670 M 1665 635 L 1735 635" stroke="#06B6D4" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Heartbeat line - top -->
+  <g opacity="0.06">
+    <path d="M 0 300 L 300 300 L 320 280 L 340 320 L 360 300 L 800 300" 
+          stroke="#0D9488" stroke-width="3" fill="none"/>
+    <path d="M 1100 300 L 1400 300 L 1420 280 L 1440 320 L 1460 300 L 1920 300" 
+          stroke="#14B8A6" stroke-width="3" fill="none"/>
+  </g>
+  
+  <!-- Floating medical elements -->
+  <g opacity="0.05">
+    <!-- Stethoscope outline -->
+    <circle cx="1500" cy="400" r="30" stroke="#0D9488" stroke-width="4" fill="none"/>
+    <path d="M 1500 430 Q 1480 480 1460 500 L 1440 520" stroke="#0D9488" stroke-width="4" fill="none" stroke-linecap="round"/>
+    
+    <!-- Pills -->
+    <ellipse cx="200" cy="600" rx="25" ry="15" fill="#14B8A6"/>
+    <ellipse cx="250" cy="580" rx="25" ry="15" fill="#06B6D4"/>
+    
+    <!-- DNA helix subtle -->
+    <path d="M 1200 100 Q 1220 120 1200 140 Q 1180 160 1200 180 Q 1220 200 1200 220" 
+          stroke="#0D9488" stroke-width="2" fill="none" opacity="0.5"/>
+    <path d="M 1240 100 Q 1220 120 1240 140 Q 1260 160 1240 180 Q 1220 200 1240 220" 
+          stroke="#14B8A6" stroke-width="2" fill="none" opacity="0.5"/>
+  </g>
+  
+  <!-- Soft wave at bottom -->
+  <path d="M 0 1000 Q 480 950 960 1000 T 1920 1000 L 1920 1080 L 0 1080 Z" 
+        fill="#0D9488" opacity="0.03"/>
+</svg>
