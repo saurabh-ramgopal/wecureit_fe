@@ -213,8 +213,7 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                      <option value="">Select gender</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
-                      <option value="other">Other</option>
-                      <option value="prefer-not">Prefer not to say</option>
+                      <option value="other">Others</option>
                     </select>
 
                   </div>

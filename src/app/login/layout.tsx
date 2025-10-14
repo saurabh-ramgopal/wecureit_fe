@@ -2,6 +2,7 @@
 
 import React from 'react'
 import '@/app/css/login.css'
+import { Toaster } from 'react-hot-toast';
 
 type Props = {
   children: React.ReactNode
@@ -9,6 +10,8 @@ type Props = {
 
 export default function LoginLayout({ children }: Props) {
   return (
-    <>{children}</>
+    <>{children}
+    <Toaster position="top-center" />
+    </>
   )
 }
