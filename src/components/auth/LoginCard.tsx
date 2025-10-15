@@ -7,6 +7,8 @@ interface LoginCardProps {
   formData: { email: string; password: string };
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
+  userType: string;
+  setUserType: (type: string) => void;
 }
   const isValidEmail = (email: string) => {
     // Simple RFC-like email regex (sufficient for client-side validation)
@@ -14,8 +16,8 @@ interface LoginCardProps {
   };
 
 
-const LoginCard :React.FC<LoginCardProps> = ({ formData, onChange, onSubmit }) =>{
-  const [userType, setUserType] = useState('patient');
+const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, onChange, onSubmit }) =>{
+
 
   return (
   <div className="min-h-screen relative overflow-hidden flex" style={{ background: 'var(--page-bg, transparent)' }}>
@@ -101,11 +103,11 @@ const LoginCard :React.FC<LoginCardProps> = ({ formData, onChange, onSubmit }) =
                   {/* Login Button */}
                   <button
                     onClick={onSubmit}
-                    disabled={formData.email === '' || formData.password === ''}
+                    disabled={formData.email === '' || formData.password === '' || !isValidEmail(formData.email)}
                     className={`w-full bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white py-3 rounded-xl font-semibold hover:from-[rgb(var(--color-primary))] hover:to-[rgb(var(--color-secondary))] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 
                     ${
-                        formData.email === '' || formData.password === '' 
-                        ? 'opacity-50 cursor-not-allowed' 
+                        formData.email === '' || formData.password === '' || !isValidEmail(formData.email)
+                        ? 'opacity-50 cursor-not-allowed'
                         : ''
                     }`}
                   >
