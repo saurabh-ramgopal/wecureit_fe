@@ -1,22 +1,19 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import LoginCard from '@/components/auth/LoginCard';
 import { useRouter } from 'next/dist/client/components/navigation';
 import toast from 'react-hot-toast';
 
-type Props = {}
-const LoginPage = (props: Props) => {
+const DoctorLoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [apiResponse, setApiResponse] = useState('');
-  const [userType, setUserType] = useState('patient');
+  const [userType, setUserType] = useState('doctor');
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
- const handleButtonClick = () => {
-    toast.success('You did it!'); // Displays a success message
-  };
+
   const handleSubmit = async () => {
     try {
       const payload = { ...formData, type: userType };
@@ -34,13 +31,10 @@ const LoginPage = (props: Props) => {
       console.log("API Response:", data);
       setApiResponse(JSON.stringify(data, null, 2));
       if (data.result === "PASS" && data.reason === "LOGIN_SUCCESSFUL") {
-        // store token for subsequent requests (sessionStorage for dev). In production use HttpOnly cookies.
-  const token = data.token || data.accessToken || data.jwt;
+        const token = data.token || data.accessToken || data.jwt;
         if (token && typeof window !== 'undefined') sessionStorage.setItem('accessToken', token);
         toast.success("Login successful! Redirecting...",  { id: 'login-success' , duration: 1500 });
-        setTimeout(() => {
-          router.push(`/dashboard/${userType}`);
-        }, 1000);
+        setTimeout(() => router.push(`/dashboard/doctor`), 1000);
       } else {
         toast.error("Login failed! Please check your credentials.", { id: 'login-fail' , duration: 1000 });
       }
@@ -50,13 +44,15 @@ const LoginPage = (props: Props) => {
       setApiResponse("Network error");
     }
   };
-    return (
-        <>
-        <LoginCard  userType={userType} setUserType={setUserType} formData={formData} onChange={handleInputChange} onSubmit={handleSubmit}/>
-        {apiResponse && (
-  <pre className="mt-4 p-3 bg-gray-100 w-full rounded text-sm">{apiResponse}</pre>
-        )}
-   </>
-    )
-}
-export default LoginPage;
+
+  return (
+    <>
+      <LoginCard userType={userType} setUserType={setUserType} formData={formData} onChange={handleInputChange} onSubmit={handleSubmit} />
+      {apiResponse && (
+        <pre className="mt-4 p-3 bg-gray-100 w-full rounded text-sm">{apiResponse}</pre>
+      )}
+    </>
+  );
+};
+
+export default DoctorLoginPage;
