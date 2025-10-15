@@ -1,10 +1,8 @@
 "use client";
 import React, { useState } from 'react'
-import Navbar from '@/components/NavBar';
 import LoginCard from '@/components/auth/LoginCard';
 import { useRouter } from 'next/dist/client/components/navigation';
 import toast from 'react-hot-toast';
-import { debounce } from 'lodash';
 
 type Props = {}
 const LoginPage = (props: Props) => {
