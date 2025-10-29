@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, Droplets, Heart, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, Lock } from 'lucide-react';
 import InputBox from '../InputBox';
 
 
@@ -52,6 +53,17 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                 >
                   Doctor Login
                 </button>
+
+                <button
+                  onClick={() => setUserType('admin')}
+                  className={`flex-1 py-4 px-6 font-semibold transition-all ${
+                    userType === 'admin'
+                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
+                      : 'bg-gradient-to-r from-teal-50 to-cyan-50 text-gray-600 hover:from-teal-100 hover:to-cyan-100'
+                  }`}
+                >
+                  Admin Login
+                </button>
               </div>
 
               {/* Form Content */}
@@ -59,10 +71,14 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                 {/* Header */}
                 <div className="mb-8">
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] bg-clip-text text-transparent mb-2">
-                    Welcome Back!
+                    Welcome!
                   </h1>
                   <p className="text-gray-600 text-sm">
-                    Login to book appointments and manage your health
+                    {userType === 'patient'
+                      ? 'Login to book appointments and manage your health'
+                      : userType === 'doctor'
+                      ? 'Login to manage your schedule and appointments'
+                      : 'Login to manage facilities and doctors'}
                   </p>
                 </div>
 
@@ -111,30 +127,37 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                         : ''
                     }`}
                   >
-                    Login as {userType === 'patient' ? 'Patient' : 'Doctor'}
+                    Login as {userType === 'patient' ? 'Patient' : userType === 'doctor' ? 'Doctor' : userType === 'admin' ? 'Admin' : 'User'}
                   </button>
 
                  
+                  {userType === 'patient' && (
+                    <>
+                      {/* Divider */}
+                      <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                          <span className="px-4 bg-white/80 text-gray-500">OR</span>
+                        </div>
+                      </div>
+                      
+                      {/* Sign Up Link */}
+                      <div className="text-center mt-3">
+                        <p className="text-sm text-gray-600">
+                          Don&apos;t have an account? 
+                          <a 
+                            href="/register" 
+                            className="text-[rgb(var(--color-primary))] font-semibold hover:underline"
+                          >
+                            Sign Up
+                          </a>
+                        </p>
+                      </div>
+                    </>
+                  )}
 
-                  {/* Divider */}
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-white/80 text-gray-500">OR</span>
-                    </div>
-                  </div>
-
-                  {/* Sign Up Link */}
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">
-                      Don't have an account?{' '}
-                      <a href="/register" className="text-[rgb(var(--color-primary))] font-semibold hover:underline">
-                        Sign Up
-                      </a>
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -142,7 +165,9 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
         </div>
         {/* Right Side - Illustration (full-bleed) */}
         <div className="hidden md:block lg:w-3/5 relative">
-          <img src="/doctor.png" alt="Doctor illustration" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0">
+            <Image src="/doctor.png" alt="Doctor illustration" fill className="object-cover" />
+          </div>
 
           {/* Optional translucent overlay to increase contrast */}
           <div className="absolute inset-0 bg-[rgba(255,255,255,0.06)]" />
