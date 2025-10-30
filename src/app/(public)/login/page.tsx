@@ -31,7 +31,7 @@ const LoginPage = (props: Props) => {
       if (data.result === "PASS" && data.reason === "LOGIN_SUCCESSFUL") {
         toast.success("Login successful! Redirecting...",  { id: 'login-success' , duration: 1500 });
         setTimeout(() => {
-          router.push(`/dashboard/${userType}`);
+          router.push(`/${userType}/dashboard`);
         }, 1000);
       } else {
         toast.error("Login failed! Please check your credentials.", { id: 'login-fail' , duration: 1000 });

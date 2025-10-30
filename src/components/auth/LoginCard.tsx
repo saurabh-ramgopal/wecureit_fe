@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useState } from 'react';
 import Image from 'next/image';
 import { Mail, Lock } from 'lucide-react';
-import InputBox from '../InputBox';
+import InputBox from '../common/InputBox';
 
 
 interface LoginCardProps {
@@ -53,17 +53,6 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                 >
                   Doctor Login
                 </button>
-
-                <button
-                  onClick={() => setUserType('admin')}
-                  className={`flex-1 py-4 px-6 font-semibold transition-all ${
-                    userType === 'admin'
-                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
-                      : 'bg-gradient-to-r from-teal-50 to-cyan-50 text-gray-600 hover:from-teal-100 hover:to-cyan-100'
-                  }`}
-                >
-                  Admin Login
-                </button>
               </div>
 
               {/* Form Content */}
@@ -76,9 +65,7 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                   <p className="text-gray-600 text-sm">
                     {userType === 'patient'
                       ? 'Login to book appointments and manage your health'
-                      : userType === 'doctor'
-                      ? 'Login to manage your schedule and appointments'
-                      : 'Login to manage facilities and doctors'}
+                      : 'Login to manage your schedule and appointments'}
                   </p>
                 </div>
 
@@ -110,11 +97,11 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
        
 
                   {/* Remember Me & Forgot Password */}
-                  <div className="flex items-center justify-between">
+                  {/* <div className="flex items-center justify-between">
                     <a href="#" className="text-sm text-[rgb(var(--color-primary))] font-semibold hover:underline">
                       Forgot Password?
                     </a>
-                  </div>
+                  </div> */}
 
                   {/* Login Button */}
                   <button
@@ -127,7 +114,7 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                         : ''
                     }`}
                   >
-                    Login as {userType === 'patient' ? 'Patient' : userType === 'doctor' ? 'Doctor' : userType === 'admin' ? 'Admin' : 'User'}
+                    Login as {userType === 'patient' ? 'Patient' : 'Doctor'}
                   </button>
 
                  

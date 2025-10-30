@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { User, Mail, Lock, Phone, Calendar, ShieldCheck } from 'lucide-react';
-import InputBox from '../InputBox';
-import Button from '../Button';
+import InputBox from '../common/InputBox';
+import Button from '../common/Button';
 import { on } from 'events';
 
 type RegisterCardProps = {

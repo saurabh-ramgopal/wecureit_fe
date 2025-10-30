@@ -39,3 +39,109 @@ Create .env.local file in the root directory and add the following environment v
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
+
+#Project Folder struture
+wecureit_fe/
+└── src/
+    ├── app/
+    │   ├── (public)/                      # public pages (accessible without login)
+    │   │   ├── home/
+    │   │   │   └── page.tsx
+    │   │   ├── login/
+    │   │   │   ├── page.tsx
+    │   │   │   └── layout.tsx
+    │   │   ├── register/
+    │   │   │   └── page.tsx
+    │   │   └── layout.tsx                 # shared public layout
+    │   │
+    │   ├── (protected)/                   # all authenticated pages
+    │   │   ├── admin/
+    │   │   │   ├── dashboard/
+    │   │   │   │   ├── page.tsx
+    │   │   │   │   ├── DoctorsTable.tsx
+    │   │   │   │   ├── FacilitiesTable.tsx
+    │   │   │   │   └── SpecialtiesTable.tsx
+    │   │   │   └── layout.tsx
+    │   │   │
+    │   │   ├── doctor/
+    │   │   │   ├── schedule/
+    │   │   │   │   ├── page.tsx
+    │   │   │   │   ├── AvailabilityForm.tsx
+    │   │   │   │   └── AppointmentsList.tsx
+    │   │   │   ├── profile/
+    │   │   │   │   └── page.tsx
+    │   │   │   └── layout.tsx
+    │   │   │
+    │   │   ├── patient/
+    │   │   │   ├── appointments/
+    │   │   │   │   ├── page.tsx
+    │   │   │   │   ├── AppointmentCard.tsx
+    │   │   │   │   └── AppointmentForm.tsx
+    │   │   │   ├── history/
+    │   │   │   │   └── page.tsx
+    │   │   │   └── layout.tsx
+    │   │
+    │   │   ├── layout.tsx                 # layout for authenticated users
+    │   │   └── page.tsx                   # optional dashboard redirect
+    │   │
+    │   ├── api/                           # Next.js API routes (if any serverless logic)
+    │   └── globals.css
+    │
+    ├── components/                        # reusable UI components
+    │   ├── common/                        # UI used by everyone
+    │   │   ├── Button.tsx
+    │   │   ├── InputBox.tsx
+    │   │   ├── NavBar.tsx
+    │   │   ├── Footer.tsx
+    │   │   └── Loader.tsx
+    │   │
+    │   ├── auth/
+    │   │   ├── LoginCard.tsx
+    │   │   ├── RegisterCard.tsx
+    │   │   └── ProtectedRoute.tsx
+    │   │
+    │   ├── patient/
+    │   │   └── AppointmentSummary.tsx
+    │   │
+    │   ├── doctor/
+    │   │   └── ScheduleCard.tsx
+    │   │
+    │   └── admin/
+    │       └── FacilityForm.tsx
+    │
+    ├── context/                           # React context for auth, roles, etc.
+    │   ├── AuthContext.tsx
+    │   ├── RoleContext.tsx
+    │   └── ThemeContext.tsx
+    │
+    ├── hooks/                             # custom React hooks
+    │   ├── useAuth.ts
+    │   ├── useFetch.ts
+    │   ├── useRole.ts
+    │   └── useAppointments.ts
+    │
+    ├── lib/                               # reusable logic, API clients
+    │   ├── api/
+    │   │   ├── axiosClient.ts
+    │   │   ├── patientApi.ts
+    │   │   ├── doctorApi.ts
+    │   │   ├── adminApi.ts
+    │   │   └── authApi.ts
+    │   ├── utils/
+    │   │   ├── formatDate.ts
+    │   │   ├── handleError.ts
+    │   │   ├── constants.ts
+    │   │   └── validation.ts
+    │   └── types/
+    │       ├── doctor.ts
+    │       ├── patient.ts
+    │       ├── appointment.ts
+    │       └── facility.ts
+    │
+    ├── styles/                            # global and module styles
+    │   ├── globals.css
+    │   ├── variables.css
+    │   └── components/
+    │       └── Button.module.css
+    │
+    └── middleware.ts                      # for route protection (Next.js)
