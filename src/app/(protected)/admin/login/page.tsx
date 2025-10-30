@@ -36,8 +36,12 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      const payload = { ...formData, type: 'admin' };
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/common/login`, {
+  // Include explicit type for backend compatibility
+  const payload = { ...formData, type: 'admin' };
+    // helpful debug: log the outgoing payload so you can verify in browser network tab
+    // (remove in production)
+    console.log('Login payload ->', payload);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
