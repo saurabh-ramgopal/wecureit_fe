@@ -35,10 +35,39 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-Create .env.local file in the root directory and add the following environment variables:
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+# WeCureIT Frontend (Next.js)
+
+This Next.js app uses the Firebase Web SDK for client authentication and talks to the Spring Boot backend which verifies tokens with Firebase Admin.
+
+## Firebase setup (Frontend)
+
+1) Create `.env.local` in `wecureit_fe` with:
 
 ```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyBOF42H98BborasAUfzl-UXC0blY56gHt4
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=wecureit.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=wecureit
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=wecureit.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=143760587855
+NEXT_PUBLIC_FIREBASE_APP_ID=1:143760587855:web:45f6b45d2488d7f52ffe3a
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-Q5HE50ZTMB
+
+# Backend API URL
 NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
+2) Install deps (firebase is already in `package.json`):
+
+```bash
+npm i
+```
+
+---
+
+````markdown
 
 #Project Folder struture
 wecureit_fe/

@@ -10,6 +10,7 @@ interface LoginCardProps {
   onSubmit: () => void;
   userType: string;
   setUserType: (type: string) => void;
+  isLoading?: boolean;
 }
   const isValidEmail = (email: string) => {
     // Simple RFC-like email regex (sufficient for client-side validation)
@@ -17,7 +18,7 @@ interface LoginCardProps {
   };
 
 
-const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, onChange, onSubmit }) =>{
+const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, onChange, onSubmit, isLoading = false }) =>{
 
 
   return (
@@ -106,15 +107,15 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                   {/* Login Button */}
                   <button
                     onClick={onSubmit}
-                    disabled={formData.email === '' || formData.password === '' || !isValidEmail(formData.email)}
+                    disabled={formData.email === '' || formData.password === '' || !isValidEmail(formData.email) || isLoading}
                     className={`w-full bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white py-3 rounded-xl font-semibold hover:from-[rgb(var(--color-primary))] hover:to-[rgb(var(--color-secondary))] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 
                     ${
-                        formData.email === '' || formData.password === '' || !isValidEmail(formData.email)
+                        formData.email === '' || formData.password === '' || !isValidEmail(formData.email) || isLoading
                         ? 'opacity-50 cursor-not-allowed'
                         : ''
                     }`}
                   >
-                    Login as {userType === 'patient' ? 'Patient' : 'Doctor'}
+                    {isLoading ? 'Logging in...' : `Login as ${userType === 'patient' ? 'Patient' : 'Doctor'}`}
                   </button>
 
                  
