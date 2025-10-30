@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 import { User, Mail, Lock, Phone, Calendar, ShieldCheck } from 'lucide-react';
 import InputBox from '../common/InputBox';
 import Button from '../common/Button';
-import { on } from 'events';
 
 type RegisterCardProps = {
   formData: { email: string; password: string; phone: string; dob: string, fullName: string, gender: string, confirmPassword: string };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
+  isLoading?: boolean;
 }
 
-const RegisterCard :React.FC<RegisterCardProps> = ({ formData, onChange, onSubmit }) => {
+const RegisterCard :React.FC<RegisterCardProps> = ({ formData, onChange, onSubmit, isLoading = false }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -249,11 +249,11 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                       icon={<Lock />}
                     />
                   <div className="flex gap-3">
-                    <Button variant="back" flexGrow={1}  onClick={prevStep}>
+                    <Button variant="back" flexGrow={1}  onClick={prevStep} disabled={isLoading}>
                      Back
                     </Button>
-                    <Button variant="login" flexGrow={1} onClick={onSubmit} disabled={formData.password.length < 8 || formData.password !== formData.confirmPassword}>
-                    Register
+                    <Button variant="login" flexGrow={1} onClick={onSubmit} disabled={formData.password.length < 8 || formData.password !== formData.confirmPassword || isLoading}>
+                    {isLoading ? 'Creating Account...' : 'Register'}
                     </Button>
                   </div>
                 </div>

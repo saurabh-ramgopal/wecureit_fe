@@ -1,54 +1,81 @@
 "use client";
 import React, { useState } from 'react'
 import LoginCard from '@/components/auth/LoginCard';
-import { useRouter } from 'next/dist/client/components/navigation';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { login } from '@/lib/api';
 
 type Props = {}
 const LoginPage = (props: Props) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [apiResponse, setApiResponse] = useState('');
   const [userType, setUserType] = useState('patient');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
- const handleButtonClick = () => {
-    toast.success('You did it!'); // Displays a success message
-  };
+
   const handleSubmit = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
-      const payload = { ...formData, type: userType };
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/common/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    const data = await res.json();
-      console.log("API Response:", data);
-      setApiResponse(JSON.stringify(data, null, 2));
-      if (data.result === "PASS" && data.reason === "LOGIN_SUCCESSFUL") {
-        toast.success("Login successful! Redirecting...",  { id: 'login-success' , duration: 1500 });
-        setTimeout(() => {
-          router.push(`/${userType}/dashboard`);
-        }, 1000);
-      } else {
-        toast.error("Login failed! Please check your credentials.", { id: 'login-fail' , duration: 1000 });
-      }
-    } catch (error) {
+      // Login with Firebase
+      const { user, token } = await login(formData.email, formData.password, userType);
+      
+      console.log("Firebase login successful:", { uid: user.uid, email: user.email });
+      setApiResponse(JSON.stringify({ 
+        result: "PASS", 
+        message: "Login successful", 
+        uid: user.uid,
+        email: user.email 
+      }, null, 2));
+      
+      toast.success("Login successful! Redirecting...", { id: 'login-success', duration: 1500 });
+      
+      // Redirect to appropriate dashboard
+      setTimeout(() => {
+        router.push(`/${userType}/dashboard`);
+      }, 1000);
+      
+    } catch (error: unknown) {
       console.error("Error during login:", error);
-      toast.error("Network error! Please try again later.", { id: 'login-error' , duration: 1000 });
-      setApiResponse("Network error");
+      
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      
+      // Handle specific Firebase auth errors
+      if (errorMessage.includes('wrong-password') || errorMessage.includes('user-not-found')) {
+        toast.error("Invalid email or password", { id: 'login-fail', duration: 3000 });
+      } else if (errorMessage.includes('too-many-requests')) {
+        toast.error("Too many failed attempts. Please try again later.", { id: 'login-error', duration: 3000 });
+      } else if (errorMessage.includes('network')) {
+        toast.error("Network error! Please check your connection.", { id: 'login-error', duration: 3000 });
+      } else {
+        toast.error(errorMessage || "Login failed! Please try again.", { id: 'login-error', duration: 3000 });
+      }
+      
+      setApiResponse(JSON.stringify({ error: errorMessage }, null, 2));
+    } finally {
+      setIsLoading(false);
     }
   };
-    return (
-        <>
-        <LoginCard  userType={userType} setUserType={setUserType} formData={formData} onChange={handleInputChange} onSubmit={handleSubmit}/>
-        {apiResponse && (
-  <pre className="mt-4 p-3 bg-gray-100 w-full rounded text-sm">{apiResponse}</pre>
-        )}
-   </>
-    )
+
+  return (
+    <>
+      <LoginCard  
+        userType={userType} 
+        setUserType={setUserType} 
+        formData={formData} 
+        onChange={handleInputChange} 
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+      />
+      {apiResponse && (
+        <pre className="mt-4 p-3 bg-gray-100 w-full rounded text-sm">{apiResponse}</pre>
+      )}
+    </>
+  )
 }
 export default LoginPage;
