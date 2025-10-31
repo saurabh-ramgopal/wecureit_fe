@@ -46,8 +46,18 @@ export const firebaseAuth = {
       const token = await userCredential.user.getIdToken();
       return { user: userCredential.user, token };
     } catch (err: unknown) {
-      const e = err as { message?: string };
+      const e = err as { code?: string; message?: string };
       console.error('Firebase registration error:', err);
+      
+      // Provide user-friendly error messages
+      if (e?.code === 'auth/email-already-in-use') {
+        throw new Error('This email is already registered. Please login instead.');
+      } else if (e?.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address.');
+      } else if (e?.code === 'auth/weak-password') {
+        throw new Error('Password is too weak. Please use at least 6 characters.');
+      }
+      
       throw new Error(e?.message || 'Registration failed');
     }
   },
