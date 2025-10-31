@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { login } from '@/lib/api';
 
-type Props = {}
-const LoginPage = (props: Props) => {
+const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [apiResponse, setApiResponse] = useState('');
   const [userType, setUserType] = useState('patient');
@@ -23,7 +22,7 @@ const LoginPage = (props: Props) => {
     setIsLoading(true);
     try {
       // Login with Firebase
-      const { user, token } = await login(formData.email, formData.password, userType);
+        const { user, userName } = await login(formData.email, formData.password, userType);
       
       console.log("Firebase login successful:", { uid: user.uid, email: user.email });
       setApiResponse(JSON.stringify({ 
@@ -33,7 +32,7 @@ const LoginPage = (props: Props) => {
         email: user.email 
       }, null, 2));
       
-      toast.success("Login successful! Redirecting...", { id: 'login-success', duration: 1500 });
+        toast.success(`Welcome, ${userName}!`, { id: 'login-success', duration: 2000 });
       
       // Redirect to appropriate dashboard
       setTimeout(() => {
@@ -51,7 +50,6 @@ const LoginPage = (props: Props) => {
       } else if (errorMessage.includes('too-many-requests')) {
         toast.error("Too many failed attempts. Please try again later.", { id: 'login-error', duration: 3000 });
       } else if (errorMessage.includes('network')) {
-        toast.error("Network error! Please check your connection.", { id: 'login-error', duration: 3000 });
       } else {
         toast.error(errorMessage || "Login failed! Please try again.", { id: 'login-error', duration: 3000 });
       }

@@ -46,7 +46,7 @@ async function apiCall<T>(
 
 // Public API calls (no auth required)
 export async function getDoctors() {
-  const res = await fetch(`${API_BASE_URL}/api/doctors/get`, {
+  const res = await fetch(`${API_BASE_URL}/admin/getAllDoctors`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -68,7 +68,7 @@ export async function registerPatient(data: {
   
   // Step 2: Register with backend (just stores user data in database)
   // Backend will get the Firebase UID from the JWT token
-  const response = await fetch(`${API_BASE_URL}/api/patient/register`, {
+  const response = await fetch(`${API_BASE_URL}/patient/registration`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -100,7 +100,36 @@ export async function login(email: string, password: string, userType: string) {
   localStorage.setItem('firebaseToken', token);
   localStorage.setItem('userType', userType);
   
-  return { user, token };
+  // Call backend to verify login and get user data including name
+  let userName = user.displayName || user.email?.split('@')[0] || 'User';
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/common/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email: email,
+        password: '', // Not needed for Firebase auth
+        type: userType,
+      }),
+    });
+    
+    if (response.ok) {
+      const loginData = await response.json();
+      // Get name from backend response (from registration data)
+      if (loginData.name) {
+        userName = loginData.name;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    // Continue with fallback name
+  }
+  
+  return { user, token, userName };
 }
 
 // Logout function
@@ -112,13 +141,13 @@ export async function logout() {
 
 // Protected API calls
 export async function getPatientById(patientId: number) {
-  return apiCall(`/api/patient/getById?patientId=${patientId}`, {
+  return apiCall(`/patient/getById?patientId=${patientId}`, {
     method: 'GET',
   });
 }
 
 export async function updatePatient(patientData: any) {
-  return apiCall('/api/patient/addOrUpdate', {
+  return apiCall('/patient/addOrUpdate', {
     method: 'POST',
     body: JSON.stringify(patientData),
   });
@@ -126,7 +155,7 @@ export async function updatePatient(patientData: any) {
 
 // Doctor API calls
 export async function getDoctorById(doctorId: number) {
-  return apiCall(`/api/doctor/getById?doctorId=${doctorId}`, {
+  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
     method: 'GET',
   });
 }
