@@ -160,10 +160,3 @@ export async function getDoctorById(doctorId: number) {
   });
 }
 
-// Admin API calls
-export async function getAdminById(adminId: number) {
-  return apiCall(`/api/admin/getById?adminId=${adminId}`, {
-    method: 'GET',
-  });
-}
-
