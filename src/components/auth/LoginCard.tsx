@@ -10,11 +10,6 @@ interface LoginCardProps {
   onSubmit: () => void;
   userType: string;
   setUserType: (type: string) => void;
-  isLoading?: boolean;
-  // Optional: lock the card to a specific user type and hide tabs
-  fixedUserType?: 'patient' | 'doctor' | 'admin';
-  // Optional: override the patient sign-up link
-  registerLink?: string;
 }
   const isValidEmail = (email: string) => {
     // Simple RFC-like email regex (sufficient for client-side validation)
@@ -22,10 +17,7 @@ interface LoginCardProps {
   };
 
 
-const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, onChange, onSubmit, isLoading = false, fixedUserType, registerLink }) =>{
-
-  const effectiveUserType = (fixedUserType ?? (userType as 'patient' | 'doctor')) as 'patient' | 'doctor' | 'admin';
-  const showTabs = !fixedUserType; // hide tabs when fixed (e.g., admin-only or fixed patient/doctor)
+const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, onChange, onSubmit }) =>{
 
 
   return (
@@ -39,31 +31,29 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
         {/* Card with Glassmorphism */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden" >
               
-              {/* User Type Tabs (hidden when fixedUserType is provided) */}
-              {showTabs && (
-                <div className="flex" >
-                  <button
-                    onClick={() => setUserType('patient')}
-                    className={`flex-1 py-4 px-6 font-semibold transition-all  ${
-                      userType === 'patient'
-                        ? 'bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white'
-                          : 'bg-gradient-to-r from-[rgb(var(--color-primary)/0.06)] to-[rgb(var(--color-secondary)/0.06)] text-gray-600 hover:from-[rgb(var(--color-primary)/0.08)] hover:to-[rgb(var(--color-secondary)/0.08)]'
-                    }`}
-                  >
-                    Patient Login
-                  </button>
-                  <button
-                    onClick={() => setUserType('doctor')}
-                    className={`flex-1 py-4 px-6 font-semibold transition-all ${
-                      userType === 'doctor'
-                        ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
-                        : 'bg-gradient-to-r from-teal-50 to-cyan-50 text-gray-600 hover:from-teal-100 hover:to-cyan-100'
-                    }`}
-                  >
-                    Doctor Login
-                  </button>
-                </div>
-              )}
+              {/* User Type Tabs */}
+              <div className="flex" >
+                <button
+                  onClick={() => setUserType('patient')}
+                  className={`flex-1 py-4 px-6 font-semibold transition-all  ${
+                    userType === 'patient'
+                      ? 'bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white'
+                        : 'bg-gradient-to-r from-[rgb(var(--color-primary)/0.06)] to-[rgb(var(--color-secondary)/0.06)] text-gray-600 hover:from-[rgb(var(--color-primary)/0.08)] hover:to-[rgb(var(--color-secondary)/0.08)]'
+                  }`}
+                >
+                  Patient Login
+                </button>
+                <button
+                  onClick={() => setUserType('doctor')}
+                  className={`flex-1 py-4 px-6 font-semibold transition-all ${
+                    userType === 'doctor'
+                      ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white'
+                      : 'bg-gradient-to-r from-teal-50 to-cyan-50 text-gray-600 hover:from-teal-100 hover:to-cyan-100'
+                  }`}
+                >
+                  Doctor Login
+                </button>
+              </div>
 
               {/* Form Content */}
               <div className="p-8">
@@ -73,11 +63,9 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                     Welcome!
                   </h1>
                   <p className="text-gray-600 text-sm">
-                    {effectiveUserType === 'patient'
+                    {userType === 'patient'
                       ? 'Login to book appointments and manage your health'
-                      : effectiveUserType === 'doctor'
-                        ? 'Login to manage your schedule and appointments'
-                        : 'Sign in with your administrator account'}
+                      : 'Login to manage your schedule and appointments'}
                   </p>
                 </div>
 
@@ -118,19 +106,19 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                   {/* Login Button */}
                   <button
                     onClick={onSubmit}
-                    disabled={formData.email === '' || formData.password === '' || !isValidEmail(formData.email) || isLoading}
+                    disabled={formData.email === '' || formData.password === '' || !isValidEmail(formData.email)}
                     className={`w-full bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] text-white py-3 rounded-xl font-semibold hover:from-[rgb(var(--color-primary))] hover:to-[rgb(var(--color-secondary))] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 
                     ${
-                        formData.email === '' || formData.password === '' || !isValidEmail(formData.email) || isLoading
+                        formData.email === '' || formData.password === '' || !isValidEmail(formData.email)
                         ? 'opacity-50 cursor-not-allowed'
                         : ''
                     }`}
                   >
-                    {isLoading ? 'Logging in...' : `Login as ${effectiveUserType.charAt(0).toUpperCase() + effectiveUserType.slice(1)}`}
+                    Login as {userType === 'patient' ? 'Patient' : 'Doctor'}
                   </button>
 
                  
-                  {effectiveUserType === 'patient' && (
+                  {userType === 'patient' && (
                     <>
                       {/* Divider */}
                       <div className="relative my-6">
@@ -147,7 +135,7 @@ const LoginCard :React.FC<LoginCardProps> = ({ userType, setUserType, formData, 
                         <p className="text-sm text-gray-600">
                           Don&apos;t have an account? 
                           <a 
-                            href={registerLink ?? '/patient/register'} 
+                            href="/register" 
                             className="text-[rgb(var(--color-primary))] font-semibold hover:underline"
                           >
                             Sign Up
