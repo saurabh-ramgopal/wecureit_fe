@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import RegisterCard from '@/components/auth/RegisterCard';
 import { registerPatient } from '@/lib/api';
+import RegisterCard from '@/components/auth/RegisterCard';
 
-const RegisterPage = () => {
+const PatientRegisterPage = () => {
   const [formData, setFormData] = useState({ 
     email: '', 
     password: '', 
@@ -15,7 +15,6 @@ const RegisterPage = () => {
     gender: '', 
     confirmPassword: '' 
   });
-  const [apiResponse, setApiResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -39,8 +38,7 @@ const RegisterPage = () => {
 
     setIsLoading(true);
     try {
-      // Register with Firebase and backend
-      const result = await registerPatient({
+      await registerPatient({
         email: formData.email,
         password: formData.password,
         fullName: formData.fullName,
@@ -48,18 +46,14 @@ const RegisterPage = () => {
         dob: formData.dob,
         gender: formData.gender,
       });
-
-      console.log('Registration successful:', result);
-      setApiResponse(JSON.stringify(result.data, null, 2));
       
       toast.success('Registration successful! Redirecting to login...', { 
         id: 'register-success', 
         duration: 2000 
       });
 
-      // Redirect to login page after successful registration
       setTimeout(() => {
-        router.push('/login');
+        router.push('/patient/login');
       }, 2000);
 
     } catch (error: unknown) {
@@ -67,7 +61,6 @@ const RegisterPage = () => {
       
       const errorMessage = error instanceof Error ? error.message : 'Registration failed';
       
-      // Handle specific errors
       if (errorMessage.includes('email-already-in-use')) {
         toast.error('This email is already registered', { id: 'register-error', duration: 3000 });
       } else if (errorMessage.includes('weak-password')) {
@@ -79,26 +72,20 @@ const RegisterPage = () => {
       } else {
         toast.error(errorMessage, { id: 'register-error', duration: 3000 });
       }
-      
-      setApiResponse(JSON.stringify({ error: errorMessage }, null, 2));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <RegisterCard 
-        formData={formData} 
-        onChange={handleInputChange} 
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-      {apiResponse && (
-        <pre className="mt-4 p-3 bg-gray-100 w-full rounded text-sm">{apiResponse}</pre>
-      )}
-    </div>
+    <RegisterCard
+      formData={formData}
+      onChange={handleInputChange}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      loginLink="/patient/login"
+    />
   );
 }
 
-export default RegisterPage;
+export default PatientRegisterPage;
