@@ -1,17 +1,18 @@
 'use client';
 import React, { useState } from 'react';
-import { User, Mail, Lock, Phone, Calendar, ShieldCheck } from 'lucide-react';
+import { User, Mail, Lock, Phone, Calendar } from 'lucide-react';
 import InputBox from '../common/InputBox';
 import Button from '../common/Button';
-import { on } from 'events';
 
 type RegisterCardProps = {
   formData: { email: string; password: string; phone: string; dob: string, fullName: string, gender: string, confirmPassword: string };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: () => void;
+  isLoading?: boolean;
+  loginLink?: string;
 }
 
-const RegisterCard :React.FC<RegisterCardProps> = ({ formData, onChange, onSubmit }) => {
+const RegisterCard :React.FC<RegisterCardProps> = ({ formData, onChange, onSubmit, isLoading = false, loginLink }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -63,9 +64,7 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = () => {
-    alert('Registration successful! 🎉\n\nWelcome to MediCare!');
-  };
+  // Submission is handled by parent via onSubmit prop
 
   const getPasswordStrengthColor = () => {
     if (passwordStrength <= 1) return 'bg-red-500';
@@ -249,11 +248,11 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                       icon={<Lock />}
                     />
                   <div className="flex gap-3">
-                    <Button variant="back" flexGrow={1}  onClick={prevStep}>
+                    <Button variant="back" flexGrow={1}  onClick={prevStep} disabled={isLoading}>
                      Back
                     </Button>
-                    <Button variant="login" flexGrow={1} onClick={onSubmit} disabled={formData.password.length < 8 || formData.password !== formData.confirmPassword}>
-                    Register
+                    <Button variant="login" flexGrow={1} onClick={onSubmit} disabled={formData.password.length < 8 || formData.password !== formData.confirmPassword || isLoading}>
+                    {isLoading ? 'Creating Account...' : 'Register'}
                     </Button>
                   </div>
                 </div>
@@ -263,7 +262,7 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="text-center mt-6">
                 <p className="text-sm text-gray-600">
                   Already have an account?{' '}
-                  <a href="/login" className="text-[rgb(var(--color-primary))] font-semibold hover:underline">
+                  <a href={loginLink ?? '/patient/login'} className="text-[rgb(var(--color-primary))] font-semibold hover:underline">
                     Login
                   </a>
                 </p>
