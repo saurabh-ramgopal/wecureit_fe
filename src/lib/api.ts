@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Read auth token issued by backend from localStorage
@@ -14,7 +17,14 @@ function getAuthHeaders(): HeadersInit {
     'Content-Type': 'application/json',
   };
 
+<<<<<<< HEAD
   if (token) headers['Authorization'] = `Bearer ${token}`;
+=======
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
   return headers;
 }
 
@@ -45,7 +55,11 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 // Public API calls (no auth required)
 export async function getDoctors() {
+<<<<<<< HEAD
   const res = await fetch(`${API_BASE_URL}/api/doctors/get`, {
+=======
+  const res = await fetch(`${API_BASE_URL}/admin/getAllDoctors`, {
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -53,7 +67,11 @@ export async function getDoctors() {
   return res.json();
 }
 
+<<<<<<< HEAD
 // Patient registration (backend handles password hashing/storage)
+=======
+// Patient registration (backend handles password hashing / storage)
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 export async function registerPatient(data: {
   email: string;
   password: string;
@@ -85,14 +103,26 @@ export async function registerPatient(data: {
   return response.json();
 }
 
+<<<<<<< HEAD
 // Login (backend authenticates and returns a token stored under 'authToken')
+=======
+// Login (backend authenticates and returns a token)
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 export async function login(email: string, password: string, userType: string) {
   const response = await fetch(`${API_BASE_URL}/common/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+<<<<<<< HEAD
     body: JSON.stringify({ email, password, type: userType }),
+=======
+    body: JSON.stringify({
+      email,
+      password,
+      type: userType,
+    }),
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
   });
 
   if (!response.ok) {
@@ -122,15 +152,29 @@ export async function logout() {
 
 // Protected API calls
 export async function getPatientById(patientId: number) {
+<<<<<<< HEAD
   return apiCall(`/patient/getById?patientId=${patientId}`, { method: 'GET' });
 }
 
 export async function updatePatient(patientData: Record<string, unknown>) {
   return apiCall('/patient/addOrUpdate', { method: 'POST', body: JSON.stringify(patientData) });
+=======
+  return apiCall(`/patient/getById?patientId=${patientId}`, {
+    method: 'GET',
+  });
+}
+
+export async function updatePatient(patientData: Record<string, unknown>) {
+  return apiCall('/patient/addOrUpdate', {
+    method: 'POST',
+    body: JSON.stringify(patientData),
+  });
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 }
 
 // Doctor API calls
 export async function getDoctorById(doctorId: number) {
+<<<<<<< HEAD
   return apiCall(`/doctor/getById?doctorId=${doctorId}`, { method: 'GET' });
 }
 
@@ -155,5 +199,10 @@ export async function getSpecialities() {
 // Admin: add or update doctor
 export async function addDoctor(doctorData: Record<string, unknown>) {
   return apiCall('/admin/doctor/addOrUpdate', { method: 'POST', body: JSON.stringify(doctorData) });
+=======
+  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
+    method: 'GET',
+  });
+>>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 }
 
