@@ -52,7 +52,7 @@ const DoctorLoginPage = (props: Props) => {
       } else if (errorMessage.includes('network')) {
         toast.error("Network error! Please check your connection.", { id: 'login-error', duration: 3000 });
       } else {
-        toast.error(errorMessage || "Login failed! Please try again.", { id: 'login-error', duration: 3000 });
+        toast.error("Login failed! Please check your credentials.", { id: 'login-fail' , duration: 1000 });
       }
       setApiResponse(JSON.stringify({ error: errorMessage }, null, 2));
     } finally {
