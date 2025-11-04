@@ -1,30 +1,33 @@
-"use client";
-import React, { useState } from 'react'
-import LoginCard from '@/components/auth/LoginCard';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+'use client';
+import LoginCard from '@/components/LoginCard/LoginCard';
 import { login } from '@/lib/api';
+import { Stethoscope } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react'
+import toast from 'react-hot-toast';
 
 type Props = {}
-const LoginPage = (props: Props) => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [apiResponse, setApiResponse] = useState('');
-  const [userType, setUserType] = useState('patient');
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+const DoctorLoginPage = (props: Props) => {
+   const [loading, setLoading] = useState(false);
+  const [apiResponse, setApiResponse] = useState('');
+  const router = useRouter();
+  type FormData = {
+    email: string;
+    password: string;
   };
 
-  const handleSubmit = async () => {
-    if (isLoading) return;
+  const handleLogin = async (formData: FormData) => {
+    if (loading) return;
+    setLoading(true);
     
-    setIsLoading(true);
     try {
+      const { email, password } = formData;
+      console.log("Form Data submitted:", { email, password });
+      // You may need to define userType or extract it similarly
+      const userType = 'patient'; // Adjust as needed
       // Login with Firebase
-      const { user, token } = await login(formData.email, formData.password, userType);
-      
+      const { user, token } = await login(email, password, userType);
       console.log("Firebase login successful:", { uid: user.uid, email: user.email });
       setApiResponse(JSON.stringify({ 
         result: "PASS", 
@@ -32,19 +35,15 @@ const LoginPage = (props: Props) => {
         uid: user.uid,
         email: user.email 
       }, null, 2));
-      
       toast.success("Login successful! Redirecting...", { id: 'login-success', duration: 1500 });
-      
       // Redirect to appropriate dashboard
       setTimeout(() => {
         router.push(`/${userType}/dashboard`);
       }, 1000);
-      
+      console.log("API Response:", apiResponse);
     } catch (error: unknown) {
       console.error("Error during login:", error);
-      
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      
       // Handle specific Firebase auth errors
       if (errorMessage.includes('wrong-password') || errorMessage.includes('user-not-found')) {
         toast.error("Invalid email or password", { id: 'login-fail', duration: 3000 });
@@ -55,27 +54,23 @@ const LoginPage = (props: Props) => {
       } else {
         toast.error(errorMessage || "Login failed! Please try again.", { id: 'login-error', duration: 3000 });
       }
-      
       setApiResponse(JSON.stringify({ error: errorMessage }, null, 2));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-
+    
   return (
-    <>
-      <LoginCard  
-        userType={userType} 
-        setUserType={setUserType} 
-        formData={formData} 
-        onChange={handleInputChange} 
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-      {apiResponse && (
-        <pre className="mt-4 p-3 bg-gray-100 w-full rounded text-sm">{apiResponse}</pre>
-      )}
-    </>
+    <div className="theme-doctor">
+    <LoginCard
+      title="Doctor Login"
+      description="Sign in with your doctor account"
+      logo={<Stethoscope size={45} />}
+      onSubmit={handleLogin}
+      loading={loading}
+    />
+    </div>
   )
 }
-export default LoginPage;
+
+export default DoctorLoginPage;
