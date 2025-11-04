@@ -8,7 +8,7 @@ import { User } from "lucide-react";
 
 export default function PatientLoginPage() {
   const [loading, setLoading] = useState(false);
-  const [apiResponse, setApiResponse] = useState('');
+  // kept for potential debugging; not displayed in UI
   const router = useRouter();
   type FormData = {
     email: string;
@@ -24,21 +24,23 @@ export default function PatientLoginPage() {
       console.log("Form Data submitted:", { email, password });
       // You may need to define userType or extract it similarly
       const userType = 'patient'; // Adjust as needed
-      // Login with Firebase
-      const { user, token } = await login(email, password, userType);
-      console.log("Firebase login successful:", { uid: user.uid, email: user.email });
-      setApiResponse(JSON.stringify({ 
-        result: "PASS", 
-        message: "Login successful", 
-        uid: user.uid,
-        email: user.email 
-      }, null, 2));
-      toast.success("Login successful! Redirecting...", { id: 'login-success', duration: 1500 });
-      // Redirect to appropriate dashboard
-      setTimeout(() => {
-        router.push(`/${userType}/dashboard`);
-      }, 1000);
-      console.log("API Response:", apiResponse);
+      // Login via backend API (returns loginData and token)
+      const { loginData, token, userName } = await login(email, password, userType);
+      console.log('Login response from backend:', loginData, 'token:', token, 'userName:', userName);
+
+      if (loginData?.result === 'PASS') {
+  // optional: store or log backend response
+        toast.success('Login successful! Redirecting...', { id: 'login-success', duration: 1500 });
+        // Redirect to appropriate dashboard
+        setTimeout(() => {
+          router.push(`/${userType}/dashboard`);
+        }, 1000);
+      } else {
+        // Backend returned failure (user not found / wrong password etc.)
+        const reason = loginData?.reason || 'Login failed';
+        toast.error(reason, { id: 'login-fail', duration: 3000 });
+  // optional: store or log backend failure reason
+      }
     } catch (error: unknown) {
       console.error("Error during login:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
@@ -52,7 +54,7 @@ export default function PatientLoginPage() {
       } else {
         toast.error(errorMessage || "Login failed! Please try again.", { id: 'login-error', duration: 3000 });
       }
-      setApiResponse(JSON.stringify({ error: errorMessage }, null, 2));
+  // optional: log error response for debugging
     } finally {
       setLoading(false);
     }
