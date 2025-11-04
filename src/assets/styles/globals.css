@@ -1,0 +1,97 @@
+/* Import SCSS variables (if using SCSS, otherwise can import in _app.tsx) */
+@import './_themes.scss';
+
+/* Reset / Base styles */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-family, 'Roboto', sans-serif);
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-page, #ffffff);
+  color: var(--text-body, #212121);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Headings */
+h1 { font-size: var(--fs-h1); font-weight: var(--fw-bold); }
+h2 { font-size: var(--fs-h2); font-weight: var(--fw-semibold); }
+h3 { font-size: var(--fs-h3); font-weight: var(--fw-semibold); }
+h4 { font-size: var(--fs-h4); font-weight: var(--fw-medium); }
+h5 { font-size: var(--fs-h5); font-weight: var(--fw-medium); }
+h6 { font-size: var(--fs-h6); font-weight: var(--fw-medium); }
+
+/* Paragraphs and text */
+p { font-size: var(--fs-body); margin-bottom: var(--space-md); }
+small { font-size: var(--fs-small); }
+label { font-size: var(--fs-label); }
+
+/* Links */
+a {
+  color: var(--link-default, #1E3A8A);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+a:hover {
+  color: var(--link-hover, #3B82F6);
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: var(--transition-base);
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: var(--fs-body);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-default);
+  border: 1px solid var(--border-grey, #e0e0e0);
+  outline: none;
+  transition: var(--transition-base);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--border-focus, var(--primary, #1E3A8A));
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* optional focus effect */
+}
+
+/* Scrollbar (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary, #1E3A8A);
+  border-radius: var(--radius-full);
+}
+
+/* Role-based theme example wrapper */
+.theme-patient,
+.theme-doctor,
+.theme-admin {
+  min-height: 100vh;
+  width: 100%;
+}

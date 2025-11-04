@@ -1,0 +1,162 @@
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--bg-page, transparent); // uses parent theme variable
+  overflow: hidden;
+}
+.logo {
+  font-size: 19rem;       // size of the icon
+  color: var(--primary); // theme-aware
+  margin: 0 auto 1rem;   // center above the title
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardWrapper {
+  width: 100%;
+  max-width: 600px;
+  padding: 1.5rem;
+}
+
+.card {
+  background: var(--bg-card, rgba(255, 255, 255, 0.8)); // theme-aware
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-small, 1.25rem); // slightly less rounded
+  box-shadow: var(--shadow-lg, 0 25px 50px rgba(0, 0, 0, 0.1));
+  overflow: hidden;
+  padding: 3rem;         // more padding → bigger card
+  width: 100%;
+  max-width: 550px;      // increased width
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: var(--fs-h2, 2rem);
+  font-weight: var(--fw-bold, 700);
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    var(--secondary)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  font-size: var(--fs-label, 0.875rem);
+  color: var(--text-secondary, #4b5563);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-weight: var(--fw-medium, 500);
+    font-size: var(--fs-label, 0.875rem);
+    color: var(--text-primary, #1f2937);
+  }
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid var(--border-default, #ccc);
+  border-radius: var(--radius-small, 1rem);
+  overflow: hidden;
+  height: 3rem;
+
+  input {
+    flex: 1;
+    padding: 0.75rem 1rem 0.75rem 2.5rem; // space for left icon
+    border: none;
+    outline: none;
+    font-size: var(--fs-body, 1rem);
+    background: transparent;
+    height: 100%;
+    
+  }
+
+  .icon {
+    position: absolute;
+    left: 0.75rem;
+    color: #9ca3af;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .eyeIcon {
+    position: absolute;
+    right: 0.75rem;
+    cursor: pointer;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+  }
+
+  input:focus + .icon,
+  input:focus + .eyeIcon {
+    color: var(--primary);
+  }
+}
+
+.error {
+  font-size: var(--fs-small, 0.75rem);
+  color: var(--status-error, #dc2626);
+}
+
+.loginButton {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: var(--radius-small, 1.25rem);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--text-white, #fff);
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    var(--secondary)
+  );
+  margin-top: 1rem; // space below inputs
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-base, all 0.2s);
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.response {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-disabled, #f3f4f6);
+  border-radius: var(--radius-medium, 1rem);
+  font-size: var(--fs-label, 0.875rem);
+  overflow-x: auto;
+}
