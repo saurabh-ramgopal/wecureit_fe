@@ -38,8 +38,8 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
       if (typeof window !== 'undefined') window.location.href = '/login';
       throw new Error('Authentication required');
     }
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error((errorData as any).message || `API error: ${response.statusText}`);
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
+    throw new Error(errorData.message || `API error: ${response.statusText}`);
   }
 
   return response.json() as Promise<T>;
@@ -80,8 +80,8 @@ export async function registerPatient(data: {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error((errorData as any).message || 'Registration failed');
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
+    throw new Error(errorData.message || 'Registration failed');
   }
 
   return response.json();
@@ -89,32 +89,48 @@ export async function registerPatient(data: {
 
 // Login (backend authenticates and returns a token)
 export async function login(email: string, password: string, userType: string) {
-  const response = await fetch(`${API_BASE_URL}/common/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email,
-      password,
-      type: userType,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error((err as any).message || 'Login failed');
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/common/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        type: userType,
+      }),
+    });
+  } catch (err) {
+    // Network-level failure (server down, CORS, DNS, etc.)
+    console.error('Network error while calling /common/login', err);
+    throw new Error(`Network error: ${(err as Error).message || err}`);
   }
 
-  const loginData = await response.json();
-  const token = (loginData as any).token || (loginData as any).accessToken || (loginData as any).jwt || '';
+  if (!response.ok) {
+    const errObj = (await response.json().catch(() => ({} as { message?: string }))) as { message?: string };
+    throw new Error(errObj.message || 'Login failed');
+  }
+
+  type LoginData = {
+    token?: string;
+    accessToken?: string;
+    jwt?: string;
+    name?: string;
+    user?: { name?: string };
+    [k: string]: unknown;
+  };
+
+  const loginData = (await response.json()) as LoginData;
+  const token = loginData.token ?? loginData.accessToken ?? loginData.jwt ?? '';
 
   if (token && typeof window !== 'undefined') {
-    localStorage.setItem('authToken', token);
+    localStorage.setItem('authToken', String(token));
     localStorage.setItem('userType', userType);
   }
 
-  const userName = (loginData as any).name || (loginData as any).user?.name || email.split('@')[0];
+  const userName = loginData.name ?? loginData.user?.name ?? email.split('@')[0];
   return { loginData, token, userName };
 }
 
