@@ -115,6 +115,44 @@
   gap: 1rem;
 }
 
+.licenseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.addLicenseBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #eff6ff;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.addLicenseBtn:hover {
+  background: #dbeafe;
+}
+
+.removeLicenseBtn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: opacity 0.2s;
+}
+
+.removeLicenseBtn:hover {
+  opacity: 0.7;
+}
+
 .infoNote {
   display: flex;
   align-items: flex-start;
