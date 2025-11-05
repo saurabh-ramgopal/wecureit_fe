@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { User, Stethoscope, UserPlus } from "lucide-react";
 import styles from "./home.module.scss";
+import LockButton from '@/components/LockButton/LockButton';
 
 export default function HomeView() {
     
@@ -127,6 +128,7 @@ export default function HomeView() {
           </div>
         </div>
       </footer>
+      <LockButton />
     </div>
   );
 }
