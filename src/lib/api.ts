@@ -1,3 +1,4 @@
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Read auth token issued by backend from localStorage
@@ -13,10 +14,7 @@ function getAuthHeaders(): HeadersInit {
     'Content-Type': 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
 
@@ -47,7 +45,7 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 // Public API calls (no auth required)
 export async function getDoctors() {
-  const res = await fetch(`${API_BASE_URL}/admin/getAllDoctors`, {
+  const res = await fetch(`${API_BASE_URL}/api/doctors/get`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -55,7 +53,7 @@ export async function getDoctors() {
   return res.json();
 }
 
-// Patient registration (backend handles password hashing / storage)
+// Patient registration (backend handles password hashing/storage)
 export async function registerPatient(data: {
   email: string;
   password: string;
@@ -87,18 +85,14 @@ export async function registerPatient(data: {
   return response.json();
 }
 
-// Login (backend authenticates and returns a token)
+// Login (backend authenticates and returns a token stored under 'authToken')
 export async function login(email: string, password: string, userType: string) {
   const response = await fetch(`${API_BASE_URL}/common/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      email,
-      password,
-      type: userType,
-    }),
+    body: JSON.stringify({ email, password, type: userType }),
   });
 
   if (!response.ok) {
@@ -128,22 +122,15 @@ export async function logout() {
 
 // Protected API calls
 export async function getPatientById(patientId: number) {
-  return apiCall(`/patient/getById?patientId=${patientId}`, {
-    method: 'GET',
-  });
+  return apiCall(`/patient/getById?patientId=${patientId}`, { method: 'GET' });
 }
 
 export async function updatePatient(patientData: Record<string, unknown>) {
-  return apiCall('/patient/addOrUpdate', {
-    method: 'POST',
-    body: JSON.stringify(patientData),
-  });
+  return apiCall('/patient/addOrUpdate', { method: 'POST', body: JSON.stringify(patientData) });
 }
 
 // Doctor API calls
 export async function getDoctorById(doctorId: number) {
-  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
-    method: 'GET',
-  });
+  return apiCall(`/doctor/getById?doctorId=${doctorId}`, { method: 'GET' });
 }
 
