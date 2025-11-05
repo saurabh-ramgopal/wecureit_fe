@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import styles from "./AdminDashboard.module.scss";
-import AddDoctor, { Doctor as AddDoctorType } from "./AddDoctor";
+import styles from "../AdminDashboard.module.scss";
+import AddDoctor, { type Doctor as AddDoctorType } from "./AddDoctor";
 import { Pencil, Trash2, UserPlus } from 'lucide-react';
 
 

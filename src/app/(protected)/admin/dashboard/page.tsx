@@ -6,8 +6,8 @@ import dynamic from 'next/dynamic'
 import styles from "./AdminDashboard.module.scss";
 
 
-const DoctorTable = dynamic(() => import('./DoctorTable').then(m => m.default ?? m), { ssr: false })
-const FacilityTable = dynamic(() => import('./FacilityTable').then(m => m.default ?? m), { ssr: false })
+const DoctorTable = dynamic(() => import('./doctors/DoctorTable').then(m => m.default ?? m), { ssr: false })
+const FacilityTable = dynamic(() => import('./facilities/FacilityTable').then(m => m.default ?? m), { ssr: false })
 
 const AdminDashboard = () => {
   const [tab, setTab] = useState<"doctors" | "facilities">("doctors");

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./AddDoctor.module.scss";
 import { X, Info, Plus, Trash2 } from "lucide-react";
-import { getStates, getSpecialities } from "../../../../lib/api";
+import { getStates, getSpecialities } from "../../../../../lib/api";
 
 export interface License {
   stateId: string;
