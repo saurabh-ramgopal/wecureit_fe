@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { User, Stethoscope, UserPlus, Lock } from "lucide-react";
 import styles from "./home.module.scss";
-// Inlined Lock button (admin login) - previously a separate component
 
 export default function HomeView() {
     

@@ -134,3 +134,26 @@ export async function getDoctorById(doctorId: number) {
   return apiCall(`/doctor/getById?doctorId=${doctorId}`, { method: 'GET' });
 }
 
+// Master data
+// Assumption: backend exposes endpoints that return arrays of { id, name }
+export async function getStates() {
+  // Call the correct backend endpoint now that it exists: /common/getState
+  return apiCall('/common/getState', { method: 'GET' });
+}
+
+export async function getSpecialities() {
+  // Backend exposes specialities via CommonController -> /common/getSpeciality
+  // (see CommonController.getSpeciality()). Use that path instead of /master/specialities.
+  try {
+    return await apiCall('/common/getSpeciality', { method: 'GET' });
+  } catch (err) {
+    console.error('getSpecialities failed', err);
+    throw err;
+  }
+}
+
+// Admin: add or update doctor
+export async function addDoctor(doctorData: Record<string, unknown>) {
+  return apiCall('/admin/doctor/addOrUpdate', { method: 'POST', body: JSON.stringify(doctorData) });
+}
+

@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./AdminDashboard.module.scss";
-import AddDoctorModal from "./AddDoctorModal";
-import { Stethoscope, Edit, Pencil, Trash2, UserPlus } from 'lucide-react';
+import AddDoctor from "./AddDoctor";
+import { Pencil, Trash2, UserPlus } from 'lucide-react';
 
 
 const doctors = [
@@ -51,7 +51,7 @@ const DoctorTable = () => {
       </div>
 
       {showModal && (
-        <AddDoctorModal
+        <AddDoctor
           onClose={() => setShowModal(false)}
           onSubmit={() => {
             // handle submit logic
