@@ -1,11 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import styles from "./AdminDashboard.module.scss";
-import AddDoctor from "./AddDoctor";
+import AddDoctor, { Doctor as AddDoctorType } from "./AddDoctor";
 import { Pencil, Trash2, UserPlus } from 'lucide-react';
 
 
-const doctors = [
+type DocLicense = { state: string; specialty: string; id: string };
+type DoctorSummary = { name: string; email: string; gender: string; licenses: DocLicense[] };
+
+const doctors: DoctorSummary[] = [
   {
     name: "Dr. Sarah Mitchell",
     email: "sarah.mitchell@hospital.com",
@@ -34,6 +37,12 @@ const doctors = [
 
 const DoctorTable = () => {
   const [showModal, setShowModal] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<AddDoctorType | null>(null);
+  // placeholder refresh handler until full CRUD is wired
+  const refreshDoctors = () => {
+    // TODO: implement re-fetching doctors from backend
+    console.log("refreshDoctors called");
+  };
   return (
     <div className="w-full">
       {/* Header */}
@@ -52,10 +61,16 @@ const DoctorTable = () => {
 
       {showModal && (
         <AddDoctor
-          onClose={() => setShowModal(false)}
-          onSubmit={() => {
-            // handle submit logic
+          mode={selectedDoctor ? "edit" : "create"}
+          doctor={selectedDoctor ?? undefined}
+          onClose={() => {
             setShowModal(false);
+            setSelectedDoctor(null);
+          }}
+          onSubmit={() => {
+            refreshDoctors();
+            setShowModal(false);
+            setSelectedDoctor(null);
           }}
         />
       )}
@@ -93,13 +108,30 @@ const DoctorTable = () => {
                 <td className="px-2">{doc.gender}</td>
                 <td className="px-2">
               <div className={styles.actions}>
-              <button className={styles.iconButton}>
-                <Pencil size={18} strokeWidth={2} className={styles.iconEdit} />
+                <button
+                  className={styles.iconButton}
+                  onClick={() => {
+                    // map DoctorSummary -> AddDoctorType shape
+                    const mapped = {
+                      name: doc.name,
+                      email: doc.email,
+                      gender: doc.gender,
+                      licenses: doc.licenses.map((l) => ({
+                        stateId: l.state,
+                        specialityId: l.specialty,
+                        licenseNumber: l.id,
+                      })),
+                    } as AddDoctorType;
+                    setSelectedDoctor(mapped);
+                    setShowModal(true);
+                  }}
+                >
+                  <Pencil size={18} strokeWidth={2} className={styles.iconEdit} />
                 </button>
-              <button className={styles.iconButton}>
-             <Trash2 size={18} strokeWidth={2} className={styles.iconDelete} />
-         </button>
-        </div>
+                <button className={styles.iconButton}>
+                  <Trash2 size={18} strokeWidth={2} className={styles.iconDelete} />
+                </button>
+              </div>
         </td>
 
               </tr>

@@ -4,19 +4,68 @@ import styles from "./AddDoctor.module.scss";
 import { X, Info, Plus, Trash2 } from "lucide-react";
 import { getStates, getSpecialities } from "../../../../lib/api";
 
+export interface License {
+  stateId: string;
+  specialityId: string;
+  licenseNumber: string;
+}
+
+export interface Doctor {
+  id?: string;
+  name?: string;
+  email?: string;
+  gender?: string;
+  licenses?: License[];
+}
+
 interface AddDoctorModalProps {
+  mode?: "create" | "edit";
+  doctor?: Doctor;
   onClose: () => void;
   onSubmit: () => void;
 }
 
-const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
+const AddDoctor: React.FC<AddDoctorModalProps> = ({
+  mode = "create",
+  doctor,
+  onClose,
+  onSubmit,
+}) => {
+  
+  const [fullName, setFullName] = useState<string>(doctor?.name ?? "");
+  const [email, setEmail] = useState<string>(doctor?.email ?? "");
+  const [password, setPassword] = useState<string>("");
+  const [gender, setGender] = useState<string>(doctor?.gender ?? "");
+  const [licenses, setLicenses] = useState<License[]>(
+    doctor?.licenses?.length
+      ? (doctor.licenses as License[])
+      : [{ stateId: "", specialityId: "", licenseNumber: "" }]
+  );
   const [states, setStates] = useState<Array<Record<string, unknown>>>([]);
   const [specialities, setSpecialities] = useState<Array<Record<string, unknown>>>([]);
-  const [licenses, setLicenses] = useState([
-    { stateId: "", specialityId: "", licenseNumber: "" },
-  ]);
+  // --- Load states & specialities from backend ---
+  useEffect(() => {
+    let mounted = true;
+    getStates()
+      .then((res: unknown) => {
+        if (mounted && Array.isArray(res))
+          setStates(res as Array<Record<string, unknown>>);
+      })
+      .catch((err: unknown) => console.error("getStates error", err));
 
-  // Helpers for backend shape differences
+    getSpecialities()
+      .then((res: unknown) => {
+        if (mounted && Array.isArray(res))
+          setSpecialities(res as Array<Record<string, unknown>>);
+      })
+      .catch((err: unknown) => console.error("getSpecialities error", err));
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // --- Extract ID & name from backend objects ---
   const extractId = (item: unknown) => {
     const it = item as Record<string, unknown>;
     const candidate =
@@ -45,29 +94,31 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
     return String(candidate);
   };
 
-  // Fetch state + speciality lists
+  // --- Prefill form when editing ---
   useEffect(() => {
-    let mounted = true;
-    getStates()
-      .then((res: unknown) => {
-        if (mounted && Array.isArray(res))
-          setStates(res as Array<Record<string, unknown>>);
-      })
-      .catch((err: unknown) => console.error("getStates error", err));
+    if (doctor && mode === "edit") {
+      setFullName(doctor.name || "");
+      setEmail(doctor.email || "");
+      setGender(doctor.gender || "");
+      setLicenses(
+        doctor.licenses?.length
+          ? doctor.licenses.map((l) => ({
+              stateId: l.stateId,
+              specialityId: l.specialityId,
+              licenseNumber: l.licenseNumber,
+            }))
+          : [{ stateId: "", specialityId: "", licenseNumber: "" }]
+      );
+    } else if (mode === "create") {
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setGender("");
+      setLicenses([{ stateId: "", specialityId: "", licenseNumber: "" }]);
+    }
+  }, [doctor, mode]);
 
-    getSpecialities()
-      .then((res: unknown) => {
-        if (mounted && Array.isArray(res))
-          setSpecialities(res as Array<Record<string, unknown>>);
-      })
-      .catch((err: unknown) => console.error("getSpecialities error", err));
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // 🧩 Add / Remove license functionality
+  // --- Add / remove / change license blocks ---
   const handleAddLicense = () => {
     setLicenses([...licenses, { stateId: "", specialityId: "", licenseNumber: "" }]);
   };
@@ -77,54 +128,102 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
     setLicenses(updated);
   };
 
-  const handleLicenseChange = (index: number, field: string, value: string) => {
+  const handleLicenseChange = (index: number, field: keyof License, value: string) => {
     const updated = [...licenses];
-    (updated[index] as any)[field] = value;
+    updated[index][field] = value;
     setLicenses(updated);
+  };
+
+  // --- Handle Submit ---
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      name: fullName,
+      email,
+      password: mode === "create" ? password : undefined,
+      gender,
+      licenses: licenses.filter(
+        (l) => l.stateId && l.specialityId && l.licenseNumber
+      ),
+    };
+
+    console.log(mode === "edit" ? "Editing doctor..." : "Creating doctor...", payload);
+
+    // You can call API here: addDoctor() or updateDoctor()
+    onSubmit();
+    onClose();
   };
 
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
+        {/* Header */}
         <div className={styles.header}>
-          <h2>Add New Doctor</h2>
+          <h2>{mode === "edit" ? "Edit Doctor" : "Add New Doctor"}</h2>
           <button onClick={onClose} className={styles.closeBtn}>
             <X size={20} />
           </button>
         </div>
 
         <p className={styles.subtext}>
-          Create a new doctor account with state licenses (doctors assign their own facilities).
+          {mode === "edit"
+            ? "Update doctor details and licenses."
+            : "Create a new doctor account with state licenses."}
         </p>
 
-        <form className={styles.form}>
+        {/* Form */}
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {/* Row 1 */}
           <div className={styles.row}>
             <div className={styles.field}>
               <label>Full Name *</label>
-              <input type="text" placeholder="Dr. John Smith" />
+              <input
+                type="text"
+                placeholder="Dr. John Smith"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
             </div>
             <div className={styles.field}>
               <label>Email *</label>
-              <input type="email" placeholder="john.smith@hospital.com" />
+              <input
+                type="email"
+                placeholder="john.smith@hospital.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
           </div>
 
+          {/* Row 2 */}
           <div className={styles.row}>
-            <div className={styles.field}>
-              <label>Password *</label>
-              <input type="password" placeholder="Create secure password" />
-            </div>
+            {mode === "create" && (
+              <div className={styles.field}>
+                <label>Password *</label>
+                <input
+                  type="password"
+                  placeholder="Create secure password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            )}
             <div className={styles.field}>
               <label>Gender *</label>
-              <select>
-                <option>Select gender</option>
-                <option>Female</option>
-                <option>Male</option>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <option value="">Select gender</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
               </select>
             </div>
           </div>
 
-          {/* ===== State License Section with Add Button ===== */}
+          {/* --- Licenses --- */}
           <div className={styles.licenseHeader}>
             <label>State Licenses *</label>
             <button
@@ -143,7 +242,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
             </p>
           </div>
 
-          {/* 🧩 Render Dynamic License Blocks */}
           {licenses.map((lic, index) => (
             <div key={index} className={styles.licenseBox}>
               <div className={styles.row}>
@@ -156,19 +254,14 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
                     }
                   >
                     <option value="">Select state</option>
-                    {states.length === 0 ? (
-                      <option value="" disabled>
-                        No states available
+                    {states.map((s) => (
+                      <option key={extractId(s)} value={extractId(s)}>
+                        {extractName(s)}
                       </option>
-                    ) : (
-                      states.map((s) => (
-                        <option key={extractId(s)} value={extractId(s)}>
-                          {extractName(s)}
-                        </option>
-                      ))
-                    )}
+                    ))}
                   </select>
                 </div>
+
                 <div className={styles.field}>
                   <label>Specialty</label>
                   <select
@@ -178,17 +271,11 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
                     }
                   >
                     <option value="">Select specialty</option>
-                    {specialities.length === 0 ? (
-                      <option value="" disabled>
-                        No specialities available
+                    {specialities.map((sp) => (
+                      <option key={extractId(sp)} value={extractId(sp)}>
+                        {extractName(sp)}
                       </option>
-                    ) : (
-                      specialities.map((sp) => (
-                        <option key={extractId(sp)} value={extractId(sp)}>
-                          {extractName(sp)}
-                        </option>
-                      ))
-                    )}
+                    ))}
                   </select>
                 </div>
 
@@ -208,11 +295,11 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
                 <label>License Number *</label>
                 <input
                   type="text"
+                  placeholder="e.g. VA-CARD-2020-1234"
                   value={lic.licenseNumber}
                   onChange={(e) =>
                     handleLicenseChange(index, "licenseNumber", e.target.value)
                   }
-                  placeholder="e.g. VA-CARD-2020-1234"
                 />
               </div>
             </div>
@@ -221,25 +308,17 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({ onClose, onSubmit }) => {
           <div className={styles.infoNote}>
             <Info size={16} />
             <p>
-              Doctors will assign their own facilities through the Doctor Portal
-              based on their availability preferences.
+              Doctors will assign their own facilities through the Doctor Portal based on their availability preferences.
             </p>
           </div>
 
+          {/* Footer */}
           <div className={styles.footer}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={styles.cancelBtn}
-            >
+            <button type="button" onClick={onClose} className={styles.cancelBtn}>
               Cancel
             </button>
-            <button
-              type="submit"
-              onClick={onSubmit}
-              className={styles.submitBtn}
-            >
-              Create Doctor
+            <button type="submit" className={styles.submitBtn}>
+              {mode === "edit" ? "Save Changes" : "Create Doctor"}
             </button>
           </div>
         </form>
