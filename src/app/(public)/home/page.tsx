@@ -77,7 +77,7 @@ export default function HomeView() {
                 </div>
                 <button
                   className={styles.registerButton}
-                    onClick={() => router.push("/register/patient")}
+                    onClick={() => router.push("patient/register")}
                 >
                   Register Now
                 </button>
