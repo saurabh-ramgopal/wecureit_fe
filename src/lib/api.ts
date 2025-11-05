@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Read auth token issued by backend from localStorage
@@ -17,19 +13,15 @@ function getAuthHeaders(): HeadersInit {
     'Content-Type': 'application/json',
   };
 
-<<<<<<< HEAD
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-=======
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
   return headers;
 }
 
 // Generic API call wrapper
-async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers = getAuthHeaders();
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -47,19 +39,15 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
       throw new Error('Authentication required');
     }
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `API error: ${response.statusText}`);
+    throw new Error((errorData as any).message || `API error: ${response.statusText}`);
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }
 
 // Public API calls (no auth required)
 export async function getDoctors() {
-<<<<<<< HEAD
-  const res = await fetch(`${API_BASE_URL}/api/doctors/get`, {
-=======
   const res = await fetch(`${API_BASE_URL}/admin/getAllDoctors`, {
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -67,11 +55,7 @@ export async function getDoctors() {
   return res.json();
 }
 
-<<<<<<< HEAD
-// Patient registration (backend handles password hashing/storage)
-=======
 // Patient registration (backend handles password hashing / storage)
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 export async function registerPatient(data: {
   email: string;
   password: string;
@@ -97,48 +81,40 @@ export async function registerPatient(data: {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Registration failed');
+    throw new Error((errorData as any).message || 'Registration failed');
   }
 
   return response.json();
 }
 
-<<<<<<< HEAD
-// Login (backend authenticates and returns a token stored under 'authToken')
-=======
 // Login (backend authenticates and returns a token)
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 export async function login(email: string, password: string, userType: string) {
   const response = await fetch(`${API_BASE_URL}/common/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-<<<<<<< HEAD
-    body: JSON.stringify({ email, password, type: userType }),
-=======
     body: JSON.stringify({
       email,
       password,
       type: userType,
     }),
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || 'Login failed');
+    throw new Error((err as any).message || 'Login failed');
   }
 
   const loginData = await response.json();
-  const token = loginData.token || loginData.accessToken || loginData.jwt || '';
+  const token = (loginData as any).token || (loginData as any).accessToken || (loginData as any).jwt || '';
 
   if (token && typeof window !== 'undefined') {
     localStorage.setItem('authToken', token);
     localStorage.setItem('userType', userType);
   }
 
-  const userName = loginData.name || loginData.user?.name || email.split('@')[0];
+  const userName = (loginData as any).name || (loginData as any).user?.name || email.split('@')[0];
   return { loginData, token, userName };
 }
 
@@ -152,13 +128,6 @@ export async function logout() {
 
 // Protected API calls
 export async function getPatientById(patientId: number) {
-<<<<<<< HEAD
-  return apiCall(`/patient/getById?patientId=${patientId}`, { method: 'GET' });
-}
-
-export async function updatePatient(patientData: Record<string, unknown>) {
-  return apiCall('/patient/addOrUpdate', { method: 'POST', body: JSON.stringify(patientData) });
-=======
   return apiCall(`/patient/getById?patientId=${patientId}`, {
     method: 'GET',
   });
@@ -169,25 +138,23 @@ export async function updatePatient(patientData: Record<string, unknown>) {
     method: 'POST',
     body: JSON.stringify(patientData),
   });
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 }
 
 // Doctor API calls
 export async function getDoctorById(doctorId: number) {
-<<<<<<< HEAD
-  return apiCall(`/doctor/getById?doctorId=${doctorId}`, { method: 'GET' });
+  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
+    method: 'GET',
+  });
 }
 
 // Master data
-// Assumption: backend exposes endpoints that return arrays of { id, name }
+// Assumption: backend exposes endpoints that return arrays of objects (various field names).
 export async function getStates() {
-  // Call the correct backend endpoint now that it exists: /common/getState
+  // GET /common/getState returns state_master list
   return apiCall('/common/getState', { method: 'GET' });
 }
 
 export async function getSpecialities() {
-  // Backend exposes specialities via CommonController -> /common/getSpeciality
-  // (see CommonController.getSpeciality()). Use that path instead of /master/specialities.
   try {
     return await apiCall('/common/getSpeciality', { method: 'GET' });
   } catch (err) {
@@ -198,11 +165,10 @@ export async function getSpecialities() {
 
 // Admin: add or update doctor
 export async function addDoctor(doctorData: Record<string, unknown>) {
-  return apiCall('/admin/doctor/addOrUpdate', { method: 'POST', body: JSON.stringify(doctorData) });
-=======
-  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
-    method: 'GET',
+  return apiCall('/admin/doctor/addOrUpdate', {
+    method: 'POST',
+    body: JSON.stringify(doctorData),
   });
->>>>>>> 7fe3808 (chore(fe): remove firebase helper and switch api to backend auth)
 }
+
 
