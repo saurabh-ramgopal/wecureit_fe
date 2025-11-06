@@ -117,7 +117,7 @@ const DoctorTable = () => {
                       email: doc.email,
                       gender: doc.gender,
                       licenses: doc.licenses.map((l) => ({
-                        stateId: l.state,
+                        stateCode: l.state,
                         specialityId: l.specialty,
                         licenseNumber: l.id,
                       })),

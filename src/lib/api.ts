@@ -109,8 +109,25 @@ export async function login(email: string, password: string, userType: string) {
   }
 
   if (!response.ok) {
-    const errObj = (await response.json().catch(() => ({} as { message?: string }))) as { message?: string };
-    throw new Error(errObj.message || 'Login failed');
+    // Try to parse JSON error body, but fall back to raw text so we get server stack/HTML
+    let bodyText = '';
+    try {
+      // attempt to parse JSON first
+      const json = await response.json().catch(() => null);
+      if (json && typeof json === 'object') {
+        const j = json as Record<string, unknown>;
+        const msgCandidate = j['message'] ?? j['reason'] ?? j['error'];
+        throw new Error(String(msgCandidate ?? `Login failed (${response.status})`));
+      }
+      // if not JSON, read as text
+      bodyText = await response.text().catch(() => '');
+    } catch {
+      // if json parsing threw, try to capture text
+      bodyText = bodyText || (await response.text().catch(() => ''));
+    }
+
+    const snippet = bodyText ? ` Response body: ${bodyText.slice(0, 200)}` : '';
+    throw new Error(`Login failed (${response.status})${snippet}`);
   }
 
   type LoginData = {

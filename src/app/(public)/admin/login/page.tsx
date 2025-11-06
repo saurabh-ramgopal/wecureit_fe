@@ -35,8 +35,8 @@ const AdminLoginPage = (props: Props) => {
           router.push(`/${userType}/dashboard`);
         }, 1000);
       } else {
-        const reason = loginData?.reason || 'Login failed';
-        toast.error(reason, { id: 'login-fail', duration: 3000 });
+        const reason = loginData?.reason ?? 'Login failed';
+        toast.error(String(reason), { id: 'login-fail', duration: 3000 });
       }
     } catch (error: unknown) {
       console.error("Error during login:", error);
