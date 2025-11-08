@@ -34,8 +34,10 @@ const FacilityTable = () => {
       // expose specMap to render logic
       setSpecMapState(specMap);
       if (Array.isArray(res)) {
+        // ensure we operate on an array reference to avoid calling .filter on non-arrays
+        const rawArr = Array.isArray(res) ? (res as unknown[]) : [];
         // Filter out inactive facilities (backend returns isActive flag)
-  const activeRes = (res as any[]).filter((f) => {
+        const activeRes = rawArr.filter((f) => {
           const ff = f as Record<string, unknown>;
           // treat explicit false (boolean or string) as inactive
           if (ff['isActive'] === false) return false;
@@ -45,11 +47,11 @@ const FacilityTable = () => {
         // Backend returns FacilityMaster entities which look like:
         // { facilityMasterId, facilityName, noOfRooms, facilityStreet, facilityCity, isActive }
         // Map them into the AddFacilityType shape used by the FE components.
-        const normalized = activeRes.map((ff) => {
+  const normalized = (activeRes as Record<string, unknown>[]).map((ff) => {
           const id = ff['facilityMasterId'] ?? ff['facility_master_id'] ?? '';
 
           // helper to map spec master list to ids/names
-          const facilitySpecs = Array.isArray(ff['speciality']) ? (ff['speciality'] as any[]) : [];
+          const facilitySpecs = Array.isArray(ff['speciality']) ? (ff['speciality'] as Record<string, unknown>[]) : [];
           const facilitySpecIds = facilitySpecs.map((s) => String(s['specialityMasterId'] ?? s['speciality_master_id'] ?? '')).filter(Boolean);
           const facilitySpecNames = facilitySpecs.map((s) => String(s['specialityName'] ?? s['speciality_name'] ?? s['name'] ?? '')).filter(Boolean);
 
@@ -128,7 +130,7 @@ const FacilityTable = () => {
               .join(', '),
             totalRooms: typeof ff['noOfRooms'] === 'number' ? (ff['noOfRooms'] as number) : Number(ff['no_of_rooms'] ?? 0),
             specialties: facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id) => specMap[id] ?? id),
-            roomDetails: parsedRooms as any,
+            roomDetails: parsedRooms as unknown[],
             facilityMasterId: String(id),
           };
 

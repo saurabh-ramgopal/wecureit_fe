@@ -219,7 +219,7 @@ export async function updateDoctorSpeciality(payload: Record<string, unknown>) {
 
 // Facilities
 export async function getFacilities() {
-  return apiCall('/common/getFacility', { method: 'GET' });
+  return apiCall('/common/facility/getAll', { method: 'GET' });
 }
 
 export async function addOrUpdateFacility(facilityData: Record<string, unknown>) {
@@ -230,7 +230,7 @@ export async function addOrUpdateFacility(facilityData: Record<string, unknown>)
 }
 
 export async function deleteFacility(payload: Record<string, unknown>) {
-  return apiCall('/common/deleteFacility', {
+  return apiCall('/common/facility/delete', {
     method: 'POST',
     body: JSON.stringify(payload),
   });

@@ -12,7 +12,7 @@ export type Facility = {
   address: string;
   totalRooms: number;
   specialties: string[];
-  roomDetails: string[];
+  roomDetails: unknown[];
 };
 
 interface AddFacilityProps {
