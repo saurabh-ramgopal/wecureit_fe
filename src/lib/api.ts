@@ -47,12 +47,8 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
 
 // Public API calls (no auth required)
 export async function getDoctors() {
-  const res = await fetch(`${API_BASE_URL}/admin/getAllDoctors`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to fetch doctors');
-  return res.json();
+  // Use protected apiCall so Authorization header is attached when token exists
+  return apiCall('/admin/getAllDoctors', { method: 'GET' });
 }
 
 // Patient registration (backend handles password hashing / storage)
@@ -198,9 +194,45 @@ export async function getSpecialities() {
 
 // Admin: add or update doctor
 export async function addDoctor(doctorData: Record<string, unknown>) {
-  return apiCall('/admin/doctor/addOrUpdate', {
+  // backend exposes POST /admin/addDoctor
+  return apiCall('/admin/addDoctor', {
     method: 'POST',
     body: JSON.stringify(doctorData),
+  });
+}
+
+// Delete a doctor. payload can be { doctorId } or { email } depending on backend contract.
+export async function deleteDoctor(payload: Record<string, unknown>) {
+  return apiCall('/admin/deleteDoctor', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+// Update doctor speciality (if backend exposes this separate route)
+export async function updateDoctorSpeciality(payload: Record<string, unknown>) {
+  return apiCall('/admin/updateDoctorSpeciality', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+// Facilities
+export async function getFacilities() {
+  return apiCall('/common/getFacility', { method: 'GET' });
+}
+
+export async function addOrUpdateFacility(facilityData: Record<string, unknown>) {
+  return apiCall('/common/facility/addOrUpdate', {
+    method: 'POST',
+    body: JSON.stringify(facilityData),
+  });
+}
+
+export async function deleteFacility(payload: Record<string, unknown>) {
+  return apiCall('/common/deleteFacility', {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 }
 

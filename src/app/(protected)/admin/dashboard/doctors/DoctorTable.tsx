@@ -1,55 +1,69 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../AdminDashboard.module.scss";
+import localStyles from "./DoctorTable.module.scss";
 import AddDoctor, { type Doctor as AddDoctorType } from "./AddDoctor";
 import { Pencil, Trash2, UserPlus } from 'lucide-react';
+import { getDoctors, deleteDoctor } from "../../../../../lib/api";
 
 
-type DocLicense = { state: string; specialty: string; id: string };
-type DoctorSummary = { name: string; email: string; gender: string; licenses: DocLicense[] };
-
-const doctors: DoctorSummary[] = [
-  {
-    name: "Dr. Sarah Mitchell",
-    email: "sarah.mitchell@hospital.com",
-    gender: "Female",
-    licenses: [
-      { state: "Washington DC", specialty: "Cardiology", id: "#DC-CARD-2015-8842" },
-      { state: "Maryland", specialty: "Cardiology", id: "#MD-CARD-2016-3391" },
-    ],
-  },
-  {
-    name: "Dr. James Rodriguez",
-    email: "james.rodriguez@hospital.com",
-    gender: "Male",
-    licenses: [{ state: "Virginia", specialty: "Orthopedics", id: "#VA-ORTH-2010-5527" }],
-  },
-  {
-    name: "Dr. Emily Chen",
-    email: "emily.chen@hospital.com",
-    gender: "Female",
-    licenses: [
-      { state: "Washington DC", specialty: "Pediatrics", id: "#DC-PEDI-2018-6754" },
-      { state: "Virginia", specialty: "General Practice", id: "#VA-GENP-2019-2983" },
-    ],
-  },
-];
+// Backend types
+type SpecialityItem = { specialityMasterId?: string; specialityName?: string; speciality_master_id?: string; name?: string } & Record<string, string|number|undefined>;
+type BackendDoctor = {
+  doctorMasterId?: number;
+  doctorName?: string;
+  doctorEmail?: string;
+  doctorGender?: string;
+  speciality?: SpecialityItem[];
+  licenses?: SpecialityItem[];
+  [k: string]: unknown;
+};
+type DoctorSummary = BackendDoctor;
 
 const DoctorTable = () => {
+  const [doctorsList, setDoctorsList] = useState<DoctorSummary[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<AddDoctorType | null>(null);
-  // placeholder refresh handler until full CRUD is wired
-  const refreshDoctors = () => {
-    // TODO: implement re-fetching doctors from backend
-    console.log("refreshDoctors called");
+
+  const refreshDoctors = async () => {
+    try {
+      const res = await getDoctors();
+      if (Array.isArray(res)) setDoctorsList(res as DoctorSummary[]);
+      else setDoctorsList([]);
+    } catch (err) {
+      console.error('Failed to fetch doctors', err);
+      setDoctorsList([]);
+    }
   };
+
+  useEffect(() => {
+    void refreshDoctors();
+  }, []);
+
+  const handleDelete = async (doc: DoctorSummary) => {
+    const id = (doc?.doctorMasterId ?? doc?.doctorId ?? doc?.id) as number | undefined;
+    const displayName = doc?.doctorName ?? doc?.name ?? doc?.email ?? 'doctor';
+    if (!confirm(`Delete doctor ${displayName}?`)) return;
+    if (!id) {
+      alert('Cannot delete: missing doctor id');
+      return;
+    }
+    try {
+      await deleteDoctor({ doctorMasterId: id, isActive: false });
+      await refreshDoctors();
+    } catch (err) {
+      console.error('deleteDoctor failed', err);
+      alert('Failed to delete doctor');
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Header */}
       <div className={styles.cardHeader}>
         <div>
           <div className={styles.cardTitle}>Doctor Management</div>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Create new doctor accounts and update specialties</div>
+          <div className={localStyles.headerSubtitle}>Create new doctor accounts and update specialties</div>
         </div>
 
         <button className={styles.addButton} onClick={() => setShowModal(true)}>
@@ -67,59 +81,34 @@ const DoctorTable = () => {
             setShowModal(false);
             setSelectedDoctor(null);
           }}
-          onSubmit={() => {
-            refreshDoctors();
+          onSubmit={async () => {
+            await refreshDoctors();
             setShowModal(false);
             setSelectedDoctor(null);
           }}
         />
       )}
 
-      {/* Table */}
-      <div className={styles.tableWrap}>
-        <table className="w-full border-collapse text-[0.95rem]">
-          <thead className="bg-[var(--bg-light)]">
-            <tr className="text-left border-b border-[var(--border-light)] text-[var(--text-secondary)]">
-              <th className="py-3 px-2 font-semibold">Name</th>
-              <th className="px-2 font-semibold">Email</th>
-              <th className="px-2 font-semibold">State Licenses</th>
-              <th className="px-2 font-semibold">Gender</th>
-              <th className="px-2 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {doctors.map((doc, i) => (
-              <tr
-                key={i}
-                className="border-b border-[var(--border-light)] hover:bg-[var(--bg-hover)] transition"
-              >
-                <td className="py-3 px-2 font-medium text-[var(--text-primary)]">{doc.name}</td>
-                <td className="px-2">{doc.email}</td>
-                <td className="px-2">
-                  {doc.licenses.map((l, j) => (
-                    <div key={j} className="flex items-center gap-2 mb-1">
-                      <span className={styles.badge}>
-                        {l.state}: {l.specialty}
-                      </span>
-                      <span className="text-[var(--text-muted)] text-xs">{l.id}</span>
-                    </div>
-                  ))}
-                </td>
-                <td className="px-2">{doc.gender}</td>
-                <td className="px-2">
-              <div className={styles.actions}>
+      {/* Card grid for doctors */}
+      <div className={localStyles.grid}>
+        {doctorsList.map((doc: BackendDoctor, i: number) => (
+          <div key={i} className={localStyles.card}>
+            <div className={localStyles.cardTop}>
+              <div>
+                <div className={localStyles.doctorName}>{String(doc?.doctorName ?? doc?.name ?? '')}</div>
+              </div>
+
+              <div className={localStyles.actions}>
                 <button
                   className={styles.iconButton}
                   onClick={() => {
-                    // map DoctorSummary -> AddDoctorType shape
                     const mapped = {
-                      name: doc.name,
-                      email: doc.email,
-                      gender: doc.gender,
-                      licenses: doc.licenses.map((l) => ({
-                        stateCode: l.state,
-                        specialityId: l.specialty,
-                        licenseNumber: l.id,
+                      name: doc?.doctorName ?? doc?.name,
+                      email: doc?.doctorEmail ?? doc?.email,
+                      gender: doc?.doctorGender ?? doc?.gender,
+                      licenses: (doc?.speciality ?? []).map((s: SpecialityItem) => ({
+                        stateCode: '',
+                        specialityId: s?.specialityMasterId ?? s?.speciality_master_id ?? String(s?.['id'] ?? ''),
                       })),
                     } as AddDoctorType;
                     setSelectedDoctor(mapped);
@@ -128,16 +117,35 @@ const DoctorTable = () => {
                 >
                   <Pencil size={18} strokeWidth={2} className={styles.iconEdit} />
                 </button>
-                <button className={styles.iconButton}>
+                <button className={styles.iconButton} onClick={() => void handleDelete(doc)}>
                   <Trash2 size={18} strokeWidth={2} className={styles.iconDelete} />
                 </button>
               </div>
-        </td>
+            </div>
 
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            <div className={localStyles.info}>
+              <strong>Email:</strong>{' '}
+              <a href={`mailto:${String(doc?.doctorEmail ?? doc?.email ?? '')}`}>
+                {String(doc?.doctorEmail ?? doc?.email ?? '')}
+              </a>
+            </div>
+
+            <div className={localStyles.info}>
+              <strong>Gender:</strong> {String(doc?.doctorGender ?? doc?.gender ?? '')}
+            </div>
+
+            <div>
+              <div className={localStyles.sectionTitle}><strong>Specialties:</strong></div>
+              <div className={localStyles.badgesWrap}>
+                {((doc?.speciality ?? doc?.licenses) as SpecialityItem[] ?? []).map((l: SpecialityItem, j: number) => (
+                  <span key={j} className={styles.badge}>
+                    {String(l?.specialityName ?? l?.speciality ?? l?.speciality_master_id ?? l?.name ?? '')}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

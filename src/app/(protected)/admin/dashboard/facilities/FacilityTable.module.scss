@@ -1,0 +1,98 @@
+/* Styles moved from inline styles in FacilityTable.tsx */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+.facilityName {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem; /* Slightly smaller */
+}
+.stateRow {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.info {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+.infoStrong {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+.sectionTitle {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+.badgesWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.roomContainer {
+  background: var(--bg-page);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+}
+.roomParagraph {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0;
+}
+
+/* Per-room card inside the facility card */
+.roomCard {
+  margin-bottom: 0.6rem;
+  padding: 0.45rem 0.25rem;
+  border-radius: 8px;
+}
+
+.roomHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.roomNumber {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-left: 0.6rem;
+}
+
+.roomSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.noSpecs {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

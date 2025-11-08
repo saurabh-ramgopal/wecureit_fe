@@ -7,7 +7,6 @@ import { getStates, getSpecialities } from "../../../../../lib/api";
 export interface License {
   stateCode: string;
   specialityId: string;
-  licenseNumber: string;
 }
 
 export interface Doctor {
@@ -39,7 +38,7 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
   const [licenses, setLicenses] = useState<License[]>(
     doctor?.licenses?.length
       ? (doctor.licenses as License[])
-      : [{ stateCode: "", specialityId: "", licenseNumber: "" }]
+      : [{ stateCode: "", specialityId: "" }]
   );
   const [states, setStates] = useState<Array<Record<string, unknown>>>([]);
   const [specialities, setSpecialities] = useState<Array<Record<string, unknown>>>([]);
@@ -105,22 +104,21 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
           ? doctor.licenses.map((l) => ({
               stateCode: l.stateCode,
               specialityId: l.specialityId,
-              licenseNumber: l.licenseNumber,
             }))
-          : [{ stateCode: "", specialityId: "", licenseNumber: "" }]
+          : [{ stateCode: "", specialityId: "" }]
       );
     } else if (mode === "create") {
       setFullName("");
       setEmail("");
       setPassword("");
       setGender("");
-      setLicenses([{ stateCode: "", specialityId: "", licenseNumber: "" }]);
+      setLicenses([{ stateCode: "", specialityId: "" }]);
     }
   }, [doctor, mode]);
 
   // --- Add / remove / change license blocks ---
   const handleAddLicense = () => {
-    setLicenses([...licenses, { stateCode: "", specialityId: "", licenseNumber: "" }]);
+    setLicenses([...licenses, { stateCode: "", specialityId: "" }]);
   };
 
   const handleRemoveLicense = (index: number) => {
@@ -130,7 +128,7 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
 
   const handleLicenseChange = (index: number, field: keyof License, value: string) => {
     const updated = [...licenses];
-    updated[index][field] = value;
+    updated[index] = { ...updated[index], [field]: value } as License;
     setLicenses(updated);
   };
 
@@ -143,9 +141,7 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
       email,
       password: mode === "create" ? password : undefined,
       gender,
-      licenses: licenses.filter(
-        (l) => l.stateCode && l.specialityId && l.licenseNumber
-      ),
+      licenses: licenses.filter((l) => l.stateCode && l.specialityId),
     };
 
     console.log(mode === "edit" ? "Editing doctor..." : "Creating doctor...", payload);
@@ -238,7 +234,7 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
           <div className={styles.exampleBox}>
             <Info size={16} />
             <p>
-              <strong>Example:</strong> Virginia license for Cardiology (License #: VA-CARD-2020-1234)
+              <strong>Example:</strong> Virginia license for Cardiology
             </p>
           </div>
 
@@ -291,17 +287,7 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
                 )}
               </div>
 
-              <div className={styles.field}>
-                <label>License Number *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. VA-CARD-2020-1234"
-                  value={lic.licenseNumber}
-                  onChange={(e) =>
-                    handleLicenseChange(index, "licenseNumber", e.target.value)
-                  }
-                />
-              </div>
+              {/* License number removed per request */}
             </div>
           ))}
 

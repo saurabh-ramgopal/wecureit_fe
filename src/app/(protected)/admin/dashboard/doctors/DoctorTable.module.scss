@@ -1,0 +1,57 @@
+/* Small module for DoctorTable styles */
+.headerSubtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+.tableWrap {
+  width: 100%;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Card/grid styles for doctor cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+.doctorName {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+.email {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.badgesWrap {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.info {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+.sectionTitle {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
