@@ -6,9 +6,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 
-type Props = {}
-
-const DoctorLoginPage = (props: Props) => {
+const DoctorLoginPage = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   type FormData = {

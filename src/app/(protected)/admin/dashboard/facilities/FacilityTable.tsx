@@ -12,27 +12,13 @@ const FacilityTable = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [facilities, setFacilities] = useState<AddFacilityType[]>([]);
   const [selectedFacility, setSelectedFacility] = useState<AddFacilityType | null>(null);
-  const [specMapState, setSpecMapState] = useState<Record<string, string>>({});
+  
 
   const refreshFacilities = useCallback(async () => {
     try {
       const res = await getFacilities();
-      // Fetch all specialities once so we can map ids -> names for room-level display
-  let allSpecialities: Record<string, unknown>[] = [];
-      try {
-        const specResp = await getSpecialities();
-        allSpecialities = Array.isArray(specResp) ? (specResp as Record<string, unknown>[]) : [];
-      } catch (e) {
-        console.warn('Failed to fetch speciality master list; room specialty names will show ids', e);
-      }
-      const specMap: Record<string, string> = {};
-      for (const s of allSpecialities) {
-        const id = String((s['specialityMasterId'] ?? s['speciality_master_id'] ?? '') as string);
-        const name = String((s['specialityName'] ?? s['speciality_name'] ?? s['speciality'] ?? s['name'] ?? id) as string);
-        if (id) specMap[id] = name;
-      }
-      // expose specMap to render logic
-      setSpecMapState(specMap);
+      // (no-op) we no longer fetch master speciality list here because
+      // per-room rendering has been removed from the facility card.
       if (Array.isArray(res)) {
         // ensure we operate on an array reference to avoid calling .filter on non-arrays
         const rawArr = Array.isArray(res) ? (res as unknown[]) : [];
@@ -74,7 +60,7 @@ const FacilityTable = () => {
                   const first = lst[0];
                   if (typeof first === 'string') {
                     ids = (lst as string[]).map((x) => String(x));
-                    names = ids.map((id) => specMap[id] ?? id);
+                    names = ids.map((id) => id);
                     break;
                   }
                   if (typeof first === 'object') {
@@ -89,7 +75,7 @@ const FacilityTable = () => {
                     }
                     if (extractedIds.length > 0) ids = extractedIds;
                     if (extractedNames.length > 0) names = extractedNames;
-                    if (ids.length > 0 && names.length === 0) names = ids.map((id) => specMap[id] ?? id);
+                    if (ids.length > 0 && names.length === 0) names = ids.map((id) => id);
                     break;
                   }
                 }
@@ -111,28 +97,61 @@ const FacilityTable = () => {
           if ((parsedRooms.length === 0 || parsedRooms.every((r) => !r)) && typeof ff['noOfRooms'] === 'number' && (ff['noOfRooms'] as number) > 0) {
             const n = ff['noOfRooms'] as number;
             const synth: unknown[] = [];
+            // When backend doesn't provide per-room details, distribute facility-level
+            // specialties across rooms deterministically instead of copying all into
+            // the first room. Always include General Practice and then at most one
+            // non-default speciality per room in numeric order.
+            // Build id->name map from the extracted arrays so we can present names.
+            const idToName = new Map<string, string>();
+            for (let idx = 0; idx < facilitySpecIds.length; idx++) {
+              const id = facilitySpecIds[idx];
+              const nm = facilitySpecNames[idx] ?? id;
+              if (id) idToName.set(id, nm);
+            }
+            const gpEntry = facilitySpecNames.find((s) => s === 'General Practice');
+            const gpId = gpEntry ? facilitySpecIds[facilitySpecNames.indexOf('General Practice')] : (facilitySpecNames.includes('General Practice') ? 'General Practice' : undefined);
+            // list non-GP ids in order
+            const nonGpIds = facilitySpecIds.filter((id) => (idToName.get(id) ?? id) !== 'General Practice');
+
             for (let i = 1; i <= n; i++) {
+              const idsForRoom: string[] = [];
+              // Always include GP
+              if (gpId) idsForRoom.push(gpId);
+              // Give the i-th room the (i-1)-th non-gp speciality if available
+              const extra = nonGpIds[i - 1];
+              if (extra) idsForRoom.push(extra);
+
+              const namesForRoom: string[] = idsForRoom.map((id) => idToName.get(id) ?? id);
               synth.push({
                 roomNumber: i,
                 roomLabel: `Room ${i}`,
-                specialityIds: facilitySpecIds,
-                specialityNames: facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id: string) => specMap[id] ?? id),
+                specialityIds: idsForRoom,
+                specialityNames: namesForRoom,
               });
             }
             parsedRooms = synth;
           }
 
-          const normalizedFacility: AddFacilityType = {
+          // Normalize state fields carefully: avoid String(null) -> "null" and prefer undefined
+          const rawStateCode = ff['stateCode'] ?? ff['state_code'] ?? ff['stateId'] ?? ff['state_master_id'] ?? null;
+          const rawStateName = ff['stateName'] ?? ff['state_name'] ?? null;
+          const normalizedFacility = {
             name: String(ff['facilityName'] ?? ff['facility_name'] ?? ''),
-            state: String(ff['stateName'] ?? ff['state_name'] ?? ff['facilityCity'] ?? ff['facility_city'] ?? ''),
+            state: rawStateName ? String(rawStateName) : String(ff['facilityCity'] ?? ff['facility_city'] ?? ''),
             address: [ff['facilityStreet'] ?? ff['facility_street'] ?? '', ff['facilityCity'] ?? ff['facility_city'] ?? '']
               .filter(Boolean)
               .join(', '),
             totalRooms: typeof ff['noOfRooms'] === 'number' ? (ff['noOfRooms'] as number) : Number(ff['no_of_rooms'] ?? 0),
-            specialties: facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id) => specMap[id] ?? id),
+            specialties: facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id) => id),
             roomDetails: parsedRooms as unknown[],
-            facilityMasterId: String(id),
-          };
+            facilityMasterId: id ? String(id) : undefined,
+            // include both stateName and stateCode when backend provides them so the AddFacility
+            // modal can reliably pre-select the correct option
+            // (some backend shapes use stateCode / state_code while others use stateName)
+            // expose both fields on the normalized object; only set them when non-null
+            stateCode: rawStateCode !== null && rawStateCode !== undefined ? String(rawStateCode) : undefined,
+            stateName: rawStateName !== null && rawStateName !== undefined ? String(rawStateName) : undefined,
+          } as unknown as AddFacilityType;
 
           return normalizedFacility;
         });
@@ -148,6 +167,19 @@ const FacilityTable = () => {
   useEffect(() => {
     void refreshFacilities();
   }, [refreshFacilities]);
+
+  // Load global speciality master so we can defensively map ids -> names
+  const [specialityMaster, setSpecialityMaster] = useState<Array<Record<string, unknown>>>([]);
+  useEffect(() => {
+    let mounted = true;
+    getSpecialities()
+      .then((res) => {
+        if (!mounted) return;
+        if (Array.isArray(res)) setSpecialityMaster(res as Array<Record<string, unknown>>);
+      })
+      .catch((err) => console.error('getSpecialities failed in FacilityTable', err));
+    return () => { mounted = false; };
+  }, []);
 
   // Helper to extract a displayable state name from various backend shapes
   const extractStateName = (s: unknown): string => {
@@ -222,6 +254,10 @@ const FacilityTable = () => {
                 <button
                   className={styles.iconButton}
                   onClick={() => {
+                    // Debug: log the normalized facility when opening the edit modal
+                    if (typeof console !== 'undefined' && typeof console.debug === 'function') {
+                      console.debug('Opening AddFacility modal with facility:', f);
+                    }
                     setSelectedFacility(f);
                     setShowAddModal(true);
                   }}
@@ -267,67 +303,35 @@ const FacilityTable = () => {
 
             {/* Specialties section intentionally removed: UI simplified to show per-room specialties only */}
 
-            {/* Room Details */}
+            {/* Room Details: show per-room specialties.
+                We display General Practice as present for every room, and
+                any other facility specialties are distributed one-per-room
+                in numeric order so the card reflects the per-room config
+                (or the facility-level mapping when explicit roomDetails
+                are not provided by the backend). */}
             <div>
               <p className={localStyles.sectionTitle}>Room Details:</p>
               <div className={localStyles.roomContainer}>
                 {(Array.isArray(f.roomDetails) ? f.roomDetails : []).map((r, idx) => {
-                  // r may be a string (legacy) or a structured object { roomNumber, roomLabel, specialityNames }
                   if (!r) return null;
-                  if (typeof r === 'string') {
-                    return (
-                      <p key={idx} className={localStyles.roomParagraph}>
-                        <strong>Room {idx + 1}:</strong> {r}
-                      </p>
-                    );
-                  }
-                  const roomObj = r as Record<string, unknown>;
+                  // r may already be normalized by the API mapping code in refreshFacilities
+                  const roomObj = (r as Record<string, unknown>);
                   const roomNumber = roomObj.roomNumber ?? roomObj.room_number ?? (idx + 1);
                   const roomLabel = roomObj.roomLabel ?? roomObj.room_label ?? `Room ${roomNumber}`;
-                  const maybeSpecNames = roomObj['specialityNames'] ?? roomObj['specialityList'];
+                  const specialityNames = Array.isArray(roomObj['specialityNames']) ? (roomObj['specialityNames'] as string[]) : (Array.isArray(roomObj['specialityList']) ? (roomObj['specialityList'] as string[]) : []);
 
-                  // normalize speciality entries (may be strings, ids, or objects)
-                  const specNames: string[] = Array.isArray(maybeSpecNames)
-                    ? (maybeSpecNames as unknown[]).map((entry) => {
-                        if (entry === null || entry === undefined) return '';
-                        if (typeof entry === 'string') {
-                          // could be id or name; prefer mapping id->name
-                          return specMapState[entry] ?? entry;
-                        }
-                        // entry may be an object with various shapes
-                        const e = entry as Record<string, unknown>;
-                        const nm = (e['specialityName'] ?? e['speciality_name'] ?? e['name'] ?? e['label'] ?? e['speciality'] ?? e['specialityMaster'] ?? e['speciality_master'] ?? undefined);
-                        if (nm && typeof nm === 'string') return nm;
-                        // nested specialityMaster object with its own fields
-                        if (typeof e['specialityMaster'] === 'object' && e['specialityMaster'] !== null) {
-                          const sm = e['specialityMaster'] as Record<string, unknown>;
-                          const nm2 = (sm['specialityName'] ?? sm['speciality_name'] ?? sm['name'] ?? undefined) as string | undefined;
-                          if (nm2) return nm2;
-                        }
-                        // fallback to id fields or stringify the object so we don't render [object Object]
-                        const id = String(e['specialityMasterId'] ?? e['speciality_master_id'] ?? e['id'] ?? e['specialityId'] ?? e['speciality'] ?? '');
-                        return specMapState[id] ?? (id ? id : JSON.stringify(e));
-                      }).filter(Boolean)
-                    : [];
+                  // Ensure General Practice is always present as a display label
+                  const labels = Array.from(new Set([...(specialityNames.length ? specialityNames.map(String) : [] )]));
+                  if (!labels.includes('General Practice')) labels.unshift('General Practice');
 
                   return (
                     <div key={idx} className={localStyles.roomCard}>
                       <div className={localStyles.roomHeader}>
                         <strong>{String(roomLabel)}</strong>
-                        {
-                          // avoid showing duplicate number when label already contains it (e.g. "Room 1")
-                          (() => {
-                            const labelStr = String(roomLabel ?? '');
-                            const num = roomNumber ?? (idx + 1);
-                            const labelHasNumber = /\b(room\s*\d+)\b/i.test(labelStr) || new RegExp(`\\b${num}\\b`).test(labelStr);
-                            if (!labelHasNumber) return <span className={localStyles.roomNumber}>#{String(num)}</span>;
-                            return null;
-                          })()
-                        }
                       </div>
                       <div className={localStyles.roomSpecs}>
-                        {specNames.length > 0 ? (
-                          specNames.map((s, i2) => (
+                        {labels.length > 0 ? (
+                          labels.map((s, i2) => (
                             <span key={i2} className={styles.badge} style={{ marginRight: 6 }}>
                               {String(s)}
                             </span>
@@ -361,11 +365,77 @@ const FacilityTable = () => {
             }
 
             try {
-              // Send to backend and then refresh the authoritative list.
-              // This ensures we display the normalized room/speciality data the server returns
-              // and avoids coercing objects into the string "[object Object]".
-              await addOrUpdateFacility(backendPayload as Record<string, unknown>);
-              await refreshFacilities();
+              // Send to backend and prefer the server response when updating local UI.
+              // The backend may echo back `roomDetails` (if provided) so we should
+              // use that authoritative shape instead of immediately reloading the
+              // entire list which could overwrite per-room data.
+              const saved = await addOrUpdateFacility(backendPayload as Record<string, unknown>);
+
+              // Build a normalized local facility object using the server response
+              // when available, falling back to the payload we just sent.
+              const source = (saved && typeof saved === 'object') ? (saved as Record<string, unknown>) : (backendPayload as Record<string, unknown>);
+              const id = source.facilityMasterId ?? source.facility_master_id ?? (backendPayload as Record<string, unknown>)['facilityMasterId'] ?? undefined;
+
+              // Deep-clone incoming roomDetails to avoid accidental shared references
+              const rawRoomDetails = Array.isArray(source.roomDetails)
+                ? JSON.parse(JSON.stringify(source.roomDetails))
+                : (Array.isArray((backendPayload as Record<string, unknown>).roomDetails) ? JSON.parse(JSON.stringify((backendPayload as Record<string, unknown>).roomDetails)) : []);
+
+              // Ensure each roomDetail has specialityList (ids) and specialityNames (friendly labels)
+              const normalizedRooms = (rawRoomDetails as Record<string, unknown>[]).map((rd) => {
+                const sList = Array.isArray(rd['specialityList']) ? (rd['specialityList'] as unknown[]).map(String) : (Array.isArray(rd['specialityIds']) ? (rd['specialityIds'] as unknown[]).map(String) : []);
+                // map ids -> names using local speciality master as a fallback
+                const sNames = sList.map((id) => {
+                  const found = specialityMaster.find((sp) => {
+                    const candidate = String(sp['specialityMasterId'] ?? sp['speciality_master_id'] ?? sp['id'] ?? sp['code'] ?? sp['stateCode'] ?? '');
+                    return candidate === String(id);
+                  });
+                  if (found) return String(found['specialityName'] ?? found['speciality_name'] ?? found['name'] ?? id);
+                  // if id already looks like a name, keep it
+                  return String(id);
+                });
+                return {
+                  roomNumber: rd['roomNumber'] ?? rd['room_number'],
+                  roomLabel: rd['roomLabel'] ?? rd['room_label'] ?? (rd['roomNumber'] ? `Room ${rd['roomNumber']}` : undefined),
+                  specialityList: sList,
+                  specialityNames: sNames,
+                } as unknown;
+              });
+
+              const stateDisplay = source.stateName ?? source.state ?? source.state_name ?? source.facilityCity ?? (backendPayload as Record<string, unknown>)?.facilityCity ?? (backendPayload as Record<string, unknown>)?.stateName ?? (backendPayload as Record<string, unknown>)?.state ?? (backendPayload as Record<string, unknown>)?.state_name ?? '';
+
+              const normalizedLocal: AddFacilityType = {
+                facilityMasterId: id ? String(id) : undefined,
+                name: String(source.facilityName ?? source.facility_name ?? (backendPayload as Record<string, unknown>).facilityName ?? ''),
+                address: [source.facilityStreet ?? source.facility_street ?? (backendPayload as Record<string, unknown>).facilityStreet ?? '', source.facilityCity ?? source.facility_city ?? (backendPayload as Record<string, unknown>).facilityCity ?? '']
+                  .filter(Boolean)
+                  .join(', '),
+                state: String(stateDisplay),
+                totalRooms: Number(source.noOfRooms ?? source.noOf_rooms ?? (backendPayload as Record<string, unknown>).noOfRooms ?? 1),
+                specialties: Array.isArray(source.specialityList) ? (source.specialityList as string[]).map(String) : (Array.isArray((backendPayload as Record<string, unknown>).specialityList) ? ((backendPayload as Record<string, unknown>).specialityList as string[]).map(String) : []),
+                roomDetails: normalizedRooms as unknown[],
+                // Preserve state fields so the AddFacility modal can prefill correctly
+                stateCode: source.stateCode ?? source.state_code ?? (backendPayload as Record<string, unknown>).stateCode ?? (backendPayload as Record<string, unknown>).state_code ?? undefined,
+                stateName: source.stateName ?? source.state_name ?? (backendPayload as Record<string, unknown>).stateName ?? (backendPayload as Record<string, unknown>).state_name ?? undefined,
+              } as AddFacilityType;
+
+              setFacilities((prev) => {
+                const exists = prev.some((f) => f.facilityMasterId && normalizedLocal.facilityMasterId && f.facilityMasterId === normalizedLocal.facilityMasterId);
+                let next = prev.slice();
+                if (exists) {
+                  next = prev.map((f) => (f.facilityMasterId === normalizedLocal.facilityMasterId ? normalizedLocal : f));
+                } else {
+                  next.push(normalizedLocal);
+                }
+                return sortFacilities(next);
+              });
+
+              // Do NOT immediately refresh the whole list here. A full refresh
+              // can overwrite the per-room `roomDetails` because the DB stores a
+              // flattened speciality mapping. If you want server-side normalization
+              // to be visible, trigger refresh manually. For now we rely on the
+              // server response (or our optimistic payload) to keep per-room data
+              // intact.
             } catch (err) {
               console.error('addOrUpdateFacility failed', err);
               const msg = (err as Error)?.message ?? 'Failed to save facility';

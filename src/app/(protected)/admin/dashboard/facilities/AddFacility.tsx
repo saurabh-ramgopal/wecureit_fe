@@ -112,6 +112,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     // Ensure we include speciality keys (specialityMasterId / speciality_master_id)
     const candidate =
       it["id"] ??
+      it["stateCode"] ??
       it["specialityMasterId"] ??
       it["speciality_master_id"] ??
       it["speciality_id"] ??
@@ -158,18 +159,46 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     return ['General Practice'];
   };
 
+  // Default speciality that's always present in every room
+  const DEFAULT_SPECIALITY = "General Practice";
+
   // When editing an existing facility, the backend may provide the state as a name
-  // (e.g. "Virginia"). Our <select> uses state IDs as values, so once `states`
-  // are loaded we should map the facility.state (name or id) to the matching
+  // (e.g. "Virginia") or — due to previous inconsistencies — as a stringified
+  // JSON object like '{"stateCode":"FL","stateName":"Florida"}'. Our
+  // <select> uses state IDs as values, so once `states` are loaded we should
+  // map the facility.state (name or id or stringified object) to the matching
   // state's id so the correct option is selected.
   useEffect(() => {
     if (!facility) return;
     if (!Array.isArray(states) || states.length === 0) return;
-    const facilityStateValue = (facility as Record<string, unknown>)['state'] ?? (facility as Record<string, unknown>)['stateName'] ?? '';
+  // Prefer an explicit stateCode if the normalized facility provides it, otherwise fall back to state/stateName
+    let facilityStateValue = (facility as Record<string, unknown>)['stateCode'] ?? (facility as Record<string, unknown>)['state'] ?? (facility as Record<string, unknown>)['stateName'] ?? '';
+
+  // If the backend (or earlier FE code) stored a JSON-stringified object in the stateCode
+    // (e.g. '{"stateCode":"DE","stateName":"Delaware"}'), try to parse and extract the code.
+    if (typeof facilityStateValue === 'string') {
+      const s = facilityStateValue.trim();
+      if (s.startsWith('{') && s.endsWith('}')) {
+        try {
+          const parsed = JSON.parse(s) as Record<string, unknown>;
+          facilityStateValue = parsed['stateCode'] ?? parsed['code'] ?? parsed['id'] ?? parsed['state_id'] ?? parsed['stateMasterId'] ?? parsed['state_master_id'] ?? facilityStateValue;
+        } catch {
+          // ignore parse errors and keep original string
+        }
+      }
+    }
+
+    // Debug: log facility state resolution helpers so we can see why prefill might fail
+    // Log basic debug info (console may be disabled in some environments)
+    // log to console directly (acceptable in dev); guard in case console is undefined
+    if (typeof console !== 'undefined' && typeof console.debug === 'function') {
+      console.debug('AddFacility prefill: facilityStateValue (post-parse) =', facilityStateValue, 'selectedState currently =', selectedState);
+      console.debug('AddFacility available states sample', states.slice(0, 10));
+    }
     if (!facilityStateValue) return;
 
     // try to match by id first, then by display name
-    const byId = states.find((s) => extractId(s) === String(facilityStateValue));
+  const byId = states.find((s) => extractId(s) === String(facilityStateValue));
     if (byId) {
       setSelectedState(extractId(byId));
       return;
@@ -183,6 +212,11 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
 
     // Fallback: set the raw value (the select will fall back to empty)
     setSelectedState(String(facilityStateValue));
+  // Note: do NOT include `selectedState` in the deps - that causes the effect to
+  // re-run when the user changes the select and immediately overwrite their
+  // choice with the original facility value. Only re-run when the facility or
+  // available states change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facility, states]);
 
   // Ensure specialties are pre-selected when editing.
@@ -232,16 +266,29 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
 
   const handleRoomSpecialityToggle = (room: number, speciality: string) => {
     // Prevent toggling the default speciality
-    const DEFAULT_SPECIALITY = "General Practice";
     if (speciality === DEFAULT_SPECIALITY) return;
 
     setRoomConfig((prev) => {
       const existing = prev[room] || [];
+      const hasOther = existing.some((s) => s !== DEFAULT_SPECIALITY);
+
+      // If we're unchecking an already-selected speciality, allow it
+      if (existing.includes(speciality)) {
+        return {
+          ...prev,
+          [room]: existing.filter((s) => s !== speciality),
+        };
+      }
+
+      // If there's already a non-default speciality selected, ignore additional selections
+      if (hasOther) {
+        return prev;
+      }
+
+      // Otherwise, add the new speciality
       return {
         ...prev,
-        [room]: existing.includes(speciality)
-          ? existing.filter((s) => s !== speciality)
-          : [...existing, speciality],
+        [room]: [...existing, speciality],
       };
     });
   };
@@ -292,35 +339,86 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     }
 
     // Build structured roomDetails and global specialityList as IDs using fetched specialities
-    const roomDetailsStructured: Array<Record<string, unknown>> = [];
-    const allSpecialityIds = new Set<string>();
+    // Ensure every room (1..numRooms) has an explicit entry so the backend can persist
+    // per-room configuration. Use DEFAULT_SPECIALITY as fallback when a room has no selection.
+  const roomDetailsStructured: Array<Record<string, unknown>> = [];
 
-    Object.keys(roomConfig).forEach((k) => {
-      const roomNumber = Number(k);
-      const names = (roomConfig[roomNumber] || []).map((s) => String(s));
+    // Build roomDetails and a specialityList ordered by room so the backend's
+    // facility_speciality_mapping (which stores facility-level specialties) can
+    // be derived deterministically. We include General Practice first, then
+    // one additional speciality per room (if any) in room order.
+    const gpEntry = specialities.find((sp) => extractName(sp) === DEFAULT_SPECIALITY);
+    const gpId = gpEntry ? extractId(gpEntry) : DEFAULT_SPECIALITY;
+
+    const specialityListOrdered: string[] = [];
+    // always include General Practice first
+    if (gpId) specialityListOrdered.push(gpId);
+
+    for (let roomNumber = 1; roomNumber <= Math.max(1, Number(numRooms) || 1); roomNumber++) {
+      const rawNames = Array.isArray(roomConfig[roomNumber]) && roomConfig[roomNumber].length > 0
+        ? roomConfig[roomNumber]
+        : [DEFAULT_SPECIALITY];
+      const names = (rawNames as string[]).map((s) => String(s));
+
+      // map to ids and names
       const ids = names.map((name) => {
         const found = specialities.find((sp) => extractName(sp) === name);
-        const id = found ? extractId(found) : name;
-        return id;
+        return found ? extractId(found) : name;
       });
-      ids.forEach((id) => allSpecialityIds.add(String(id)));
-      roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: ids });
-    });
+      const namesForIds = ids.map((id) => {
+        const found = specialities.find((sp) => extractId(sp) === String(id));
+        return found ? extractName(found) : String(id);
+      });
 
-    const specialityList = Array.from(allSpecialityIds);
+      // push the room's specialityList (ids) and specialityNames so the
+      // facility card can render friendly labels even if the server echoes ids
+      roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: ids, specialityNames: namesForIds });
+
+      // pick the first non-default speciality (if any) to append to the ordered list
+      const nonDefault = ids.find((id) => {
+        const label = (specialities.find((sp) => extractId(sp) === id) ? extractName(specialities.find((sp) => extractId(sp) === id)) : id);
+        return label !== DEFAULT_SPECIALITY;
+      });
+      if (nonDefault) {
+        // avoid duplicates in the ordered list
+        if (!specialityListOrdered.includes(String(nonDefault))) specialityListOrdered.push(String(nonDefault));
+      }
+    }
+
+    const specialityList = specialityListOrdered;
 
     const ff = facility as Record<string, unknown> | undefined;
+    const selectedStateObj = states.find((s) => extractId(s) === selectedState);
+    const selectedStateName = selectedStateObj ? extractName(selectedStateObj) : undefined;
+
+    // Normalize selectedState: if the value is a JSON-stringified object (e.g. '{"stateCode":"FL","stateName":"Florida"}')
+    // parse it and extract the canonical state code. Otherwise use the value directly.
+    let normalizedStateCode: string | undefined = undefined;
+    if (selectedState && typeof selectedState === 'string') {
+      try {
+        const parsed = JSON.parse(selectedState);
+        // parsed may be an object containing various keys; prefer common ones
+        normalizedStateCode = String(parsed.stateCode ?? parsed.code ?? parsed.id ?? parsed.state_id ?? parsed.stateCode ?? parsed.stateMasterId ?? parsed.state_master_id ?? '');
+        if (!normalizedStateCode) normalizedStateCode = undefined;
+      } catch {
+        // not JSON, assume it's already the plain code
+        normalizedStateCode = selectedState;
+      }
+    }
+
     const backendPayload: Record<string, unknown> = {
       facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
       facilityName: facilityName,
-      // include selected state name so backend can persist it
-      stateName: (states.find((s) => extractId(s) === selectedState) ? extractName(states.find((s) => extractId(s) === selectedState)) : selectedState) ?? undefined,
+      // include selected state code (id) so backend persists the correct StateMaster relation
+      stateCode: normalizedStateCode ?? undefined,
+      // also include stateName as a fallback in case the backend receives a name instead of a code
+      stateName: selectedStateName ?? undefined,
       noOfRooms: numRooms,
       facilityStreet,
       facilityCity,
       specialityList,
-      // include roomDetails for frontend use (backend will ignore unknown fields)
-  roomDetails: roomDetailsStructured,
+      // include explicit per-room details so backend can persist room-level specialties
+      roomDetails: roomDetailsStructured,
     };
     // Debug: show exactly what we'll send to the backend (inspect in browser console)
     console.debug('AddFacility outgoing payload', backendPayload);
@@ -381,8 +479,16 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
               <div className={styles.field}>
                 <label>State *</label>
                 <select
+                  id="facility-state-select"
+                  aria-label="Select state"
                   value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value)}
+                  onChange={(e) => {
+                    if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select onChange ->', (e.target as HTMLSelectElement).value);
+                    setSelectedState(e.target.value);
+                  }}
+                  onClick={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select clicked'); }}
+                  onMouseDown={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select mousedown'); }}
+                  onFocus={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select focus'); }}
                   required
                 >
                   <option value="">Select state</option>
@@ -409,9 +515,18 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
           <div className={styles.section}>
             <h4>Room Specialties Configuration</h4>
 
+            {/* Debug: show current roomConfig in console to diagnose cross-room selection issues */}
+            {(() => {
+              if (typeof console !== 'undefined' && typeof console.debug === 'function') {
+                console.debug('roomConfig render', roomConfig);
+              }
+              return null;
+            })()}
             {[...Array(numRooms)].map((_, i) => {
               const room = i + 1;
-              const selected = roomConfig[room] || [];
+              // ensure we operate on a shallow copy so we don't accidentally share
+              // the same array reference between rooms when manipulating state
+              const selected = Array.isArray(roomConfig[room]) ? ([...roomConfig[room] as string[]]) : [];
 
               return (
                 <div key={room} className={`${styles.roomBox} ${deletingRooms[room] ? styles.deleting : ''}`}>
@@ -442,25 +557,20 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
                   <div className={styles.specialityGrid}>
                     {specialities.map((sp) => {
                       const name = extractName(sp);
-                      const DEFAULT_SPECIALITY = "General Practice";
                       const locked = name === DEFAULT_SPECIALITY;
+                      const otherSelected = (selected || []).some((s) => s !== DEFAULT_SPECIALITY && s !== name);
+                      const disabled = locked ? true : (otherSelected && !selected.includes(name));
 
                       return (
                         <label
                           key={name}
-                          className={`${styles.checkboxLabel} ${
-                            locked ? styles.locked : ""
-                          }`}
+                          className={`${styles.checkboxLabel} ${locked ? styles.locked : ""}`}
                         >
                           <input
                             type="checkbox"
                             checked={selected.includes(name) || locked}
-                            disabled={locked}
-                            onChange={
-                              locked
-                                ? undefined
-                                : () => handleRoomSpecialityToggle(room, name)
-                            }
+                            disabled={disabled}
+                            onChange={locked ? undefined : () => handleRoomSpecialityToggle(room, name)}
                           />
                           {name}
                         </label>
