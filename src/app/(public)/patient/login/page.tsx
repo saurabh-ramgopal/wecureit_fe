@@ -37,8 +37,8 @@ export default function PatientLoginPage() {
         }, 1000);
       } else {
         // Backend returned failure (user not found / wrong password etc.)
-        const reason = loginData?.reason || 'Login failed';
-        toast.error(reason, { id: 'login-fail', duration: 3000 });
+  const reason = loginData?.reason || 'Login failed';
+  toast.error(String(reason), { id: 'login-fail', duration: 3000 });
   // optional: store or log backend failure reason
       }
     } catch (error: unknown) {
