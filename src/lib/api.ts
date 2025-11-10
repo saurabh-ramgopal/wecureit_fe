@@ -21,7 +21,7 @@ function getAuthHeaders(): HeadersInit {
 }
 
 // Generic API call wrapper
-async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers = getAuthHeaders();
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -38,21 +38,17 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
       if (typeof window !== 'undefined') window.location.href = '/login';
       throw new Error('Authentication required');
     }
-    const errorData = await response.json().catch(() => ({}));
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
     throw new Error(errorData.message || `API error: ${response.statusText}`);
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }
 
 // Public API calls (no auth required)
 export async function getDoctors() {
-  const res = await fetch(`${API_BASE_URL}/admin/getAllDoctors`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to fetch doctors');
-  return res.json();
+  // Use protected apiCall so Authorization header is attached when token exists
+  return apiCall('/admin/getAllDoctors', { method: 'GET' });
 }
 
 // Patient registration (backend handles password hashing / storage)
@@ -80,7 +76,7 @@ export async function registerPatient(data: {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
     throw new Error(errorData.message || 'Registration failed');
   }
 
@@ -89,32 +85,65 @@ export async function registerPatient(data: {
 
 // Login (backend authenticates and returns a token)
 export async function login(email: string, password: string, userType: string) {
-  const response = await fetch(`${API_BASE_URL}/common/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email,
-      password,
-      type: userType,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || 'Login failed');
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/common/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        type: userType,
+      }),
+    });
+  } catch (err) {
+    // Network-level failure (server down, CORS, DNS, etc.)
+    console.error('Network error while calling /common/login', err);
+    throw new Error(`Network error: ${(err as Error).message || err}`);
   }
 
-  const loginData = await response.json();
-  const token = loginData.token || loginData.accessToken || loginData.jwt || '';
+  if (!response.ok) {
+    // Try to parse JSON error body, but fall back to raw text so we get server stack/HTML
+    let bodyText = '';
+    try {
+      // attempt to parse JSON first
+      const json = await response.json().catch(() => null);
+      if (json && typeof json === 'object') {
+        const j = json as Record<string, unknown>;
+        const msgCandidate = j['message'] ?? j['reason'] ?? j['error'];
+        throw new Error(String(msgCandidate ?? `Login failed (${response.status})`));
+      }
+      // if not JSON, read as text
+      bodyText = await response.text().catch(() => '');
+    } catch {
+      // if json parsing threw, try to capture text
+      bodyText = bodyText || (await response.text().catch(() => ''));
+    }
+
+    const snippet = bodyText ? ` Response body: ${bodyText.slice(0, 200)}` : '';
+    throw new Error(`Login failed (${response.status})${snippet}`);
+  }
+
+  type LoginData = {
+    token?: string;
+    accessToken?: string;
+    jwt?: string;
+    name?: string;
+    user?: { name?: string };
+    [k: string]: unknown;
+  };
+
+  const loginData = (await response.json()) as LoginData;
+  const token = loginData.token ?? loginData.accessToken ?? loginData.jwt ?? '';
 
   if (token && typeof window !== 'undefined') {
-    localStorage.setItem('authToken', token);
+    localStorage.setItem('authToken', String(token));
     localStorage.setItem('userType', userType);
   }
 
-  const userName = loginData.name || loginData.user?.name || email.split('@')[0];
+  const userName = loginData.name ?? loginData.user?.name ?? email.split('@')[0];
   return { loginData, token, userName };
 }
 
@@ -146,4 +175,65 @@ export async function getDoctorById(doctorId: number) {
     method: 'GET',
   });
 }
+
+// Master data
+// Assumption: backend exposes endpoints that return arrays of objects (various field names).
+export async function getStates() {
+  // GET /common/getState returns state_master list
+  return apiCall('/common/getState', { method: 'GET' });
+}
+
+export async function getSpecialities() {
+  try {
+    return await apiCall('/common/getSpeciality', { method: 'GET' });
+  } catch (err) {
+    console.error('getSpecialities failed', err);
+    throw err;
+  }
+}
+
+// Admin: add or update doctor
+export async function addDoctor(doctorData: Record<string, unknown>) {
+  // backend exposes POST /admin/addDoctor
+  return apiCall('/admin/addDoctor', {
+    method: 'POST',
+    body: JSON.stringify(doctorData),
+  });
+}
+
+// Delete a doctor. payload can be { doctorId } or { email } depending on backend contract.
+export async function deleteDoctor(payload: Record<string, unknown>) {
+  return apiCall('/admin/deleteDoctor', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+// Update doctor speciality (if backend exposes this separate route)
+export async function updateDoctorSpeciality(payload: Record<string, unknown>) {
+  return apiCall('/admin/updateDoctorSpeciality', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+// Facilities
+export async function getFacilities() {
+  return apiCall('/common/facility/getAll', { method: 'GET' });
+}
+
+export async function addOrUpdateFacility(facilityData: Record<string, unknown>) {
+  return apiCall('/common/facility/addOrUpdate', {
+    method: 'POST',
+    body: JSON.stringify(facilityData),
+  });
+}
+
+export async function deleteFacility(payload: Record<string, unknown>) {
+  return apiCall('/common/facility/delete', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 
