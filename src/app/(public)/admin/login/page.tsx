@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 
-const AdminLoginPage = () => {
+type Props = {}
+
+const AdminLoginPage = (props: Props) => {
     const [loading, setLoading] = useState(false);
   const router = useRouter();
   type FormData = {
@@ -33,8 +35,8 @@ const AdminLoginPage = () => {
           router.push(`/${userType}/dashboard`);
         }, 1000);
       } else {
-        const reason = loginData?.reason ?? 'Login failed';
-        toast.error(String(reason), { id: 'login-fail', duration: 3000 });
+        const reason = loginData?.reason || 'Login failed';
+        toast.error(reason, { id: 'login-fail', duration: 3000 });
       }
     } catch (error: unknown) {
       console.error("Error during login:", error);
