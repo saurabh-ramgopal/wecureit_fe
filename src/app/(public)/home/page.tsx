@@ -55,7 +55,7 @@ export default function HomeView() {
                 </p>
                 <button
                   className={styles.cardButton}
-                  onClick={() => router.push('/doctor/login')}
+                  onClick={() => router.push('/doctor/login/')}
                 >
                   Login as Doctor →
                 </button>

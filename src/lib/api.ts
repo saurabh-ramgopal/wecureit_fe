@@ -107,15 +107,15 @@ export async function login(email: string, password: string, userType: string) {
   }
 
   const loginData = await response.json();
-  const token = loginData.token || loginData.accessToken || loginData.jwt || '';
+  // const token = loginData.token || loginData.accessToken || loginData.jwt || '';
 
-  if (token && typeof window !== 'undefined') {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('userType', userType);
-  }
+  // if (token && typeof window !== 'undefined') {
+  //   localStorage.setItem('authToken', token);
+  //   localStorage.setItem('userType', userType);
+  // }
 
   const userName = loginData.name || loginData.user?.name || email.split('@')[0];
-  return { loginData, token, userName };
+  return { loginData, userName };
 }
 
 // Logout

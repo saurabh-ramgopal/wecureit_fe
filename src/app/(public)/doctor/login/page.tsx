@@ -26,8 +26,8 @@ const DoctorLoginPage = (props: Props) => {
       const userType = 'doctor';
 
       // Login via backend API
-      const { loginData, token, userName } = await login(email, password, userType);
-      console.log('Login response from backend:', loginData, 'token:', token, 'userName:', userName);
+      const { loginData, userName } = await login(email, password, userType);
+      console.log('Login response from backend:', loginData, 'userName:', userName);
 
       if (loginData?.result === 'PASS') {
         toast.success('Login successful! Redirecting...', { id: 'login-success', duration: 1500 });

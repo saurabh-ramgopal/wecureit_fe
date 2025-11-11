@@ -25,8 +25,8 @@ export default function PatientLoginPage() {
       // You may need to define userType or extract it similarly
       const userType = 'patient'; // Adjust as needed
       // Login via backend API (returns loginData and token)
-      const { loginData, token, userName } = await login(email, password, userType);
-      console.log('Login response from backend:', loginData, 'token:', token, 'userName:', userName);
+      const { loginData, userName } = await login(email, password, userType);
+      console.log('Login response from backend:', loginData, 'userName:', userName);
 
       if (loginData?.result === 'PASS') {
   // optional: store or log backend response
