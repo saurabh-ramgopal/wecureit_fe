@@ -1,7 +1,7 @@
 // HomeView.tsx
 "use client";
 import { useRouter } from "next/navigation";
-import { User, Stethoscope, UserPlus } from "lucide-react";
+import { User, Stethoscope, UserPlus, Lock } from "lucide-react";
 import styles from "./home.module.scss";
 
 export default function HomeView() {
@@ -127,6 +127,13 @@ export default function HomeView() {
           </div>
         </div>
       </footer>
+      <button
+        aria-label="Admin login"
+        onClick={() => router.push('/admin/login')}
+        className="wecureit-lock-button"
+      >
+        <Lock className="w-5 h-5" color="#ffffff" strokeWidth={2} />
+      </button>
     </div>
   );
 }

@@ -96,5 +96,30 @@ select:focus {
   width: 100%;
 }
 
+/* Lock button (top-right fixed) */
+.wecureit-lock-button {
+  position: fixed;
+  right: 24px;
+  top: 24px;
+  z-index: 1000;
+  background-color: var(--primary, #1E3A8A);
+  border: 2px solid var(--primary, #1E3A8A);
+  border-radius: 9999px;
+  padding: 0.6rem;
+  box-shadow: 0 6px 18px rgba(30,58,138,0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
 
+.wecureit-lock-button:hover,
+.wecureit-lock-button:focus {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 30px rgba(30,58,138,0.22);
+  outline: none;
+}
 
+.wecureit-lock-button:active {
+  transform: translateY(-1px) scale(0.99);
+}
