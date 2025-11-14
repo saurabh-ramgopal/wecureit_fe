@@ -1,8 +1,12 @@
 "use client";
 import React, { useState } from 'react'
-import DoctorDashboardHeader from "../../../../components/DoctorDashboard/DoctorDashboardHeader/DoctorDashboardHeader";
+import DoctorDashboardHeader from "@/components/DoctorDashboard/DoctorDashboardHeader/DoctorDashboardHeader";
 import { NextPage } from 'next';
 import styles from './doctordashboard.module.scss';
+import DoctorSchedule from "@/components/DoctorDashboard/Schedule/DoctorSchedule/DoctorSchedule";
+import SetDoctorAvailability from '@/components/DoctorDashboard/SetAvailability/SetDoctorAvailabilityView/SetDoctorAvailabilityView';
+import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentNotesView/AppointmentNotesView';
+
 type Props = {
 }
 
@@ -22,9 +26,9 @@ const DoctorDashboardPage: NextPage<Props> = () => {
       onTabClick={handleTabClick} 
     />
       <div>
-        {activeTab === "My Schedule" && <p>Here is your schedule for today.</p>}
-        {activeTab === "Set Availability" && <p>Set your available hours here.</p>}
-        {activeTab === "Appointments & Notes" && <p>View and manage your appointments and notes.</p>}
+        {activeTab === "My Schedule" && <DoctorSchedule/>}
+        {activeTab === "Set Availability" && <SetDoctorAvailability/>}
+        {activeTab === "Appointments & Notes" && <AppointmentNotesView/>}
       </div>
   </div>
   );

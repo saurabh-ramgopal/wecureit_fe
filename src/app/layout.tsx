@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Inter, Lora } from 'next/font/google'
 import "../assets/styles/globals.css";
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -40,6 +41,12 @@ export default function RootLayout({
         className={`${inter.variable} ${lora.variable} ${inter.className} antialiased`}
       >
         {children}
+      <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+          }}
+        />
       </body>
     </html>
   );
