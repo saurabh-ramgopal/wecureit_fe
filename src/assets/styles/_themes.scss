@@ -85,6 +85,7 @@
   --bg-hover: #FEE2E2;
   --bg-disabled: #F3F4F6;
   --bg-light: #FFF5F5;
+  --bg-card-light: #f8fbff;
 
   /* Status Colors */
   --status-success: #10B981;
@@ -106,6 +107,7 @@
   --border-error: #DC2626;
   --border-success: #10B981;
   --border-light: #FECACA;
+  
 }
 
 /* =========================
@@ -113,10 +115,10 @@
    ========================= */
 .theme-doctor {
   /* Primary Colors */
-  --primary: #0D9488;
-  --secondary: #0891B2;
+  --primary: #0891B2;
+  --secondary: #0D9488;
   --dark: #115E59;
-  --light: #CCFBF1;
+  --light: #bcf4f9;
   --accent: #06B6D4;
 
   /* Text Colors */
@@ -127,11 +129,13 @@
   --text-error: #EF4444;
 
   /* Background Colors */
-  --bg-page: #F0FDFA;
+  --bg-page: #edfbfd;
+  --bg-light: #dadfe5;
   --bg-card: #FFFFFF;
-  --bg-hover: #CCFBF1;
+  --bg-hover: #06B6D4;
   --bg-disabled: #F3F4F6;
-  --bg-light: #F7FFFE;
+ --bg-card-light: #f8fafd; 
+  
 
   /* Status Colors */
   --status-success: #10B981;
@@ -141,18 +145,18 @@
   --status-pending: #6B7280;
 
   /* Status Light Backgrounds */
-  --status-light-success: #D1FAE5;
-  --status-light-error: #FEE2E2;
-  --status-light-warning: #FEF3C7;
-  --status-light-info: #CFFAFE;
-  --status-light-pending: #F3F4F6;
+--status-light-success: #86EFAC;  /* deeper green */
+--status-light-error: #FCA5A5;    /* deeper red */
+--status-light-warning: #FCD34D;  /* deeper yellow */
+--status-light-info: #b7f5fd;     /* deeper cyan */
+--status-light-pending: #D1D5DB;  /* deeper gray */
 
   /* Border Colors */
-  --border-default: #5EEAD4;
-  --border-focus: #0D9488;
-  --border-error: #EF4444;
-  --border-success: #10B981;
-  --border-light: #99F6E4;
+--border-default: #E5E7EB;   
+--border-light: #bec6c5;       
+--border-focus: #0891B2;       
+--border-error: #EF4444;
+--border-success: #10B981;
 }
 
 /* =========================
@@ -179,6 +183,7 @@
   --bg-hover: #DBEAFE;
   --bg-disabled: #F3F4F6;
   --bg-light: #F8FAFC;
+  --bg-card-light: #f3f4f6; /*
 
   /* Status Colors */
   --status-success: #10B981;

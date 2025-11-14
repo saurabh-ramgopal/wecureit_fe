@@ -1,10 +1,37 @@
-import React from 'react'
+"use client";
+import React, { useState } from 'react'
+import DoctorDashboardHeader from "@/components/DoctorDashboard/DoctorDashboardHeader/DoctorDashboardHeader";
+import { NextPage } from 'next';
+import styles from './doctordashboard.module.scss';
+import DoctorSchedule from "@/components/DoctorDashboard/Schedule/DoctorSchedule/DoctorSchedule";
+import SetDoctorAvailability from '@/components/DoctorDashboard/SetAvailability/SetDoctorAvailabilityView/SetDoctorAvailabilityView';
+import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentNotesView/AppointmentNotesView';
 
-const DoctorDashboard = () => {
-  return (
-      <div className="flex items-center justify-center min-h-screen">
-      <h1 className='text-2xl font-bold justify-center text-center align-center'>Welcome to Doctor Dashboard</h1>
-      </div>
-  )
+type Props = {
 }
-export default DoctorDashboard;
+
+const DoctorDashboardPage: NextPage<Props> = () => {
+   const [activeTab, setActiveTab] = useState("My Schedule");
+    const handleTabClick = (tabLabel: string) => {
+    setActiveTab(tabLabel);
+    console.log("Active Tab:", tabLabel);
+  };
+  return (
+  <div className={`${styles.doctorDashboard} theme-doctor`} style={{ background: 'var(--bg-page)' }}>
+       <div className={styles.dashboardHeaderSection}>
+        <h1 className={styles.portalTitle}>Welcome to Doctor Portal</h1>
+    </div>
+    <DoctorDashboardHeader 
+      activeTab={activeTab}
+      onTabClick={handleTabClick} 
+    />
+      <div>
+        {activeTab === "My Schedule" && <DoctorSchedule/>}
+        {activeTab === "Set Availability" && <SetDoctorAvailability/>}
+        {activeTab === "Appointments & Notes" && <AppointmentNotesView/>}
+      </div>
+  </div>
+  );
+};
+
+export default DoctorDashboardPage;

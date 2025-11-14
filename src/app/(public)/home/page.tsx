@@ -55,7 +55,7 @@ export default function HomeView() {
                 </p>
                 <button
                   className={styles.cardButton}
-                  onClick={() => router.push('/doctor/login')}
+                  onClick={() => router.push('/doctor/login/')}
                 >
                   Login as Doctor →
                 </button>
@@ -77,7 +77,7 @@ export default function HomeView() {
                 </div>
                 <button
                   className={styles.registerButton}
-                    onClick={() => router.push("/register/patient")}
+                    onClick={() => router.push("patient/register")}
                 >
                   Register Now
                 </button>
