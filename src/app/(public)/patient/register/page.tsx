@@ -2,7 +2,11 @@
 import RegisterCard from '@/components/RegisterCard/RegisterCard'
 import { UserPlus } from 'lucide-react'
 import React, { useState } from 'react'
-
+import { useRouter } from "next/navigation";
+import { registerPatient } from '@/lib/api';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import {auth} from "@/lib/firebase"
+import {toast} from "react-hot-toast"
 type RegisterFormData = {
   email: string;
   phone: string;
@@ -16,31 +20,28 @@ type RegisterFormData = {
 const PatientRegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<RegisterFormData | null>(null);
-  console.log(formData);
-
+  const router = useRouter();
   const handleRegister = async (data: RegisterFormData) => {
-    // save the data locally so the page can display it and use it
     setFormData(data);
     setLoading(true);
     try {
-      // Example API call
-      
-      // const response = await fetch("/api/register", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const firebaseUid = userCredential.user.uid;
 
-      // if (!response.ok) {
-      //   throw new Error("Registration failed");
-      // }
-
-      // const result = await response.json();
+      console.log("Firebase UID:", firebaseUid);
+      await registerPatient({   email: data.email,
+                                fullName: data.name,
+                                phone: data.phone,
+                                dob: data.dob,
+                                gender: data.gender,
+                                firebaseUid: firebaseUid });
       console.log("Registration successful:");
-      alert("Registration successful!");
+      toast.success("Registration successful!");
+      await signOut(auth);
+      router.push("/patient/login"); // redirect to login page
     } catch (error: any) {
       console.error(error);
-      alert(error.message || "Something went wrong");
+      toast.error(error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }

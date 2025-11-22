@@ -3,40 +3,23 @@
 import React, { useState } from "react";
 import styles from "./LoginCard.module.scss";
 import { Eye, EyeOff, Mail , Lock} from "lucide-react";
-
-type LoginFormData = {
-  email: string;
-  password: string;
-};
-
 type LoginCardProps = {
   title: string;
   description?: string;
   logo?: React.ReactNode;
-  onSubmit: (formData: LoginFormData) => void;
+  email: string;
+  password: string;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: () => void;
   loading?: boolean;
 };
 
-const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubmit , loading }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubmit , loading , email,  password, onEmailChange, onPasswordChange}) => {
   const [showPassword, setShowPassword] = useState(false);
   
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // prevent page reload
-    if (!email || !password || !isValidEmail(email)) return;
-    
-    const formData: LoginFormData = {
-      email: email,
-      password: password,
-    };
-    
-    onSubmit(formData);
-  };
-
   return (
     <div className={styles.wrapper}>
       <div className={styles.cardWrapper}>
@@ -47,7 +30,7 @@ const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubm
             {description && <p className={styles.description}>{description}</p>}
           </div>
 
-            <form className={styles.body} onSubmit={handleSubmit}>
+            <form className={styles.body} onSubmit={(e) => { e.preventDefault(); onSubmit();}}>
             {/* Email input */}
             <div className={styles.inputGroup}>
               <label>Email Address</label>
@@ -57,7 +40,7 @@ const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubm
                   type="email"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                   onChange={(e) => onEmailChange(e.target.value)}
                   required
                 />
               </div>
@@ -75,7 +58,7 @@ const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubm
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => onPasswordChange(e.target.value)}
                   required
                 />
                 <span

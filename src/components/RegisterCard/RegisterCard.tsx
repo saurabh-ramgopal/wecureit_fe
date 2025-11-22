@@ -28,7 +28,10 @@ export default function RegisterCard({
   onSubmit,
   loading
 }: RegisterCardProps) {
-  const [step, setStep] = useState(1); // Step 1 or 2
+  const [step, setStep] = useState(1);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+ // Step 1 or 2
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
     phone: "",
@@ -38,8 +41,6 @@ export default function RegisterCard({
     gender: "",
     name: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -71,9 +72,10 @@ export default function RegisterCard({
     return (
       formData.email &&
       formData.phone &&
-      formData.dob &&
-      formData.gender &&
-      formData.name &&
+      formData.password &&
+      formData.confirmPassword &&
+      isPasswordStrong(formData.password) &&
+      passwordsMatch() &&
       isValidEmail(formData.email) &&
       isValidPhone(formData.phone)
     );
@@ -81,10 +83,9 @@ export default function RegisterCard({
 
   const isStep2Valid = () => {
     return (
-      formData.password &&
-      formData.confirmPassword &&
-      isPasswordStrong(formData.password) &&
-      passwordsMatch()
+      formData.dob &&
+      formData.gender &&
+      formData.name 
     );
   };
 
@@ -134,27 +135,7 @@ const handleSubmit = (e: React.FormEvent) => {
             {/* STEP 1: Personal Information */}
             {step === 1 && (
               <>
-                <div className={styles.inputGroup}>
-                  <label>Name</label>
-                  <div className={styles.inputWrapper}>
-                    <User className={styles.icon} />
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      maxLength={10}
-                      required
-                    />
-                  </div>
-                  {!isValidPhone(formData.phone) && formData.phone.length > 0 && (
-                    <span className={styles.error}>
-                      Please enter a valid 10-digit phone number.
-                    </span>
-                  )}
-                </div>
-                <div className={styles.inputGroup}>
+                 <div className={styles.inputGroup}>
                   <label>Email Address</label>
                   <div className={styles.inputWrapper}>
                     <Mail className={styles.icon} />
@@ -164,7 +145,6 @@ const handleSubmit = (e: React.FormEvent) => {
                       placeholder="Enter your email"
                       value={formData.email}
                       onChange={handleChange}
-                      required
                     />
                   </div>
                   {!isValidEmail(formData.email) && formData.email.length > 0 && (
@@ -173,77 +153,27 @@ const handleSubmit = (e: React.FormEvent) => {
                     </span>
                   )}
                 </div>
-
-                <div className={styles.inputGroup}>
+                 <div className={styles.inputGroup}>
                   <label>Phone Number</label>
                   <div className={styles.inputWrapper}>
                     <Phone className={styles.icon} />
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="Enter 10-digit phone number"
+                      placeholder="10-digit phone number"
+                      maxLength={10}
                       value={formData.phone}
                       onChange={handleChange}
-                      maxLength={10}
-                      required
                     />
                   </div>
-                  {!isValidPhone(formData.phone) && formData.phone.length > 0 && (
+                   {!isValidPhone(formData.phone) && formData.phone.length > 0 && (
                     <span className={styles.error}>
                       Please enter a valid 10-digit phone number.
                     </span>
                   )}
+                 
                 </div>
-               
-
-                <div className={styles.inputGroup}>
-                  <label>Date of Birth</label>
-                  <div className={styles.inputWrapper}>
-                    <Calendar className={styles.icon} />
-                    <input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleChange}
-                      max={new Date().toISOString().split("T")[0]}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.inputGroup}>
-                  <label>Gender</label>
-                  <div className={styles.inputWrapper}>
-                    <User className={styles.icon} />
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={!isStep1Valid()}
-                  className={styles.nextButton}
-                >
-                  Next <ArrowRight className={styles.buttonIcon} />
-                </button>
-              </>
-            )}
-
-            {/* STEP 2: Security */}
-            {step === 2 && (
-              <>
-                <div className={styles.inputGroup}>
+                  <div className={styles.inputGroup}>
                   <label>Password</label>
                   <div className={styles.inputWrapper}>
                     <Lock className={styles.icon} />
@@ -293,7 +223,65 @@ const handleSubmit = (e: React.FormEvent) => {
                     <span className={styles.error}>Passwords do not match.</span>
                   )}
                 </div>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!isStep1Valid()}
+                  className={styles.nextButton}
+                >
+                  Next <ArrowRight className={styles.buttonIcon} />
+                </button>
+              </>
+            )}
 
+            {/* STEP 2: Security */}
+            {step === 2 && (
+              <>
+               <div className={styles.inputGroup}>
+                  <label>Full Name</label>
+                  <div className={styles.inputWrapper}>
+                    <User className={styles.icon} />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Your full name"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className={styles.inputGroup}>
+                  <label>Date of Birth</label>
+                  <div className={styles.inputWrapper}>
+                    <Calendar className={styles.icon} />
+                    <input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleChange}
+                      max={new Date().toISOString().split("T")[0]}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label>Gender</label>
+                  <div className={styles.inputWrapper}>
+                    <User className={styles.icon} />
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
                 <div className={styles.buttonGroup}>
                   <button
                     type="button"

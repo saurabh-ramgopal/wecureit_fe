@@ -1,3 +1,5 @@
+import firebase from "firebase/compat/app";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Read auth token issued by backend from localStorage
@@ -54,11 +56,11 @@ export async function getDoctors() {
 // Patient registration (backend handles password hashing / storage)
 export async function registerPatient(data: {
   email: string;
-  password: string;
   fullName: string;
   phone: string;
   dob: string;
   gender: string;
+  firebaseUid: string,
 }) {
   const response = await fetch(`${API_BASE_URL}/patient/registration`, {
     method: 'POST',
@@ -67,11 +69,11 @@ export async function registerPatient(data: {
     },
     body: JSON.stringify({
       email: data.email,
-      password: data.password,
       name: data.fullName,
       phone: data.phone,
       dob: data.dob,
       gender: data.gender,
+      firebaseUid: data.firebaseUid
     }),
   });
 
