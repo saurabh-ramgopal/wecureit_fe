@@ -36,7 +36,7 @@ const PatientRegisterPage = () => {
                                 gender: data.gender,
                                 firebaseUid: firebaseUid });
       console.log("Registration successful:");
-      toast.success("Registration successful!");
+      toast.success("Registration successful! Please Login");
       await signOut(auth);
       router.push("/patient/login"); // redirect to login page
     } catch (error: any) {

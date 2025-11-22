@@ -1,7 +1,6 @@
 'use client';
 import toast from "react-hot-toast";
 import LoginCard from "../../../../components/LoginCard/LoginCard";
-import { login } from "@/lib/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
@@ -27,10 +26,10 @@ export default function PatientLoginPage() {
        const idToken = await user.getIdToken(true); 
        console.log("Firebase ID Token:", idToken);
         const decodedToken = await user.getIdTokenResult();
-        console.log("Custom claims:", decodedToken.claims);
         const patientMasterId = decodedToken.claims.patientMasterId;
         console.log(patientMasterId);
-        toast.success("Login successful!");
+        sessionStorage.setItem("idToken", idToken);
+        toast.success("Login Credentials verified successfully!");
         router.push("/patient/dashboard");
         } catch (error: any) {
           console.error(error);

@@ -1,4 +1,5 @@
 import firebase from "firebase/compat/app";
+import { convertSegmentPathToStaticExportFilename } from "next/dist/shared/lib/segment-cache/segment-value-encoding";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -81,7 +82,7 @@ export async function registerPatient(data: {
     const errorData = (await response.json().catch(() => ({}))) as { message?: string };
     throw new Error(errorData.message || 'Registration failed');
   }
-
+  console.log(response);
   return response.json();
 }
 
