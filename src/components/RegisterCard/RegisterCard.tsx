@@ -228,6 +228,21 @@ const handleSubmit = (e: React.FormEvent) => {
                     </select>
                   </div>
                 </div>
+                {/* Adding Address field as per request */}
+                {/* <div className={styles.inputGroup}>
+                  <label>Residential Address</label>
+                  <div className={styles.inputWrapper}>
+                    <Mail className={styles.icon} />
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Enter your address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div> */}
 
                 <button
                   type="button"
