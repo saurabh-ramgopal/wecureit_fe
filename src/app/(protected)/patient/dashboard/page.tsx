@@ -4,13 +4,20 @@ import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
 import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
 import toast from "react-hot-toast";
+import { NextPage } from 'next';
+import styles from './patientdashboard.module.scss';
+import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboardHeader/PatientDashboardHeader";
+import AppointmentHistoryCard from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentHistoryCard/AppointmentHistoryCard';
 
-const PatientDashboard = () => {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
+type Props = {
+}
 
-  useEffect(() => {
+const PatientDashboardPage: NextPage<Props> = () => {
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [authorized, setAuthorized] = useState(false);
+    const [activeTab, setActiveTab] = useState("Home");
+     useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = sessionStorage.getItem("idToken");
@@ -53,20 +60,32 @@ const PatientDashboard = () => {
       </div>
     );
   }
-
   if (!authorized) return null; 
+    const handleTabClick = (tabLabel: string) => {
+    setActiveTab(tabLabel);
+    console.log("Active Tab:", tabLabel);
+  };
+  return (
 
-return (
-  <div className="flex items-center justify-center min-h-screen">
-    {loading || !authorized ? (
+  <div className={`${styles.patientDashboard} theme-patient`} style={{ background: 'var(--bg-page)' }}>
+      {loading || !authorized ? (
       <p>Loading...</p>
     ) : (
-      <h1 className="text-2xl font-bold text-center">
-        Welcome to Patient Dashboard
-      </h1>
+      <>
+       <div className={styles.dashboardHeaderSection}>
+        <h1 className={styles.portalTitle}>Welcome to Patient Portal</h1>
+    </div>
+    <PatientDashboardHeader 
+      activeTab={activeTab}
+      onTabClick={handleTabClick} 
+    />
+      <div>
+        {activeTab === "Home"}
+        {activeTab === "My Profile"}
+        {activeTab === "Appointment History"}
+      </div>
+      </>
     )}
   </div>
-);
-}
-
-export default PatientDashboard;
+  )
+};
