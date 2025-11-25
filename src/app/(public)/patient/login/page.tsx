@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-
+import styles from "./login.module.scss";
 
 export default function PatientLoginPage() {
   const [loading, setLoading] = useState(false);
@@ -20,15 +20,13 @@ export default function PatientLoginPage() {
     setLoading(true);
     
     try {
-       console.log("Login submitted:", { email, password });
        const userCredential = await signInWithEmailAndPassword(auth, email, password);
        const user = userCredential.user;
        const idToken = await user.getIdToken(true); 
        console.log("Firebase ID Token:", idToken);
-        const decodedToken = await user.getIdTokenResult();
+        const decodedToken = await user.getIdTokenResult(true);
         const patientMasterId = decodedToken.claims.patientMasterId;
         console.log(patientMasterId);
-        sessionStorage.setItem("idToken", idToken);
         toast.success("Login Credentials verified successfully!");
         router.push("/patient/dashboard");
         } catch (error: any) {
@@ -52,6 +50,7 @@ export default function PatientLoginPage() {
       onPasswordChange={setPassword}
       onSubmit={handleLogin}
       loading={loading}
+      onBack={() => router.push("/")} // Add this
     />
     </div>
   );

@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import styles from "./AddDoctor.module.scss";
 import { X, Info, Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import { getStates, getSpecialities, addDoctor } from "../../../../../lib/api";
-
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import {auth} from "@/lib/firebase"
 export interface License {
   stateCode: string;
   // allow multiple specialties per state
@@ -207,6 +208,16 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
     setIsSaving(true);
     try {
       if (mode === "create") {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUid = userCredential.user.uid;
+          const payload = {
+          doctorName: fullName,
+          doctorEmail: email,
+          doctorGender: gender,
+          specialityList: Array.from(allSpecs),
+          doctorStateSpeciality,
+          firebaseUid: firebaseUid,
+        };
         await addDoctor(payload);
       } else {
         // For edit mode we still call addDoctor (backend will upsert) —

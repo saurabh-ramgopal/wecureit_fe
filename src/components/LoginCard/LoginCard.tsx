@@ -13,9 +13,10 @@ type LoginCardProps = {
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
   loading?: boolean;
+  onBack?: () => void;
 };
 
-const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubmit , loading , email,  password, onEmailChange, onPasswordChange}) => {
+const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubmit , loading , email,  password, onEmailChange, onPasswordChange, onBack}) => {
   const [showPassword, setShowPassword] = useState(false);
   
 
@@ -78,9 +79,19 @@ const LoginCard: React.FC<LoginCardProps> = ({  logo, title, description, onSubm
               {loading ? "Signing in…" : "Login"}
             </button>
           </form>
+           {onBack && (
+            <button 
+              className={styles.backButton} 
+              onClick={onBack}
+              type="button"
+            >
+              ⬅ Back to Home
+            </button>
+          )}
+           </div>
+         
         </div>
-      </div>
-    </div>
+        </div>
   );
 };
 

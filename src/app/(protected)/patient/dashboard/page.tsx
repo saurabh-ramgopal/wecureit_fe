@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
 import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
@@ -17,41 +17,41 @@ const PatientDashboardPage: NextPage<Props> = () => {
     const [loading, setLoading] = useState(true);
     const [authorized, setAuthorized] = useState(false);
     const [activeTab, setActiveTab] = useState("Home");
-     useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = sessionStorage.getItem("idToken");
-        if (!token) {
-          router.push("/patient/login"); 
-          return;
-        }
+    const toastShownRef = useRef(false);
+      useEffect(() => {
+    // Subscribe to auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.push("/patient/login");
+        return;
+      }
 
-        onAuthStateChanged(auth, async (user) => {
-          if (!user) {
-            router.push("/patient/login");
-            return;
+      try {
+        // Get fresh token with claims
+        const tokenResult = await user.getIdTokenResult(true);
+        const role = tokenResult.claims.role;
+
+        if (role === "patient") {
+          setAuthorized(true);
+        } else {
+         if (!toastShownRef.current) {
+            toast.error(`You are logged in as ${role}. Only Patient can access this page.`);
+            toastShownRef.current = true;
           }
-          const tokenResult = await getIdTokenResult(user, true);
-          const role = tokenResult.claims.role;
-          const patientMasterId = tokenResult.claims.patientMasterId;
-          console.log(patientMasterId);
-          if (role === "patient") {
-            setAuthorized(true); 
-          } else {
-            toast.error(`You are logged in as ${role}. Only Patients can access this page.`);
-            router.push("/patient/login"); 
-          }
-        });
+          router.push("/patient/login");
+        }
       } catch (error) {
-        console.error("Authorization error:", error);
+        console.error("Error fetching token:", error);
         router.push("/patient/login");
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    checkAuth();
+    // Cleanup on unmount
+    return () => unsubscribe();
   }, [router]);
+
 
   if (loading) {
     return (
@@ -68,10 +68,6 @@ const PatientDashboardPage: NextPage<Props> = () => {
   return (
 
   <div className={`${styles.patientDashboard} theme-patient`} style={{ background: 'var(--bg-page)' }}>
-      {loading || !authorized ? (
-      <p>Loading...</p>
-    ) : (
-      <>
        <div className={styles.dashboardHeaderSection}>
         <h1 className={styles.portalTitle}>Welcome to Patient Portal</h1>
     </div>
@@ -84,8 +80,7 @@ const PatientDashboardPage: NextPage<Props> = () => {
         {activeTab === "My Profile"}
         {activeTab === "Appointment History"}
       </div>
-      </>
-    )}
   </div>
   )
 };
+export default PatientDashboardPage;
