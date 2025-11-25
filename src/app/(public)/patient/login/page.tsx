@@ -1,63 +1,41 @@
 'use client';
 import toast from "react-hot-toast";
 import LoginCard from "../../../../components/LoginCard/LoginCard";
-import { login } from "@/lib/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import styles from "./login.module.scss";
 
 export default function PatientLoginPage() {
   const [loading, setLoading] = useState(false);
-  // kept for potential debugging; not displayed in UI
-  const router = useRouter();
-  type FormData = {
-    email: string;
-    password: string;
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = async (formData: FormData) => {
+  const router = useRouter();
+  const handleLogin = async () => {
+    console.log("Login submitted:", { email, password });
     if (loading) return;
     setLoading(true);
     
     try {
-      const { email, password } = formData;
-      console.log("Form Data submitted:", { email, password });
-      // You may need to define userType or extract it similarly
-      const userType = 'patient'; // Adjust as needed
-      // Login via backend API (returns loginData and token)
-      const { loginData, userName } = await login(email, password, userType);
-      console.log('Login response from backend:', loginData, 'userName:', userName);
+       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+       const user = userCredential.user;
+       const idToken = await user.getIdToken(true); 
+       console.log("Firebase ID Token:", idToken);
+        const decodedToken = await user.getIdTokenResult(true);
+        const patientMasterId = decodedToken.claims.patientMasterId;
+        console.log(patientMasterId);
+        toast.success("Login Credentials verified successfully!");
+        router.push("/patient/dashboard");
+        } catch (error: any) {
+          console.error(error);
+          toast.error(error.message || "Something went wrong");
+        } finally {
+          setLoading(false);
+        }
 
-      if (loginData?.result === 'PASS') {
-  // optional: store or log backend response
-        toast.success('Login successful! Redirecting...', { id: 'login-success', duration: 1500 });
-        // Redirect to appropriate dashboard
-        setTimeout(() => {
-          router.push(`/${userType}/dashboard`);
-        }, 1000);
-      } else {
-        // Backend returned failure (user not found / wrong password etc.)
-  const reason = loginData?.reason || 'Login failed';
-  toast.error(String(reason), { id: 'login-fail', duration: 3000 });
-  // optional: store or log backend failure reason
-      }
-    } catch (error: unknown) {
-      console.error("Error during login:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      // Handle specific Firebase auth errors
-      if (errorMessage.includes('wrong-password') || errorMessage.includes('user-not-found')) {
-        toast.error("Invalid email or password", { id: 'login-fail', duration: 3000 });
-      } else if (errorMessage.includes('too-many-requests')) {
-        toast.error("Too many failed attempts. Please try again later.", { id: 'login-error', duration: 3000 });
-      } else if (errorMessage.includes('network')) {
-        toast.error("Network error! Please check your connection.", { id: 'login-error', duration: 3000 });
-      } else {
-        toast.error(errorMessage || "Login failed! Please try again.", { id: 'login-error', duration: 3000 });
-      }
-  // optional: log error response for debugging
-    } finally {
-      setLoading(false);
-    }
   };
     
   return (
@@ -66,8 +44,13 @@ export default function PatientLoginPage() {
       title="Patient Login"
       description="Sign in with your patient account"
       logo={<User size={45} />}
+      email={email}
+      password={password}
+      onEmailChange={setEmail}
+      onPasswordChange={setPassword}
       onSubmit={handleLogin}
       loading={loading}
+      onBack={() => router.push("/")} // Add this
     />
     </div>
   );

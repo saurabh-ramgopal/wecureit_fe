@@ -5,59 +5,48 @@ import { Stethoscope } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 const DoctorLoginPage = () => {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
-  type FormData = {
-    email: string;
-    password: string;
-  };
 
-  const handleLogin = async (formData: FormData) => {
+
+  const handleLogin = async () => {
     if (loading) return;
+    console.log("Login submitted:", { email, password });
     setLoading(true);
-    
     try {
-      const { email, password } = formData;
-      console.log("Form Data submitted:", { email, password });
-      const userType = 'doctor';
-
-      // Login via backend API
-      const { loginData, userName } = await login(email, password, userType);
-      console.log('Login response from backend:', loginData, 'userName:', userName);
-
-      if (loginData?.result === 'PASS') {
-        toast.success('Login successful! Redirecting...', { id: 'login-success', duration: 1500 });
-        setTimeout(() => {
-          router.push(`/${userType}/dashboard`);
-        }, 1000);
-      } else {
-        const reason = loginData?.reason ?? 'Login failed';
-        toast.error(String(reason), { id: 'login-fail', duration: 3000 });
-      }
-    } catch (error: unknown) {
-      console.error("Error during login:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      // Show generic or network-related errors
-      if (errorMessage.includes('network')) {
-        toast.error('Network error! Please check your connection.', { id: 'login-error', duration: 3000 });
-      } else {
-        toast.error(errorMessage || 'Login failed! Please check your credentials.', { id: 'login-fail', duration: 3000 });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-    
+       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+             const user = userCredential.user;
+             const idToken = await user.getIdToken(true); 
+             console.log("Firebase ID Token:", idToken);
+              toast.success("Login Credentials verified successfully!");
+              router.push("/doctor/dashboard");
+              } catch (error: any) {
+                console.error(error);
+                toast.error(error.message || "Something went wrong");
+              } finally {
+                setLoading(false);
+              }
+      
+        };    
   return (
     <div className="theme-doctor">
     <LoginCard
       title="Doctor Login"
       description="Sign in with your doctor account"
       logo={<Stethoscope size={45} />}
+      email={email}
+      password={password}
+      onEmailChange={setEmail}
+      onPasswordChange={setPassword}
       onSubmit={handleLogin}
       loading={loading}
+      onBack={() => router.push("/")}
     />
     </div>
   )

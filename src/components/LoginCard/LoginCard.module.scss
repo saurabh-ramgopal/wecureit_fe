@@ -160,3 +160,21 @@
   font-size: var(--fs-label, 0.875rem);
   overflow-x: auto;
 }
+
+.backButton {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border-radius: var(--radius-small, 0.5rem);
+  font-weight: var(--fw-medium, 500);
+  color: var(--text-primary, #1f2937);
+  background: transparent;
+  border: 1px solid var(--border-default, #ccc);
+  cursor: pointer;
+  transition: var(--transition-base, all 0.2s);
+
+  &:hover {
+    background: var(--bg-disabled, #f3f4f6);
+    border-color: var(--primary);
+  }
+}
