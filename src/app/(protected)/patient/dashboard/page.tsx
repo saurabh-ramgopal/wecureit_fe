@@ -69,16 +69,18 @@ const PatientDashboardPage: NextPage<Props> = () => {
 
   <div className={`${styles.patientDashboard} theme-patient`} style={{ background: 'var(--bg-page)' }}>
        <div className={styles.dashboardHeaderSection}>
-        <h1 className={styles.portalTitle}>Welcome to Patient Portal</h1>
+        {/* <h1 className={styles.portalTitle}></h1> */}
     </div>
     <PatientDashboardHeader 
       activeTab={activeTab}
       onTabClick={handleTabClick} 
     />
-      <div>
-        {activeTab === "Home"}
-        {activeTab === "My Profile"}
-        {activeTab === "Appointment History"}
+      <div className={styles.contentArea}>
+        {activeTab === "Home" }
+
+        {activeTab === "My Profile" && <MyProfile />}
+
+        {activeTab === "Appointment History" }
       </div>
   </div>
   )
