@@ -58,6 +58,42 @@ const MyProfile: React.FC = () => {
         return res.json();
     };
 
+    const updateCard = async (card: {
+        ccNumber: string;
+        ccExpiry: string; // MM/YY
+        cvv: string;
+        }) => {
+        const patientId = await getPatientId();
+        if (!patientId) throw new Error('No patient id found in session.');
+
+        const [mm, yy] = card.ccExpiry.split('/');
+
+        const payload = {
+            pan: card.ccNumber.replace(/\D/g, ''),
+            cvc: card.cvv,
+            expMonth: Number(mm),
+            expYear: 2000 + Number(yy),
+            patientMasterId: Number(patientId),
+        };
+
+        const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080').replace(/\/$/, '');
+
+        const res = await fetch(`${apiBase}/cards/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            const msg = await res.text();
+            throw new Error(`Card save failed: ${msg}`);
+        }
+
+        return res.json();
+    };
+
+
 
     useEffect(() => {
         let mounted = true;
@@ -257,115 +293,64 @@ const MyProfile: React.FC = () => {
             {myProfileData.ccNumber && (
 
                 <div className="myprofile-card__body">
-                    {!cardEditing ? (
-                        <>
-                            <div className="grid-row">
-                                <div className="field field--full">
-                                    <label>Card Number</label>
-                                    <div className="value">**** **** **** {myProfileData.ccNumber}</div>
-                                </div>
-                            </div>
-
-                            <div className="grid-row">
-                                <div className="field">
-                                    <label>Expiry Date</label>
-                                    <div className="value">{myProfileData.ccExpiry}</div>
-                                </div>
-                                <div className="field">
-                                    <label>CVV</label>
-                                    <div className="value">{myProfileData.cvv}</div>
-                                </div>
-                            </div>
-
-                            <div style={{ marginTop: 10 }}>
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => {
-                                        // Open form for editing: prefill expiry/cvv, ccNumber left blank (user must re-enter full card to replace)
-                                        setCard({ ccNumber: '', ccExpiry: myProfileData.ccExpiry ?? '', cvv: myProfileData.cvv ?? '' });
-                                        setCardEditing(true);
-                                    }}
-                                >
-                                    Edit Card
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="card-form">
-                            <div className="grid-row">
-                                <div className="field field--full">
-                                    <label>Card Number</label>
-                                    <input
-                                        className="value-input"
-                                        placeholder="Enter full card number to replace"
-                                        value={card.ccNumber}
-                                        onChange={e => setCard(prev => ({ ...prev, ccNumber: e.target.value }))}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid-row">
-                                <div className="field">
-                                    <label>Expiry (MM/YY)</label>
-                                    <input
-                                        className="value-input"
-                                        placeholder="MM/YY"
-                                        value={card.ccExpiry}
-                                        onChange={e => setCard(prev => ({ ...prev, ccExpiry: e.target.value }))}
-                                    />
-                                </div>
-                                <div className="field">
-                                    <label>CVV</label>
-                                    <input
-                                        className="value-input"
-                                        placeholder="123"
-                                        value={card.cvv}
-                                        onChange={e => setCard(prev => ({ ...prev, cvv: e.target.value }))}
-                                    />
-                                </div>
-                            </div>
-
-                            <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => {
-                                        const numRaw = String(card.ccNumber).replace(/\D/g, '');
-                                        const expiry = String(card.ccExpiry);
-                                        const cvv = String(card.cvv);
-
-                                        // If user provided a new card number, validate it; otherwise keep existing masked number
-                                        if (card.ccNumber) {
-                                            if (!/^\d{13,19}$/.test(numRaw)) {
-                                                alert('Please enter a valid card number (13-19 digits).');
-                                                return;
-                                            }
-                                        }
-
-                                        if (!/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry)) {
-                                            alert('Please enter expiry in MM/YY format.');
-                                            return;
-                                        }
-                                        if (!/^\d{3,4}$/.test(cvv)) {
-                                            alert('Please enter a valid CVV (3-4 digits).');
-                                            return;
-                                        }
-
-                                        setMyProfileData(prev => ({
-                                            ...prev,
-                                            ccNumber: card.ccNumber ? numRaw : prev.ccNumber,
-                                            ccExpiry: expiry,
-                                            cvv,
-                                        }));
-                                        setCard({ ccNumber: '', ccExpiry: '**/**', cvv: '***' });
-                                        setCardEditing(false);
-                                    }}
-                                >
-                                    Save
-                                </button>
-                                <button className="btn btn-ghost" onClick={() => { setCard({ ccNumber: '', ccExpiry: '', cvv: '' }); setCardEditing(false); }}>Cancel</button>
-                            </div>
+                    <div className="grid-row">
+                        <div className="field field--full">
+                            <label>Card Number</label>
+                            <div className="value">**** **** **** {myProfileData.ccNumber}</div>
                         </div>
-                    )}
+                    </div>
+
+                    <div className="grid-row">
+                        <div className="field">
+                            <label>Expiry Date</label>
+                            <div className="value">{myProfileData.ccExpiry}</div>
+                        </div>
+                        <div className="field">
+                            <label>CVV</label>
+                            <div className="value">{myProfileData.cvv}</div>
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: 10 }}>
+                        <button
+                            className="btn btn-danger"
+                            onClick={async () => {
+                                setLoading(true);
+                                setError(null);
+                                try {
+                                    const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080').replace(/\/$/, '');
+                                    const patientId = await getPatientId();
+                                    console.log('Deleting card for patientId:', patientId);
+                                    if (patientId) {
+                                        // backend expects a query param delete call: /cards/delete?patientId=...
+                                        // send patientId as a query parameter so Spring's @RequestParam can find it
+                                        const delUrl = `${apiBase}/cards/delete?patientId=${encodeURIComponent(patientId)}`;
+                                        const delRes = await fetch(delUrl, {
+                                            method: 'PATCH',
+                                            credentials: 'include',
+                                        });
+
+                                        if (!delRes.ok) {
+                                            const bodyText = await delRes.text().catch(() => '<no-body>');
+                                            console.error('cards/delete failed', { status: delRes.status, body: bodyText });
+                                            throw new Error(`Delete failed ${delRes.status}: ${bodyText}`);
+                                        }
+                                    }
+                                } catch (err) {
+                                    console.error('Delete card failed', err);
+                                    setError((err as Error)?.message ?? String(err));
+                                } finally {
+                                    setLoading(false);
+                                    // clear locally regardless of backend result
+                                    setMyProfileData(prev => ({ ...prev, ccNumber: '', ccExpiry: '**/**', cvv: '***' }));
+                                    setCard({ ccNumber: '', ccExpiry: '', cvv: '' });
+                                    setCardEditing(false);
+                                }
+                            }}
+                        >
+                            Delete Card
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -415,27 +400,43 @@ const MyProfile: React.FC = () => {
                             <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
                                 <button
                                     className="btn btn-primary"
-                                    onClick={() => {
-                                        const num = String(card.ccNumber).replace(/\D/g, '');
-                                        const expiry = String(card.ccExpiry);
-                                        const cvv = String(card.cvv);
+                                    onClick={async () => {
+                                        setError(null);
+                                        setLoading(true);
+                                        try {
+                                            const num = String(card.ccNumber).replace(/\D/g, '');
+                                            const expiry = String(card.ccExpiry);
+                                            const cvv = String(card.cvv);
 
-                                        if (!/^\d{13,19}$/.test(num)) {
-                                            alert('Please enter a valid card number (13-19 digits).');
-                                            return;
-                                        }
-                                        if (!/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry)) {
-                                            alert('Please enter expiry in MM/YY format.');
-                                            return;
-                                        }
-                                        if (!/^\d{3,4}$/.test(cvv)) {
-                                            alert('Please enter a valid CVV (3-4 digits).');
-                                            return;
-                                        }
+                                            if (!/^\d{13,19}$/.test(num)) {
+                                                alert('Please enter a valid card number (13-19 digits).');
+                                                setLoading(false);
+                                                return;
+                                            }
+                                            if (!/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry)) {
+                                                alert('Please enter expiry in MM/YY format.');
+                                                setLoading(false);
+                                                return;
+                                            }
+                                            if (!/^\d{3,4}$/.test(cvv)) {
+                                                alert('Please enter a valid CVV (3-4 digits).');
+                                                setLoading(false);
+                                                return;
+                                            }
 
-                                        setMyProfileData(prev => ({ ...prev, ccNumber: num, ccExpiry: expiry, cvv }));
-                                        setCard({ ccNumber: '', ccExpiry: '**/**', cvv: '***' });
-                                        setCardEditing(false);
+                                            // call backend add card endpoint
+                                            await updateCard({ ccNumber: card.ccNumber, ccExpiry: card.ccExpiry, cvv: card.cvv });
+
+                                            const last4 = num.slice(-4);
+                                            setMyProfileData(prev => ({ ...prev, ccNumber: last4, ccExpiry: expiry, cvv: '***' }));
+                                            setCard({ ccNumber: '', ccExpiry: '**/**', cvv: '***' });
+                                            setCardEditing(false);
+                                        } catch (err) {
+                                            console.error('Add card failed', err);
+                                            setError((err as Error)?.message ?? String(err));
+                                        } finally {
+                                            setLoading(false);
+                                        }
                                     }}
                                 >
                                     Save
