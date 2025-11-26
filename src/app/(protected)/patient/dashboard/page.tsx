@@ -8,6 +8,7 @@ import { NextPage } from 'next';
 import styles from './patientdashboard.module.scss';
 import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboardHeader/PatientDashboardHeader";
 import AppointmentHistoryCard from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentHistoryCard/AppointmentHistoryCard';
+import MyProfile from "@/components/PatientDashboard/MyProfile/MyProfile";
 
 type Props = {
 }

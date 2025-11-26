@@ -1,18 +1,126 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './MyProfile.scss';
 
 const MyProfile: React.FC = () => {
     const [myProfileData, setMyProfileData] = useState({
         name: 'John Doe',
         email: 'john.doe@email.com',
-        phone: '(555) 123-4567',
-        address: '123 Main St, Springfield, USA',
         dateOfBirth: 'June 14, 1985',
+        phone: '(555) 123-4567',
         gender: 'Male',
-        ccNumber: '1234123412341234',
-        ccExpiry: '12/25',
-        cvv: '123',
+        address: '123 Main St, Springfield, USA',
+        ccNumber: '',
+        ccExpiry: '**/**',
+        cvv: '***',
     });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+
+    const getPatientId = async (): Promise<string | null> => {
+        // 1) quick-local check (set this at login)
+        const fromStorage = window.localStorage.getItem('patientId');
+        if (fromStorage) return fromStorage;
+
+    
+        try {
+          const { getAuth } = await import('firebase/auth');
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (user) {
+            const token = await user.getIdTokenResult();
+            // assuming backend set `patientMasterId` as a custom claim
+            const claimId = token.claims.patientMasterId;
+            if (claimId) return String(claimId);
+          }
+        } catch (e) {
+          // ignore if firebase isn't configured here; fallback remains localStorage
+        }
+
+        return null;
+    };
+
+    const updatePatient = async (patchBody: Record<string, unknown>) => {
+        const patientId = await getPatientId();
+        if (!patientId) throw new Error('No patient id found in session.');
+        const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080').replace(/\/$/, '');
+        const res = await fetch(`${apiBase}/patient/${encodeURIComponent(patientId)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(patchBody),
+        });
+        if (!res.ok) {
+            const body = await res.text().catch(() => '<no-body>');
+            throw new Error(`Update failed ${res.status}: ${body}`);
+        }
+        return res.json();
+    };
+
+
+    useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const patientId = await getPatientId();
+                if (!patientId) {
+                    setError('No patient id found in session.');
+                    setLoading(false);
+                    return;
+                }
+
+                // prefer an explicit API base set via .env.local: NEXT_PUBLIC_API_BASE
+                // (must start with NEXT_PUBLIC_ to be accessible in the browser)
+                const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080').replace(/\/$/, '');
+                const url = `${apiBase}/patient/getById?patientId=${encodeURIComponent(patientId)}`;
+                
+                const res = await fetch(url, { credentials: 'include' });
+                
+                if (!res.ok) {
+                    // attempt to capture body for debugging
+                    throw new Error(`Server returned ${res.status}`);
+                }
+                const data = await res.json();
+
+                // Fetch card info separately
+                const cardUrl = `${apiBase}/cards/getcards?patientId=${encodeURIComponent(patientId)}`;
+                const cardRes =  await fetch (cardUrl, { credentials: 'include'});
+
+                if (!cardRes.ok) {
+                    throw new Error(`Server returned ${cardRes.status}`);
+                }
+                const cardData = await cardRes.json();
+                
+                // console.log('Fetched patient profile data:', cardData[0]);
+                // Map backend fields to our local state shape
+                const mapped = {
+                    name: data.patientName ?? myProfileData.name,
+                    email: data.patientEmail ?? myProfileData.email,
+                    dateOfBirth: data.patientDob ?? myProfileData.dateOfBirth,
+                    gender: data.patientGender ?? myProfileData.gender,
+                    phone: data.patientPhone ?? myProfileData.phone,
+                    address: data.patientAddress ?? myProfileData.address,
+                    ccNumber: cardData[0] ?? myProfileData.ccNumber,
+                    ccExpiry: cardData.ccExpiry ?? myProfileData.ccExpiry,
+                    cvv: cardData.cvv ?? myProfileData.cvv,
+                };
+
+                if (mounted) setMyProfileData(prev => ({ ...prev, ...mapped }));
+            } catch (err: unknown) {
+                console.error('Failed loading patient profile', err);
+                if (mounted) setError((err as Error)?.message ?? String(err));
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+
+        load();
+        return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const [editing, setEditing] = useState<{ field: 'email' | 'phone' | null, value: string | null }>({ field: null, value: null });
     const [card, setCard] = useState({
@@ -22,14 +130,16 @@ const MyProfile: React.FC = () => {
     });
     const [cardEditing, setCardEditing] = useState(false);
 
-    const maskCard = (num: string) => {
-        const cleaned = String(num).replace(/\D/g, '');
-        if (!cleaned) return '';
-        return '**** **** **** ' + cleaned.slice(-4);
-    };
+    // const maskCard = (num: string) => {
+    //     const cleaned = String(num).replace(/\D/g, '');
+    //     if (!cleaned) return '';
+    //     return '**** **** **** ' + cleaned.slice(-4);
+    // };
 
     return (
         <section className="myprofile-card">
+            {loading && <div className="myprofile-loading">Loading profile…</div>}
+            {error && <div className="myprofile-error" role="alert">{error}</div>}
 
             {/* Personal Information Section */}
             <div className="myprofile-card__header">
@@ -66,9 +176,21 @@ const MyProfile: React.FC = () => {
                                                     {editing.field === 'email' ? (
                                                         <>
                                                             <input className="value-input" value={String(editing.value ?? myProfileData.email)} onChange={e => setEditing({ field: 'email', value: e.target.value })} />
-                                                            <button className="btn btn-primary" onClick={() => {
-                                                                setMyProfileData(prev => ({ ...prev, email: String(editing.value ?? prev.email) }));
-                                                                setEditing({ field: null, value: null });
+                                                            <button className="btn btn-primary" onClick={async () => {
+                                                                try {
+                                                                    setLoading(true);
+                                                                    const newVal = String(editing.value ?? myProfileData.email);
+                                                                    // PATCH may accept partial body with only email
+                                                                    const updated = await updatePatient({ email: newVal });
+                                                                    // backend may echo updated fields; fallback to newVal
+                                                                    setMyProfileData(prev => ({ ...prev, email: updated.patientEmail ?? newVal }));
+                                                                    setEditing({ field: null, value: null });
+                                                                } catch (err: unknown) {
+                                                                    console.error('Failed to update email', err);
+                                                                    setError((err as Error)?.message ?? String(err));
+                                                                } finally {
+                                                                    setLoading(false);
+                                                                }
                                                             }}>Save</button>
                                                             <button className="btn btn-ghost" onClick={() => setEditing({ field: null, value: null })}>Cancel</button>
                                                         </>
@@ -86,9 +208,19 @@ const MyProfile: React.FC = () => {
                                                     {editing.field === 'phone' ? (
                                                         <>
                                                             <input className="value-input" value={String(editing.value ?? myProfileData.phone)} onChange={e => setEditing({ field: 'phone', value: e.target.value })} />
-                                                            <button className="btn btn-primary" onClick={() => {
-                                                                setMyProfileData(prev => ({ ...prev, phone: String(editing.value ?? prev.phone) }));
-                                                                setEditing({ field: null, value: null });
+                                                            <button className="btn btn-primary" onClick={async () => {
+                                                                try {
+                                                                    setLoading(true);
+                                                                    const newVal = String(editing.value ?? myProfileData.phone);
+                                                                    const updated = await updatePatient({ phone: newVal });
+                                                                    setMyProfileData(prev => ({ ...prev, phone: updated.patientPhone ?? newVal }));
+                                                                    setEditing({ field: null, value: null });
+                                                                } catch (err: unknown) {
+                                                                    console.error('Failed to update phone', err);
+                                                                    setError((err as Error)?.message ?? String(err));
+                                                                } finally {
+                                                                    setLoading(false);
+                                                                }
                                                             }}>Save</button>
                                                             <button className="btn btn-ghost" onClick={() => setEditing({ field: null, value: null })}>Cancel</button>
                                                         </>
@@ -130,7 +262,7 @@ const MyProfile: React.FC = () => {
                             <div className="grid-row">
                                 <div className="field field--full">
                                     <label>Card Number</label>
-                                    <div className="value">{myProfileData.ccNumber}</div>
+                                    <div className="value">**** **** **** {myProfileData.ccNumber}</div>
                                 </div>
                             </div>
 
@@ -220,11 +352,11 @@ const MyProfile: React.FC = () => {
 
                                         setMyProfileData(prev => ({
                                             ...prev,
-                                            ccNumber: card.ccNumber ? maskCard(numRaw) : prev.ccNumber,
+                                            ccNumber: card.ccNumber ? numRaw : prev.ccNumber,
                                             ccExpiry: expiry,
                                             cvv,
                                         }));
-                                        setCard({ ccNumber: '', ccExpiry: '', cvv: '' });
+                                        setCard({ ccNumber: '', ccExpiry: '**/**', cvv: '***' });
                                         setCardEditing(false);
                                     }}
                                 >
@@ -301,8 +433,8 @@ const MyProfile: React.FC = () => {
                                             return;
                                         }
 
-                                        setMyProfileData(prev => ({ ...prev, ccNumber: maskCard(num), ccExpiry: expiry, cvv }));
-                                        setCard({ ccNumber: '', ccExpiry: '', cvv: '' });
+                                        setMyProfileData(prev => ({ ...prev, ccNumber: num, ccExpiry: expiry, cvv }));
+                                        setCard({ ccNumber: '', ccExpiry: '**/**', cvv: '***' });
                                         setCardEditing(false);
                                     }}
                                 >
