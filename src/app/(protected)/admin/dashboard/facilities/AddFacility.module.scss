@@ -49,7 +49,7 @@
 .deleteRoomBtn {
   background: transparent;
   border: none;
-  color: #dc2626; /* Tailwind red-600 */
+  color: #dc2626; 
   cursor: pointer;
   padding: 0.15rem;
   display: inline-flex;
@@ -81,9 +81,9 @@
 
 .locked input[disabled] {
   cursor: not-allowed;
-  /* masked blue for the disabled checkbox */
-  accent-color: rgba(96, 165, 250, 0.55); /* Tailwind blue-400 with reduced opacity */
-  /* keep the checkbox visually slightly muted */
+
+  accent-color: rgba(96, 165, 250, 0.55); 
+
   opacity: 0.95;
 }
 
@@ -111,7 +111,7 @@
   background: var(--bg-hover);
 }
 
-/* Modal / overlay shared styles */
+
 .overlay {
   position: fixed;
   inset: 0;

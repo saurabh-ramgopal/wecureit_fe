@@ -1,13 +1,20 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import styles from "./AddDoctor.module.scss";
-import { X, Info, Plus, Trash2, Eye, EyeOff } from "lucide-react";
-import { getStates, getSpecialities, addDoctor } from "../../../../../lib/api";
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import {auth} from "@/lib/firebase"
+import { X, Info, Plus, Trash2 } from "lucide-react";
+import {
+  getStates,
+  getSpecialities,
+  addDoctor,
+  updateDoctorSpeciality,
+  getDoctors,
+} from "../../../../../lib/api";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
 export interface License {
   stateCode: string;
-  // allow multiple specialties per state
   specialityIds?: string[];
 }
 
@@ -28,209 +35,184 @@ interface AddDoctorModalProps {
   onSubmit: () => void;
 }
 
+const normalizeLicenses = (input: unknown): License[] => {
+  if (!Array.isArray(input)) return [{ stateCode: "", specialityIds: [] }];
+
+  return (input as unknown[]).map((raw) => {
+    const obj = (raw as Record<string, unknown>) || {};
+    const stateCode = String(obj['stateCode'] ?? obj['state_code'] ?? obj['state'] ?? "");
+
+    let specialityIds: string[] = [];
+    if (Array.isArray(obj['specialityIds']))
+      specialityIds = (obj['specialityIds'] as unknown[]).map(String);
+    else if (obj['specialityId']) specialityIds = [String(obj['specialityId'])];
+
+    return { stateCode, specialityIds } as License;
+  });
+};
+
+const extractId = (item: unknown) => {
+  const it = (item as Record<string, unknown>) || {};
+  return String(
+    it['code'] ?? it['specialityMasterId'] ?? it['speciality_master_id'] ?? it['stateCode'] ?? it['stateMasterId'] ?? it['state_id'] ?? it['id'] ?? ''
+  );
+};
+
+const extractName = (item: unknown) => {
+  const it = (item as Record<string, unknown>) || {};
+  return String(it['name'] ?? it['specialityName'] ?? it['speciality_name'] ?? it['stateName'] ?? it['state_name'] ?? item ?? '');
+};
+
+
+const generatePassword = () =>
+  Array.from(window.crypto.getRandomValues(new Uint8Array(12)))
+    .map((b) => (b % 36).toString(36))
+    .join("") + "A1!";
+
+
 const AddDoctor: React.FC<AddDoctorModalProps> = ({
   mode = "create",
   doctor,
   onClose,
   onSubmit,
 }) => {
-  
-  const [fullName, setFullName] = useState<string>(doctor?.name ?? "");
-  const [email, setEmail] = useState<string>(doctor?.email ?? "");
-  const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [gender, setGender] = useState<string>(doctor?.gender ?? "");
-  // Normalize incoming license structures into our License[] shape without using `any`.
-  const normalizeLicenses = (input: unknown): License[] => {
-    if (!Array.isArray(input)) return [{ stateCode: "", specialityIds: [] }];
-    return (input as unknown[]).map((item) => {
-      const l = item as Record<string, unknown>;
-      const stateCode = String(l["stateCode"] ?? l["state_code"] ?? l["state"] ?? "");
-      let specialityIds: string[] = [];
-      if (Array.isArray(l["specialityIds"])) {
-        specialityIds = (l["specialityIds"] as unknown[]).map((s) => String(s));
-      } else if (l["specialityId"]) {
-        specialityIds = [String(l["specialityId"])];
-      }
-      return { stateCode, specialityIds } as License;
-    });
-  };
+  const [fullName, setFullName] = useState(doctor?.name ?? "");
+  const [email, setEmail] = useState(doctor?.email ?? "");
+  const [gender, setGender] = useState(doctor?.gender ?? "");
 
   const [licenses, setLicenses] = useState<License[]>(
-    normalizeLicenses(doctor?.licenses ?? undefined)
+    normalizeLicenses(doctor?.licenses)
   );
+
   const [states, setStates] = useState<Array<Record<string, unknown>>>([]);
   const [specialities, setSpecialities] = useState<Array<Record<string, unknown>>>([]);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // --- Load states & specialities from backend ---
+
   useEffect(() => {
-    let mounted = true;
-    getStates()
-      .then((res: unknown) => {
-        if (mounted && Array.isArray(res))
-          setStates(res as Array<Record<string, unknown>>);
-      })
-      .catch((err: unknown) => console.error("getStates error", err));
-
-    getSpecialities()
-      .then((res: unknown) => {
-        if (mounted && Array.isArray(res))
-          setSpecialities(res as Array<Record<string, unknown>>);
-      })
-      .catch((err: unknown) => console.error("getSpecialities error", err));
-
-    return () => {
-      mounted = false;
-    };
+    getStates().then((res) => Array.isArray(res) && setStates(res));
+    getSpecialities().then(
+      (res) => Array.isArray(res) && setSpecialities(res)
+    );
   }, []);
 
-  // --- Extract ID & name from backend objects ---
-  const extractId = (item: unknown) => {
-    const it = item as Record<string, unknown>;
-    const candidate =
-      it["code"] ??
-      it["specialityMasterId"] ??
-      it["speciality_master_id"] ??
-      it["stateCode"] ??
-      it["state_code"] ??
-      it["stateMasterId"] ??
-      it["state_master_id"] ??
-      it["state_id"] ??
-      it["code"];
-    if (candidate === undefined || candidate === null) return JSON.stringify(it);
-    if (typeof candidate === "object") return JSON.stringify(candidate);
-    return String(candidate);
-  };
 
-  const extractName = (item: unknown) => {
-    const it = item as Record<string, unknown>;
-    const candidate =
-      it["name"] ??
-      it["specialityName"] ??
-      it["speciality_name"] ??
-      it["stateName"] ??
-      it["state_name"];
-    if (candidate === undefined || candidate === null) return String(item);
-    if (typeof candidate === "object") return JSON.stringify(candidate);
-    return String(candidate);
-  };
-
-  // --- Prefill form when editing ---
   useEffect(() => {
-    if (doctor && mode === "edit") {
-      setFullName(doctor.name || "");
-      setEmail(doctor.email || "");
-      setGender(doctor.gender || "");
+    if (mode === "edit" && doctor) {
+      setFullName(doctor.name ?? "");
+      setEmail(doctor.email ?? "");
+      setGender(doctor.gender ?? "");
       setLicenses(normalizeLicenses(doctor.licenses));
-  // populate password if backend provided it (allow empty string)
-  setPassword(doctor.password ?? "");
     } else if (mode === "create") {
       setFullName("");
       setEmail("");
-      setPassword("");
       setGender("");
       setLicenses([{ stateCode: "", specialityIds: [] }]);
     }
-  }, [doctor, mode]);
+  }, [mode, doctor]);
 
-  // --- Add / remove / change license blocks ---
-  const handleAddLicense = () => {
+  const addLicense = () =>
     setLicenses([...licenses, { stateCode: "", specialityIds: [] }]);
+
+  const removeLicense = (i: number) =>
+    setLicenses(licenses.filter((_, idx) => idx !== i));
+
+  const updateLicense = (i: number, field: keyof License, val: string | string[]) => {
+    const copy = [...licenses];
+    copy[i] = { ...copy[i], [field]: val };
+    setLicenses(copy);
   };
 
-  const handleRemoveLicense = (index: number) => {
-    const updated = licenses.filter((_, i) => i !== index);
-    setLicenses(updated);
+  const toggleSpeciality = (i: number, specId: string) => {
+    const copy = [...licenses];
+    const set = new Set(copy[i].specialityIds ?? []);
+    if (set.has(specId)) set.delete(specId);
+    else set.add(specId);
+    copy[i].specialityIds = [...set];
+    setLicenses(copy);
   };
 
-  const handleLicenseChange = (index: number, field: keyof License, value: string | string[]) => {
-    const updated = [...licenses];
-    updated[index] = { ...updated[index], [field]: value } as License;
-    setLicenses(updated);
-  };
-
-  const toggleLicenseSpeciality = (licenseIndex: number, specialityId: string) => {
-    const updated = [...licenses];
-    const current = new Set(updated[licenseIndex].specialityIds ?? []);
-    if (current.has(specialityId)) current.delete(specialityId);
-    else current.add(specialityId);
-    updated[licenseIndex].specialityIds = Array.from(current);
-    setLicenses(updated);
-  };
-
-  // --- Handle Submit ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // Basic client-side validation to avoid sending nulls to the backend
-    if (!fullName || !fullName.trim()) {
-      setError("Full name is required.");
-      return;
-    }
-    if (!email || !email.trim()) {
-      setError("Email is required.");
-      return;
-    }
-    if (!password || !password.trim()) {
-      setError("Password is required.");
-      return;
-    }
-    // Validate licenses: require at least one license with stateCode and at least one speciality
-    const hasValidLicense = licenses.some((l) => (l.stateCode ?? "").trim() !== "" && Array.isArray(l.specialityIds) && (l.specialityIds ?? []).length > 0);
-    if (!hasValidLicense) {
-      setError('Please add at least one state license with one or more specialties.');
-      return;
-    }
 
-    // Map to backend AddDoctorRequest shape
-    const allSpecs = new Set<string>();
-    licenses.forEach((l) => {
-      (l.specialityIds ?? []).forEach((s) => allSpecs.add(s));
-    });
+    if (!fullName.trim()) return setError("Full name is required.");
+    if (!email.trim()) return setError("Email is required.");
+
+    const validLicense = licenses.some(
+      (l) =>
+        l.stateCode.trim() !== "" &&
+        Array.isArray(l.specialityIds) &&
+        l.specialityIds.length > 0
+    );
+    if (!validLicense)
+      return setError(
+        "Please add at least one state license with at least one specialty."
+      );
+
+    const allSpecialities = new Set<string>();
+    licenses.forEach((l) => l.specialityIds?.forEach((s) => allSpecialities.add(s)));
 
     const doctorStateSpeciality = licenses.map((l) => ({
-      stateCode: l.stateCode ?? "",
+      stateCode: l.stateCode,
       specialityList: l.specialityIds ?? [],
     }));
 
-    const payload = {
-      doctorName: fullName,
-      doctorEmail: email,
-      doctorPassword: password,
-      doctorMasterId: doctor?.doctorMasterId ?? undefined,
-      doctorGender: gender,
-      // include both representations for backend compatibility
-      specialityList: Array.from(allSpecs),
-      doctorStateSpeciality,
-    } as Record<string, unknown>;
-
     setIsSaving(true);
+
     try {
       if (mode === "create") {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const firebaseUid = userCredential.user.uid;
-          const payload = {
+        const allDoctors = await getDoctors();
+        if (
+          Array.isArray(allDoctors) &&
+          allDoctors.some((d: unknown) => {
+            const rec = (d as Record<string, unknown>) || {};
+            return String(rec['doctorEmail'] ?? rec['email'] ?? rec['doctor_email'] ?? '').toLowerCase() === email.toLowerCase();
+          })
+        ) {
+          setIsSaving(false);
+          return setError(
+            "A doctor with this email already exists. Use Edit mode instead."
+          );
+        }
+
+        let firebaseUid: string;
+        try {
+          const userCred = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            generatePassword()
+          );
+          firebaseUid = userCred.user.uid;
+        } catch (err: unknown) {
+          const code = ((err as { code?: string })?.code) ?? '';
+          if (typeof code === 'string' && code.includes('email-already-in-use')) {
+            setIsSaving(false);
+            return setError('This email is already registered in Firebase. Please use Edit mode.');
+          }
+          throw err;
+        }
+
+        await addDoctor({
           doctorName: fullName,
           doctorEmail: email,
           doctorGender: gender,
-          specialityList: Array.from(allSpecs),
+          specialityList: [...allSpecialities],
           doctorStateSpeciality,
-          firebaseUid: firebaseUid,
-        };
-        await addDoctor(payload);
+          firebaseUid,
+        });
       } else {
-        // For edit mode we still call addDoctor (backend will upsert) —
-        // if your backend exposes a separate update endpoint, swap this call.
-        await addDoctor(payload);
+        await updateDoctorSpeciality({
+          doctorMasterId: doctor?.doctorMasterId,
+          doctorStateSpeciality,
+        });
       }
 
-      // Notify parent to refresh list and close modal
       onSubmit();
       onClose();
-    } catch (err) {
-      console.error('addDoctor error', err);
-      setError(String((err as Error)?.message ?? err));
+    } catch (err: unknown) {
+      console.error(err);
+      setError(((err as Error)?.message) ?? String(err));
     } finally {
       setIsSaving(false);
     }
@@ -239,7 +221,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        {/* Header */}
         <div className={styles.header}>
           <h2>{mode === "edit" ? "Edit Doctor" : "Add New Doctor"}</h2>
           <button onClick={onClose} className={styles.closeBtn}>
@@ -253,73 +234,43 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
             : "Create a new doctor account with state licenses."}
         </p>
 
-        {/* Form */}
         <form className={styles.form} onSubmit={handleSubmit}>
-          {/* Row 1 */}
+          
           <div className={styles.row}>
             <div className={styles.field}>
               <label>Full Name *</label>
               <input
-                type="text"
-                placeholder="Dr. John Smith"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                placeholder="Dr. John Smith"
               />
             </div>
+
             <div className={styles.field}>
               <label>Email *</label>
               <input
                 type="email"
-                placeholder="john.smith@hospital.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="john.smith@hospital.com"
               />
             </div>
           </div>
 
-          {/* Row 2 */}
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label>Password *</label>
-              <div className={styles.passwordWrapper}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder={mode === "create" ? "Create secure password" : "Set new password for doctor"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  onClick={() => setShowPassword((s) => !s)}
-                  className={styles.passwordToggle}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-            <div className={styles.field}>
-              <label>Gender *</label>
-              <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-              >
-                <option value="">Select gender</option>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+          <div className={styles.field}>
+            <label>Gender *</label>
+            <select value={gender} onChange={(e) => setGender(e.target.value)}>
+              <option value="">Select gender</option>
+              <option>Female</option>
+              <option>Male</option>
+              <option>Other</option>
+            </select>
           </div>
 
-          {/* --- Licenses --- */}
+          
           <div className={styles.licenseHeader}>
             <label>State Licenses *</label>
-            <button
-              type="button"
-              onClick={handleAddLicense}
-              className={styles.addLicenseBtn}
-            >
+            <button type="button" onClick={addLicense} className={styles.addLicenseBtn}>
               <Plus size={16} /> Add License
             </button>
           </div>
@@ -331,15 +282,15 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
             </p>
           </div>
 
-          {licenses.map((lic, index) => (
-            <div key={index} className={styles.licenseBox}>
+          {licenses.map((lic, i) => (
+            <div key={i} className={styles.licenseBox}>
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>State</label>
                   <select
                     value={lic.stateCode}
                     onChange={(e) =>
-                      handleLicenseChange(index, "stateCode", e.target.value)
+                      updateLicense(i, "stateCode", e.target.value)
                     }
                   >
                     <option value="">Select state</option>
@@ -351,66 +302,60 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
                   </select>
                 </div>
 
-                {/* Remove license button aligned to the row end */}
                 {licenses.length > 1 && (
-                  <div style={{ display: "flex", alignItems: "flex-end" }}>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveLicense(index)}
-                      className={styles.removeLicenseBtn}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeLicense(i)}
+                    className={styles.removeLicenseBtn}
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 )}
               </div>
 
-              {/* Render specialties table below the state select to reduce congestion */}
               <div className={styles.field}>
                 <label>Specialties</label>
                 <div className={styles.checkboxList}>
                   {specialities.map((sp) => {
                     const sid = extractId(sp);
-                    const checked = (lic.specialityIds ?? []).includes(sid);
                     return (
                       <label key={sid} className={styles.checkboxItem}>
                         <input
                           type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleLicenseSpeciality(index, sid)}
+                          checked={lic.specialityIds?.includes(sid)}
+                          onChange={() => toggleSpeciality(i, sid)}
                         />
-                        <span>{extractName(sp)}</span>
+                        {extractName(sp)}
                       </label>
                     );
                   })}
                 </div>
               </div>
-
-              {/* License number removed per request */}
             </div>
           ))}
 
           <div className={styles.infoNote}>
             <Info size={16} />
             <p>
-              Doctors will assign their own facilities through the Doctor Portal based on their availability preferences.
+              Doctors will later assign their own facilities from the Doctor
+              Portal.
             </p>
           </div>
 
-          {/* Error */}
-          {error && (
-            <div className={styles.errorMessage} role="alert">
-              {error}
-            </div>
-          )}
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
-          {/* Footer */}
           <div className={styles.footer}>
-            <button type="button" onClick={onClose} className={styles.cancelBtn} disabled={isSaving}>
+            <button type="button" onClick={onClose} className={styles.cancelBtn}>
               Cancel
             </button>
             <button type="submit" className={styles.submitBtn} disabled={isSaving}>
-              {isSaving ? (mode === "edit" ? "Saving..." : "Creating...") : mode === "edit" ? "Save Changes" : "Create Doctor"}
+              {isSaving
+                ? mode === "edit"
+                  ? "Saving..."
+                  : "Creating..."
+                : mode === "edit"
+                ? "Save Changes"
+                : "Create Doctor"}
             </button>
           </div>
         </form>

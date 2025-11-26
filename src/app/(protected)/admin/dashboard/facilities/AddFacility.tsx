@@ -4,7 +4,6 @@ import styles from "./AddFacility.module.scss";
 import { X, Info, Trash2 } from "lucide-react";
 import { getStates, getSpecialities } from "../../../../../lib/api";
 
-// Minimal exported Facility type so other modules can import it for typing
 export type Facility = {
   facilityMasterId?: string;
   name: string;
@@ -17,7 +16,6 @@ export type Facility = {
 
 interface AddFacilityProps {
   onClose: () => void;
-  // when provided, onSubmit receives the backend-shaped AddOrUpdateFacilityRequest object
   onSubmit?: (payload?: Record<string, unknown>) => void;
   facility?: Facility;
 }
@@ -53,17 +51,13 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     };
   }, []);
 
-  // Initialize form when editing an existing facility
+  
   useEffect(() => {
     if (!facility) return;
     setFacilityName(facility.name ?? "");
     setAddress(facility.address ?? "");
     const rooms = facility.totalRooms ?? 1;
     setNumRooms(rooms);
-    // Build roomConfig from roomDetails. Support multiple shapes:
-    // - legacy: array of comma-separated strings
-    // - array of objects: { roomNumber, roomLabel, specialityNames: string[] } or { specialityList: [ids|objects|names] }
-    // - array of arrays
     const rc: Record<number, string[]> = {};
     const rawRooms = (facility as Record<string, unknown>)['roomDetails'] as unknown[] | undefined;
     for (let i = 0; i < rooms; i++) {
@@ -75,7 +69,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       } else if (typeof entry === 'string') {
         specialties = entry.split(',').map((s) => s.trim()).filter(Boolean);
       } else if (Array.isArray(entry)) {
-        // array of names or objects
         if (entry.length === 0) specialties = [];
         else if (typeof entry[0] === 'string') specialties = (entry as string[]).map((s) => String(s));
         else specialties = (entry as Record<string, unknown>[]).map((el) => String(el['specialityName'] ?? el['speciality_name'] ?? el['name'] ?? el['speciality'] ?? el['label'] ?? ''));
@@ -96,20 +89,18 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
 
       if (!specialties || specialties.length === 0) specialties = ['General Practice'];
-      // ensure default is present
+      
       if (!specialties.includes('General Practice')) specialties.unshift('General Practice');
-      // dedupe
+      
       rc[i + 1] = Array.from(new Set(specialties));
     }
     setRoomConfig(rc);
   }, [facility]);
 
 
-  // Helper extractors to avoid `any` and handle variable backend field names
+  
   const extractId = (item: unknown) => {
     const it = item as Record<string, unknown>;
-    // Prefer common id field names used by different master tables.
-    // Ensure we include speciality keys (specialityMasterId / speciality_master_id)
     const candidate =
       it["id"] ??
       it["stateCode"] ??
@@ -133,7 +124,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     return String(candidate);
   };
 
-  // parse a roomDetails entry into an array of speciality names
+
   const parseRoomEntry = (entry: unknown): string[] => {
     if (entry === undefined || entry === null) return ['General Practice'];
     if (typeof entry === 'string') return entry.split(',').map((s) => s.trim()).filter(Boolean);
@@ -159,23 +150,17 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     return ['General Practice'];
   };
 
-  // Default speciality that's always present in every room
+
   const DEFAULT_SPECIALITY = "General Practice";
 
-  // When editing an existing facility, the backend may provide the state as a name
-  // (e.g. "Virginia") or — due to previous inconsistencies — as a stringified
-  // JSON object like '{"stateCode":"FL","stateName":"Florida"}'. Our
-  // <select> uses state IDs as values, so once `states` are loaded we should
-  // map the facility.state (name or id or stringified object) to the matching
-  // state's id so the correct option is selected.
+
   useEffect(() => {
     if (!facility) return;
     if (!Array.isArray(states) || states.length === 0) return;
-  // Prefer an explicit stateCode if the normalized facility provides it, otherwise fall back to state/stateName
+  
     let facilityStateValue = (facility as Record<string, unknown>)['stateCode'] ?? (facility as Record<string, unknown>)['state'] ?? (facility as Record<string, unknown>)['stateName'] ?? '';
 
-  // If the backend (or earlier FE code) stored a JSON-stringified object in the stateCode
-    // (e.g. '{"stateCode":"DE","stateName":"Delaware"}'), try to parse and extract the code.
+  
     if (typeof facilityStateValue === 'string') {
       const s = facilityStateValue.trim();
       if (s.startsWith('{') && s.endsWith('}')) {
@@ -183,14 +168,11 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
           const parsed = JSON.parse(s) as Record<string, unknown>;
           facilityStateValue = parsed['stateCode'] ?? parsed['code'] ?? parsed['id'] ?? parsed['state_id'] ?? parsed['stateMasterId'] ?? parsed['state_master_id'] ?? facilityStateValue;
         } catch {
-          // ignore parse errors and keep original string
         }
       }
     }
 
-    // Debug: log facility state resolution helpers so we can see why prefill might fail
-    // Log basic debug info (console may be disabled in some environments)
-    // log to console directly (acceptable in dev); guard in case console is undefined
+    
     if (typeof console !== 'undefined' && typeof console.debug === 'function') {
       console.debug('AddFacility prefill: facilityStateValue (post-parse) =', facilityStateValue, 'selectedState currently =', selectedState);
       console.debug('AddFacility available states sample', states.slice(0, 10));
@@ -210,25 +192,17 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       return;
     }
 
-    // Fallback: set the raw value (the select will fall back to empty)
+  
     setSelectedState(String(facilityStateValue));
-  // Note: do NOT include `selectedState` in the deps - that causes the effect to
-  // re-run when the user changes the select and immediately overwrite their
-  // choice with the original facility value. Only re-run when the facility or
-  // available states change.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [facility, states]);
 
-  // Ensure specialties are pre-selected when editing.
-  // Two possible shapes may be present on the facility prop:
-  // - roomDetails: string[] where each element is a comma-separated list of speciality names for that room
-  // - specialties: string[] (flattened list of speciality names)
-  // If speciality master objects are present on the facility (unlikely here), we also handle that.
+  
   useEffect(() => {
     if (!facility) return;
     if (!Array.isArray(specialities) || specialities.length === 0) return;
 
-    // If roomDetails already exists on the facility prop, prefer that
+    
     const fd = (facility as Record<string, unknown>)['roomDetails'] as unknown[] | undefined;
     if (Array.isArray(fd) && fd.length > 0) {
       const rooms = fd.length;
@@ -244,7 +218,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       return;
     }
 
-    // Otherwise, look for a flattened `specialties` array on the facility and put them into room 1
+    
     const flat = (facility as Record<string, unknown>)['specialties'] as string[] | undefined;
     if (Array.isArray(flat) && flat.length > 0) {
       const names = flat.map((x) => String(x));
@@ -254,7 +228,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       return;
     }
 
-    // As a last resort, check if facility has `speciality` objects (from backend) and map them
+    
     const specialityObjs = (facility as Record<string, unknown>)['speciality'] as Array<Record<string, unknown>> | undefined;
     if (Array.isArray(specialityObjs) && specialityObjs.length > 0) {
       const names = specialityObjs.map((s) => String(s['specialityName'] ?? s['speciality_name'] ?? s['name'] ?? s['speciality'] ?? '')).filter(Boolean);
@@ -265,14 +239,14 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
   }, [facility, specialities]);
 
   const handleRoomSpecialityToggle = (room: number, speciality: string) => {
-    // Prevent toggling the default speciality
+    
     if (speciality === DEFAULT_SPECIALITY) return;
 
     setRoomConfig((prev) => {
       const existing = prev[room] || [];
       const hasOther = existing.some((s) => s !== DEFAULT_SPECIALITY);
 
-      // If we're unchecking an already-selected speciality, allow it
+      
       if (existing.includes(speciality)) {
         return {
           ...prev,
@@ -280,12 +254,12 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         };
       }
 
-      // If there's already a non-default speciality selected, ignore additional selections
+      
       if (hasOther) {
         return prev;
       }
 
-      // Otherwise, add the new speciality
+      
       return {
         ...prev,
         [room]: [...existing, speciality],
@@ -300,12 +274,12 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
   };
 
   const handleDeleteRoom = (roomToDelete: number) => {
-    // Prevent deleting the last room
+    
     if (numRooms <= 1) return;
-    // mark room as deleting so we can play an animation
+    
     setDeletingRooms((prev) => ({ ...prev, [roomToDelete]: true }));
 
-    // wait for animation to play, then actually remove and reindex
+    
     window.setTimeout(() => {
       setRoomConfig((prev) => {
         const newMap: Record<number, string[]> = {};
@@ -328,8 +302,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Build backend-shaped payload AddOrUpdateFacilityRequest
-    // Split address into street and city when possible
     let facilityStreet = address;
     let facilityCity = '';
     if (address && address.includes(',')) {
@@ -338,20 +310,15 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       facilityStreet = parts.slice(0, parts.length - 1).join(', ');
     }
 
-    // Build structured roomDetails and global specialityList as IDs using fetched specialities
-    // Ensure every room (1..numRooms) has an explicit entry so the backend can persist
-    // per-room configuration. Use DEFAULT_SPECIALITY as fallback when a room has no selection.
+    
   const roomDetailsStructured: Array<Record<string, unknown>> = [];
 
-    // Build roomDetails and a specialityList ordered by room so the backend's
-    // facility_speciality_mapping (which stores facility-level specialties) can
-    // be derived deterministically. We include General Practice first, then
-    // one additional speciality per room (if any) in room order.
+    
     const gpEntry = specialities.find((sp) => extractName(sp) === DEFAULT_SPECIALITY);
     const gpId = gpEntry ? extractId(gpEntry) : DEFAULT_SPECIALITY;
 
     const specialityListOrdered: string[] = [];
-    // always include General Practice first
+    
     if (gpId) specialityListOrdered.push(gpId);
 
     for (let roomNumber = 1; roomNumber <= Math.max(1, Number(numRooms) || 1); roomNumber++) {
@@ -360,7 +327,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         : [DEFAULT_SPECIALITY];
       const names = (rawNames as string[]).map((s) => String(s));
 
-      // map to ids and names
+      
       const ids = names.map((name) => {
         const found = specialities.find((sp) => extractName(sp) === name);
         return found ? extractId(found) : name;
@@ -370,11 +337,10 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         return found ? extractName(found) : String(id);
       });
 
-      // push the room's specialityList (ids) and specialityNames so the
-      // facility card can render friendly labels even if the server echoes ids
+      
       roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: ids, specialityNames: namesForIds });
 
-      // pick the first non-default speciality (if any) to append to the ordered list
+      
       const nonDefault = ids.find((id) => {
         const label = (specialities.find((sp) => extractId(sp) === id) ? extractName(specialities.find((sp) => extractId(sp) === id)) : id);
         return label !== DEFAULT_SPECIALITY;
@@ -391,17 +357,16 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const selectedStateObj = states.find((s) => extractId(s) === selectedState);
     const selectedStateName = selectedStateObj ? extractName(selectedStateObj) : undefined;
 
-    // Normalize selectedState: if the value is a JSON-stringified object (e.g. '{"stateCode":"FL","stateName":"Florida"}')
-    // parse it and extract the canonical state code. Otherwise use the value directly.
+    
     let normalizedStateCode: string | undefined = undefined;
     if (selectedState && typeof selectedState === 'string') {
       try {
         const parsed = JSON.parse(selectedState);
-        // parsed may be an object containing various keys; prefer common ones
+        
         normalizedStateCode = String(parsed.stateCode ?? parsed.code ?? parsed.id ?? parsed.state_id ?? parsed.stateCode ?? parsed.stateMasterId ?? parsed.state_master_id ?? '');
         if (!normalizedStateCode) normalizedStateCode = undefined;
       } catch {
-        // not JSON, assume it's already the plain code
+        
         normalizedStateCode = selectedState;
       }
     }
@@ -409,18 +374,18 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const backendPayload: Record<string, unknown> = {
       facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
       facilityName: facilityName,
-      // include selected state code (id) so backend persists the correct StateMaster relation
+      
       stateCode: normalizedStateCode ?? undefined,
-      // also include stateName as a fallback in case the backend receives a name instead of a code
+      
       stateName: selectedStateName ?? undefined,
       noOfRooms: numRooms,
       facilityStreet,
       facilityCity,
       specialityList,
-      // include explicit per-room details so backend can persist room-level specialties
+      
       roomDetails: roomDetailsStructured,
     };
-    // Debug: show exactly what we'll send to the backend (inspect in browser console)
+    
     console.debug('AddFacility outgoing payload', backendPayload);
 
     if (onSubmit) onSubmit(backendPayload);
@@ -511,11 +476,11 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
             </div>
           </div>
 
-          {/* Room Configuration */}
+          
           <div className={styles.section}>
             <h4>Room Specialties Configuration</h4>
 
-            {/* Debug: show current roomConfig in console to diagnose cross-room selection issues */}
+            
             {(() => {
               if (typeof console !== 'undefined' && typeof console.debug === 'function') {
                 console.debug('roomConfig render', roomConfig);
@@ -524,8 +489,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
             })()}
             {[...Array(numRooms)].map((_, i) => {
               const room = i + 1;
-              // ensure we operate on a shallow copy so we don't accidentally share
-              // the same array reference between rooms when manipulating state
+      
               const selected = Array.isArray(roomConfig[room]) ? ([...roomConfig[room] as string[]]) : [];
 
               return (

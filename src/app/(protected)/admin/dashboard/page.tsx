@@ -19,7 +19,6 @@ const AdminDashboard = () => {
   const [authorized, setAuthorized] = useState(false);
   const toastShownRef = useRef(false);
    useEffect(() => {
-    // Subscribe to auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         router.push("/admin/login");
@@ -27,7 +26,6 @@ const AdminDashboard = () => {
       }
 
       try {
-        // Get fresh token with claims
         const tokenResult = await user.getIdTokenResult(true);
         const role = tokenResult.claims.role;
 
@@ -48,7 +46,7 @@ const AdminDashboard = () => {
       }
     });
 
-    // Cleanup on unmount
+   
     return () => unsubscribe();
   }, [router]);
 
@@ -67,7 +65,7 @@ const AdminDashboard = () => {
         <h1 className={styles.title}>Admin Portal</h1>
         <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
 
-        {/* Tabs */}
+        
         <div className={styles.tabGroup}>
         <button onClick={() => setTab("doctors")} className={`${styles.tabButton} ${tab === "doctors" ? styles.tabActive : ""}`} >
         <Stethoscope size={18} />
@@ -80,7 +78,6 @@ const AdminDashboard = () => {
     </button>
     </div>
 
-        {/* <div className={styles.tabContent}> */}
           <div className={styles.card}>
             {tab === "doctors" ? <DoctorTable /> : <FacilityTable />}
           </div>

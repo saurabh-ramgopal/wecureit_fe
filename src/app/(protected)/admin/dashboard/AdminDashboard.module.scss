@@ -1,4 +1,4 @@
-/* ===== Theme Colors ===== */
+
 .theme-admin {
   --primary: #1e3a8a;
   --secondary: #3b82f6;
@@ -21,7 +21,7 @@
   --status-error: #ef4444;
 }
 
-/* ===== Center the Page ===== */
+
 .wrapper {
   min-height: 100vh;
   display: flex;
@@ -41,7 +41,7 @@
 }
 
 
-/* ===== Main Card ===== */
+
 .container {
   background: var(--bg-card);
   border-radius: 20px;
@@ -54,7 +54,7 @@
   align-items: flex-start;
 }
 
-/* ===== Header ===== */
+
 .title {
   color: #1e3a8a;
   font-size: 2rem;
@@ -69,7 +69,7 @@
 }
 
 
-/* ===== Tabs ===== */
+
 .tabs {
   display: flex;
   gap: 0.75rem;
@@ -121,7 +121,6 @@
 }
 
 
-/* ===== Card Content ===== */
 .tabContent {
   padding-top: 0.5rem;
 }
@@ -136,7 +135,7 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
-/* ===== Card Header ===== */
+
 .cardHeader {
   display: flex;
   justify-content: space-between;
@@ -161,7 +160,7 @@
 
 
 .addButton {
-  background: #1e3a8a; /* Bright blue */
+  background: #1e3a8a; 
   color: #ffffff;
   padding: 0.6rem 1.2rem;
   border-radius: 10px;
@@ -176,7 +175,7 @@
 }
 
 .addButton:hover {
-  background: #1e40af; /* Slightly darker on hover */
+  background: #1e40af; 
   transform: translateY(-1px);
 }
 
@@ -185,7 +184,7 @@
 }
 
 
-/* ===== Table ===== */
+
 .tableWrap {
   width: 100%;
   overflow-x: auto;
@@ -213,7 +212,7 @@
     transition: background 0.2s ease-in-out;
   }
 
-  /* State Licenses cell (3rd column) */
+
   td:nth-child(3) {
     white-space: normal;
 
@@ -230,7 +229,7 @@
 
 
 
-/* ===== Misc ===== */
+
 .badge {
   background: #e8f1ff;
   color: var(--primary);
@@ -265,15 +264,15 @@
 }
 
 .iconEdit {
-  color: #111827; /* dark gray/black */
+  color: #111827; 
 }
 
 .iconDelete {
-  color: red; /* red */
+  color: red; 
 }
 
 
-/* ===== Responsive ===== */
+
 @media (max-width: 768px) {
   .container {
     padding: 1.5rem;
