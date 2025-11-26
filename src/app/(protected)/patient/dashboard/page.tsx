@@ -2,26 +2,22 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
-import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import toast from "react-hot-toast";
 import { NextPage } from 'next';
 import styles from './patientdashboard.module.scss';
 import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboardHeader/PatientDashboardHeader";
 import MyProfile from '@/components/PatientDashboard/MyProfile/MyProfile';
+import PatientHome from '@/components/PatientDashboard/PatientHome/PatientHome';
 
 
-
-type Props = {
-}
-
-const PatientDashboardPage: NextPage<Props> = () => {
+const PatientDashboardPage: NextPage = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [authorized, setAuthorized] = useState(false);
     const [activeTab, setActiveTab] = useState("Home");
     const toastShownRef = useRef(false);
       useEffect(() => {
-    // Subscribe to auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         router.push("/patient/login");
@@ -29,7 +25,6 @@ const PatientDashboardPage: NextPage<Props> = () => {
       }
 
       try {
-        // Get fresh token with claims
         const tokenResult = await user.getIdTokenResult(true);
         const role = tokenResult.claims.role;
 
@@ -50,7 +45,6 @@ const PatientDashboardPage: NextPage<Props> = () => {
       }
     });
 
-    // Cleanup on unmount
     return () => unsubscribe();
   }, [router]);
 
@@ -78,7 +72,7 @@ const PatientDashboardPage: NextPage<Props> = () => {
       onTabClick={handleTabClick} 
     />
       <div className={styles.contentArea}>
-        {activeTab === "Home" }
+        {activeTab === "Home" && <PatientHome />}
 
         {activeTab === "My Profile" && <MyProfile />}
 
