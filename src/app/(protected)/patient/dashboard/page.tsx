@@ -1,8 +1,8 @@
-'use client'
+ 'use client'
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { NextPage } from 'next';
 import styles from './patientdashboard.module.scss';
@@ -61,11 +61,42 @@ const PatientDashboardPage: NextPage = () => {
     setActiveTab(tabLabel);
     console.log("Active Tab:", tabLabel);
   };
+
+  const handleSignOut = async () => {
+    setLoading(true);
+    try {
+      // Try firebase signOut if available
+      await signOut(auth).catch((e) => {
+        console.warn('Firebase signOut failed:', e);
+      });
+
+      // clear client-side session tokens/ids
+      try { window.localStorage.removeItem('patientId'); } catch (e) { console.warn('clear patientId failed', e); }
+
+      toast.success('Signed out');
+      router.push('/patient/login');
+    } catch (err) {
+      console.error('Sign out failed', err);
+      toast.error('Sign out failed');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
 
   <div className={`${styles.patientDashboard} theme-patient`} style={{ background: 'var(--bg-page)' }}>
        <div className={styles.dashboardHeaderSection}>
         {/* <h1 className={styles.portalTitle}></h1> */}
+        <div style={{ marginLeft: 'auto' }}>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="btn btn-ghost"
+            aria-label="Sign out"
+          >
+            Sign Out
+          </button>
+        </div>
     </div>
     <PatientDashboardHeader 
       activeTab={activeTab}
