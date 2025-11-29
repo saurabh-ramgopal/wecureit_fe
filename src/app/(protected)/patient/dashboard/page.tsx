@@ -8,7 +8,7 @@ import { NextPage } from 'next';
 import styles from './patientdashboard.module.scss';
 import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboardHeader/PatientDashboardHeader";
 import MyProfile from '@/components/PatientDashboard/MyProfile/MyProfile';
-import PatientHome from '@/components/PatientDashboard/PatientHome/PatientHome';
+import PatientHome from '../../../../components/PatientDashboard/PatientHome/PatientHome';
 
 
 const PatientDashboardPage: NextPage = () => {

@@ -79,12 +79,19 @@ const FacilityTable = () => {
               if (ids.length === 0 && names.length === 0 && obj['speciality_name']) {
                 names = [String(obj['speciality_name'])];
               }
+
+              // If the room has any non-GP speciality, don't include General Practice in the
+              // per-room speciality lists returned to the UI (keep GP only when it's the only one).
+              const hasNonGp = names.some((n) => String(n) !== 'General Practice');
+              const outIds = hasNonGp ? ids.filter((id, idx) => String(names[idx] ?? id) !== 'General Practice') : ids;
+              const outNames = hasNonGp ? names.filter((n) => String(n) !== 'General Practice') : names;
+
               return {
                 raw: obj,
                 roomNumber,
                 roomLabel,
-                specialityIds: ids,
-                specialityNames: names,
+                specialityIds: outIds,
+                specialityNames: outNames,
               } as unknown;
             });
           }
@@ -113,11 +120,20 @@ const FacilityTable = () => {
               const extra = nonGpIds[i - 1];
               if (extra) idsForRoom.push(extra);
 
-              const namesForRoom: string[] = idsForRoom.map((id) => idToName.get(id) ?? id);
+              let namesForRoom: string[] = idsForRoom.map((id) => idToName.get(id) ?? id);
+
+              // If room has a non-GP speciality, remove General Practice from the per-room lists.
+              const hasNonGpRoom = namesForRoom.some((nm) => String(nm) !== 'General Practice');
+              let finalIdsForRoom = idsForRoom;
+              if (hasNonGpRoom) {
+                finalIdsForRoom = idsForRoom.filter((id) => (idToName.get(id) ?? id) !== 'General Practice');
+                namesForRoom = namesForRoom.filter((nm) => String(nm) !== 'General Practice');
+              }
+
               synth.push({
                 roomNumber: i,
                 roomLabel: `Room ${i}`,
-                specialityIds: idsForRoom,
+                specialityIds: finalIdsForRoom,
                 specialityNames: namesForRoom,
               });
             }
@@ -127,6 +143,18 @@ const FacilityTable = () => {
           
           const rawStateCode = ff['stateCode'] ?? ff['state_code'] ?? ff['stateId'] ?? ff['state_master_id'] ?? null;
           const rawStateName = ff['stateName'] ?? ff['state_name'] ?? null;
+          // Determine facility-level specialties but omit General Practice when rooms have other specialties
+          const facilitySpecialtiesRaw = facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id) => id);
+          const parsedRoomsArr = Array.isArray(parsedRooms) ? parsedRooms as Record<string, unknown>[] : [];
+          const facilityHasAnyRoomWithNonGp = parsedRoomsArr.some((r) => {
+            const names = Array.isArray((r as Record<string, unknown>)['specialityNames']) ? (r as Record<string, unknown>)['specialityNames'] as string[] : (Array.isArray((r as Record<string, unknown>)['specialityList']) ? (r as Record<string, unknown>)['specialityList'] as string[] : []);
+            return names.some((n) => String(n) !== 'General Practice');
+          });
+
+          const specialtiesNormalized = facilityHasAnyRoomWithNonGp
+            ? facilitySpecialtiesRaw.filter((s) => String(s) !== 'General Practice')
+            : facilitySpecialtiesRaw;
+
           const normalizedFacility = {
             name: String(ff['facilityName'] ?? ff['facility_name'] ?? ''),
             state: rawStateName ? String(rawStateName) : String(ff['facilityCity'] ?? ff['facility_city'] ?? ''),
@@ -134,10 +162,10 @@ const FacilityTable = () => {
               .filter(Boolean)
               .join(', '),
             totalRooms: typeof ff['noOfRooms'] === 'number' ? (ff['noOfRooms'] as number) : Number(ff['no_of_rooms'] ?? 0),
-            specialties: facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id) => id),
+            specialties: specialtiesNormalized,
             roomDetails: parsedRooms as unknown[],
             facilityMasterId: id ? String(id) : undefined,
-            
+
             stateCode: rawStateCode !== null && rawStateCode !== undefined ? String(rawStateCode) : undefined,
             stateName: rawStateName !== null && rawStateName !== undefined ? String(rawStateName) : undefined,
           } as unknown as AddFacilityType;
@@ -301,8 +329,16 @@ const FacilityTable = () => {
                   const specialityNames = Array.isArray(roomObj['specialityNames']) ? (roomObj['specialityNames'] as string[]) : (Array.isArray(roomObj['specialityList']) ? (roomObj['specialityList'] as string[]) : []);
 
                   
-                  const labels = Array.from(new Set([...(specialityNames.length ? specialityNames.map(String) : [] )]));
-                  if (!labels.includes('General Practice')) labels.unshift('General Practice');
+                  let labels = Array.from(new Set([...(specialityNames.length ? specialityNames.map(String) : [] )]));
+
+                  // Only show General Practice when it is the only speciality for the room.
+                  // If the room has any non-GP speciality, do not show GP in the UI (GP is implicitly supported).
+                  const hasNonGp = labels.some((lbl) => String(lbl) !== 'General Practice');
+                  if (!hasNonGp) {
+                    if (!labels.includes('General Practice')) labels.unshift('General Practice');
+                  } else {
+                    labels = labels.filter((lbl) => String(lbl) !== 'General Practice');
+                  }
 
                   return (
                     <div key={idx} className={localStyles.roomCard}>
@@ -360,21 +396,27 @@ const FacilityTable = () => {
               
               const normalizedRooms = (rawRoomDetails as Record<string, unknown>[]).map((rd) => {
                 const sList = Array.isArray(rd['specialityList']) ? (rd['specialityList'] as unknown[]).map(String) : (Array.isArray(rd['specialityIds']) ? (rd['specialityIds'] as unknown[]).map(String) : []);
-                
+
                 const sNames = sList.map((id) => {
                   const found = specialityMaster.find((sp) => {
                     const candidate = String(sp['specialityMasterId'] ?? sp['speciality_master_id'] ?? sp['id'] ?? sp['code'] ?? sp['stateCode'] ?? '');
                     return candidate === String(id);
                   });
                   if (found) return String(found['specialityName'] ?? found['speciality_name'] ?? found['name'] ?? id);
-                  
+
                   return String(id);
                 });
+
+                // Filter out General Practice from per-room lists if there are other specialties.
+                const roomHasNonGp = sNames.some((nm) => String(nm) !== 'General Practice');
+                const outSList = roomHasNonGp ? sList.filter((id, idx) => String(sNames[idx]) !== 'General Practice') : sList;
+                const outSNames = roomHasNonGp ? sNames.filter((nm) => String(nm) !== 'General Practice') : sNames;
+
                 return {
                   roomNumber: rd['roomNumber'] ?? rd['room_number'],
                   roomLabel: rd['roomLabel'] ?? rd['room_label'] ?? (rd['roomNumber'] ? `Room ${rd['roomNumber']}` : undefined),
-                  specialityList: sList,
-                  specialityNames: sNames,
+                  specialityList: outSList,
+                  specialityNames: outSNames,
                 } as unknown;
               });
 

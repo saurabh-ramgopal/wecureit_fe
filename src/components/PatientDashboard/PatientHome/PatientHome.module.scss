@@ -1,6 +1,10 @@
 .container {
-	
 	width: 100%;
+	padding: 1rem 1.5rem; /* px-6 py-4 equivalent */
+}
+
+.container > * + * {
+  margin-top: 1.5rem; /* space-y-6 */
 }
 
 .welcomeBanner {
@@ -50,6 +54,7 @@
 		height: 56px !important;
 		flex-shrink: 0;
 		color: #dc2626;
+		margin-bottom: 1rem;
 	}
 
 	h3 {
@@ -130,6 +135,57 @@
 	}
 
 }
+
+/* Layout helpers used by the component markup (migrated from Tailwind) */
+.apptHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.upcomingTitle {
+	font-size: 1rem;
+	font-weight: 600;
+	margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+	margin: 0;
+	color: #6b7280;
+	font-size: 0.95rem;
+}
+
+.stackSpacing {
+	margin-top: 1rem;
+}
+
+.stackSpacing > * + * {
+	margin-top: 1rem;
+}
+
+.apptBody {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.infoCol {
+	flex: 1 1 75%;
+	max-width: 75%;
+}
+
+.rightText {
+	text-align: right;
+	flex: 0 0 auto;
+}
+
+.fontMedium {
+	font-weight: 600;
+	color: #111827;
+}
+
+.marginTop3 { margin-top: 0.75rem; }
 
 .infoRow {
 	display: flex;

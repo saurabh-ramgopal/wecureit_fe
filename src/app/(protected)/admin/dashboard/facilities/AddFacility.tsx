@@ -195,7 +195,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
   
     setSelectedState(String(facilityStateValue));
 
-  }, [facility, states]);
+  }, [facility, states, selectedState]);
 
   
   useEffect(() => {
@@ -314,12 +314,11 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
   const roomDetailsStructured: Array<Record<string, unknown>> = [];
 
     
-    const gpEntry = specialities.find((sp) => extractName(sp) === DEFAULT_SPECIALITY);
-    const gpId = gpEntry ? extractId(gpEntry) : DEFAULT_SPECIALITY;
+  const gpEntry = specialities.find((sp) => extractName(sp) === DEFAULT_SPECIALITY);
+  const gpId = gpEntry ? extractId(gpEntry) : DEFAULT_SPECIALITY;
 
-    const specialityListOrdered: string[] = [];
-    
-    if (gpId) specialityListOrdered.push(gpId);
+  const specialityListOrdered: string[] = [];
+  let hasAnyRoomOnlyGP = false;
 
     for (let roomNumber = 1; roomNumber <= Math.max(1, Number(numRooms) || 1); roomNumber++) {
       const rawNames = Array.isArray(roomConfig[roomNumber]) && roomConfig[roomNumber].length > 0
@@ -337,10 +336,20 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         return found ? extractName(found) : String(id);
       });
 
-      
-      roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: ids, specialityNames: namesForIds });
+      // If the room has any non-GP specialties, do not include General Practice in that room's
+      // specialityList sent to the backend. If the room only has GP, include GP.
+      const hasNonGpInRoom = namesForIds.some((n) => String(n) !== DEFAULT_SPECIALITY);
+      const roomSpecIds = hasNonGpInRoom ? ids.filter((id, idx) => String(namesForIds[idx]) !== DEFAULT_SPECIALITY) : ids;
+      const roomSpecNames = hasNonGpInRoom ? namesForIds.filter((n) => String(n) !== DEFAULT_SPECIALITY) : namesForIds;
 
-      
+      roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: roomSpecIds, specialityNames: roomSpecNames });
+
+      if (roomSpecNames.length === 1 && String(roomSpecNames[0]) === DEFAULT_SPECIALITY) {
+        hasAnyRoomOnlyGP = true;
+      }
+
+      // collect non-GP ids for the ordered speciality list (top-level). Keep existing behaviour of
+      // adding the first non-default per room to the ordered list, avoiding duplicates.
       const nonDefault = ids.find((id) => {
         const label = (specialities.find((sp) => extractId(sp) === id) ? extractName(specialities.find((sp) => extractId(sp) === id)) : id);
         return label !== DEFAULT_SPECIALITY;
@@ -349,6 +358,11 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         // avoid duplicates in the ordered list
         if (!specialityListOrdered.includes(String(nonDefault))) specialityListOrdered.push(String(nonDefault));
       }
+    }
+
+    // Include GP in the facility-level specialityList only if at least one room is GP-only.
+    if (gpId && hasAnyRoomOnlyGP) {
+      specialityListOrdered.unshift(gpId);
     }
 
     const specialityList = specialityListOrdered;
