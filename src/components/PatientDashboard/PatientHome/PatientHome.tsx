@@ -28,7 +28,7 @@ const sampleAppointments: Appointment[] = [
 
 export default function PatientHome() {
   const router = useRouter();
-  const handleBook = () => router.push("/patient/dropdown");
+  const handleBook = () => router.push("/patient/dashboard/dropdownselection");
   const handleCancel = (id: string) => console.log("Cancel appointment", id);
 
   return (
