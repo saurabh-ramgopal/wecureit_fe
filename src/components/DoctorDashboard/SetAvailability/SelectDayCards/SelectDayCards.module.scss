@@ -2,5 +2,6 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr); /* 7 cards per row */
   gap: 1rem; /* spacing between cards */
-  margin-top: 1rem;
+  margin-bottom: 2rem;
+  padding: 0rem 0.65rem;
 }

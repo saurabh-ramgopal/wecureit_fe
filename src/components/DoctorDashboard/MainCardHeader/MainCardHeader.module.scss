@@ -21,5 +21,8 @@
     color: var(--text-secondary);
     font-size: 0.85rem;
   }
-
+     &:empty {
+      display: none;       // hide subtitle
+      margin-bottom: 0;    // remove space
+    }
 }

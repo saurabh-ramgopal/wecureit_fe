@@ -3,7 +3,7 @@ import RegisterCard from '@/components/RegisterCard/RegisterCard'
 import { UserPlus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useRouter } from "next/navigation";
-import { registerPatient } from '@/lib/api';
+import { registerPatient } from '@/lib/auth';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
 import {auth} from "@/lib/firebase"
 import {toast} from "react-hot-toast"

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import ScheduleHeader from '../ScheduleHeader/ScheduleHeader';
 import ScheduleView from '../ScheduleView/ScheduleView';
-import './DoctorSchedule.scss';
+import styles from './DoctorSchedule.module.scss';
 
-const MySchedule: React.FC = () => {
+const MySchedule = () => {
   const [currentWeek, setCurrentWeek] = useState(1);
 
   // Temporary mock schedule data
@@ -50,7 +50,7 @@ const MySchedule: React.FC = () => {
 
 
   return (
-    <div className="schedule-card">
+    <div className={styles['schedule-card']}>
       <ScheduleHeader currentWeek={currentWeek} onWeekChange={setCurrentWeek} />
       <ScheduleView schedule={schedule} currentWeek={currentWeek} />
     </div>

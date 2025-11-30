@@ -5,9 +5,7 @@ import { Stethoscope, Building2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import styles from "./AdminDashboard.module.scss";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib//firebase"; 
-import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
-import toast from "react-hot-toast";
+import { useRoleAuth } from "@/hooks/useRoleAuth";
 
 const DoctorTable = dynamic(() => import('./doctors/DoctorTable').then(m => m.default ?? m), { ssr: false })
 const FacilityTable = dynamic(() => import('./facilities/FacilityTable').then(m => m.default ?? m), { ssr: false })
@@ -15,43 +13,7 @@ const FacilityTable = dynamic(() => import('./facilities/FacilityTable').then(m 
 const AdminDashboard = () => {
   const router = useRouter();
   const [tab, setTab] = useState<"doctors" | "facilities">("doctors");
-  const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
-  const toastShownRef = useRef(false);
-   useEffect(() => {
-    // Subscribe to auth state changes
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/admin/login");
-        return;
-      }
-
-      try {
-        // Get fresh token with claims
-        const tokenResult = await user.getIdTokenResult(true);
-        const role = tokenResult.claims.role;
-
-        if (role === "admin") {
-          setAuthorized(true);
-        } else {
-          if (!toastShownRef.current) {
-            toast.error(`You are logged in as ${role}. Only Admin can access this page.`);
-            toastShownRef.current = true;
-          }
-          router.push("/admin/login");
-        }
-      } catch (error) {
-        console.error("Error fetching token:", error);
-        router.push("/admin/login");
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    // Cleanup on unmount
-    return () => unsubscribe();
-  }, [router]);
-
+  const { authorized, loading, userId, role } = useRoleAuth({ allowedRoles: ['admin'] });
 
   if (loading) {
     return (

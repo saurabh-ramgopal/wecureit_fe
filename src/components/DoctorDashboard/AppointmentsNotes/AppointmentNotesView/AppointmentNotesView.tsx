@@ -1,5 +1,5 @@
 import React from 'react'
-import './AppointmentNotesView.scss';
+import styles from './AppointmentNotesView.module.scss'
 import MainCardHeader from '../../MainCardHeader/MainCardHeader';
 import AppointmentHistoryCard from '../AppointmentHistoryCard/AppointmentHistoryCard';
 type Props = {}
@@ -63,10 +63,10 @@ const sampleAppointments = [
 ];
 const AppointmentNotesView = (props: Props) => {
   return (
-   <div className="appointmentsHistory-card">
+   <div className={styles['appointmentsHistory-card']}>
     <MainCardHeader title='Completed Appointments & Clinical Notes'
     subtitle='Add clinical notes to completed appointments and view patient history'/>
-     <div className="appointmentsHistory-card__list">
+     <div className={styles['appointmentsHistory-card__list']}>
         {sampleAppointments.map((appt, i) => (
           <AppointmentHistoryCard key={i} appointmentHistory={appt}  />
         ))}
