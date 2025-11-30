@@ -179,7 +179,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     }
     if (!facilityStateValue) return;
 
-    // try to match by id first, then by display name
   const byId = states.find((s) => extractId(s) === String(facilityStateValue));
     if (byId) {
       setSelectedState(extractId(byId));
@@ -379,8 +378,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
     }
 
-    // Include several synonymous field names to increase compatibility with backend
-    // Some backends expect keys like `speciality`, `specialityIds`, or `specialities`.
     const backendPayload: Record<string, unknown> = {
       facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
       facilityName: facilityName,
@@ -392,20 +389,16 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       facilityStreet,
       facilityCity,
 
-      // Primary list (ordered non-GP specialties, GP included first when needed)
+      
       specialityList,
 
-      // Alternate/legacy keys the backend might accept
       speciality: specialityList,
       specialityIds: specialityList,
       specialities: specialityList,
 
-      // Ensure each room entry also exposes ids/names under multiple keys
       roomDetails: (roomDetailsStructured as Array<Record<string, unknown>>).map((rd) => ({
         ...rd,
-        // some backends expect `specialityIds` instead of `specialityList`
         specialityIds: rd['specialityList'] ?? rd['specialityIds'] ?? [],
-        // keep old keys as well
         specialityList: rd['specialityList'],
         specialityNames: rd['specialityNames'],
       })),
@@ -440,7 +433,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Facility Information */}
           <div className={styles.section}>
             <h4>Facility Information</h4>
 

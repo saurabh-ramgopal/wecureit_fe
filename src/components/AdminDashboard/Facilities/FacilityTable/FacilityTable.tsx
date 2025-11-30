@@ -120,7 +120,6 @@ const FacilityTable = () => {
 
               let namesForRoom: string[] = idsForRoom.map((id) => idToName.get(id) ?? id);
 
-              // If room has a non-GP speciality, remove General Practice from the per-room lists.
               const hasNonGpRoom = namesForRoom.some((nm) => String(nm) !== 'General Practice');
               let finalIdsForRoom = idsForRoom;
               if (hasNonGpRoom) {
@@ -377,8 +376,6 @@ const FacilityTable = () => {
             try {
               
               const saved = await addOrUpdateFacility(backendPayload as Record<string, unknown>);
-
-              // Log the backend response to help debug persistence issues
               if (typeof console !== 'undefined' && typeof console.debug === 'function') {
                 console.debug('addOrUpdateFacility response', saved);
               }
@@ -445,7 +442,6 @@ const FacilityTable = () => {
                 return sortFacilities(next);
               });
 
-              // Re-sync with server to ensure persistent state is reflected
               try {
                 await refreshFacilities();
               } catch (refreshErr) {

@@ -63,7 +63,6 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       await signOut(auth).catch((e) => { console.warn('Firebase signOut failed', e); });
-      // clear client-side session tokens
   try { window.localStorage.removeItem('authToken'); window.localStorage.removeItem('userType'); } catch { /* ignore */ }
       toast.success('Signed out');
       router.push('/admin/login');
