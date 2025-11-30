@@ -1,0 +1,303 @@
+.container {
+	width: 100%;
+	padding: 1rem 1.5rem;
+}
+
+.container > * + * {
+  margin-top: 1.5rem; 
+}
+
+.welcomeBanner {
+		border-radius: 18px;
+		padding: 2.5rem 3rem;
+		background: var(--patient-welcome-bg, #fff6f6);
+		border: 1px solid rgba(239, 68, 68, 0.12);
+		color: var(--patient-welcome-color, #b91c1c);
+		min-height: 110px; 
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		box-shadow: 0 1px 0 rgba(16,24,40,0.02);
+
+		h2 {
+				font-size: 42px;
+				line-height: 1.02;
+				font-weight: 700;
+				color: #dc2626;
+				margin: 0 0 0.5rem 0;
+		}
+
+		p {
+			margin: 0;
+			font-size: 20px;
+			color: #6b6b6b;
+			opacity: 0.95;
+		}
+}
+
+.bookBox {
+	border-radius: 14px;
+	padding: 3rem 2.5rem;
+	box-shadow: 0 1px 0 rgba(16,24,40,0.04), 0 6px 16px rgba(16,24,40,0.04);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	min-height: 200px;
+	width: 100%;
+	background: #ffffff;
+	border: 1px solid rgba(15,23,42,0.04);
+
+	
+	svg {
+		width: 56px !important;
+		height: 56px !important;
+		flex-shrink: 0;
+		color: #dc2626;
+		margin-bottom: 1rem;
+	}
+
+	h3 {
+		margin-top: 0.6rem;
+		font-size: 1.25rem; 
+		color: #111827;
+		font-weight: 600;
+	}
+
+	p {
+		margin-top: 0.5rem;
+		font-size: 1rem; 
+		color: #6b7280;
+	}
+
+	
+	.bookBtn {
+		margin-top: 1.25rem;
+		background: #dc2626;
+		color: #ffffff;
+		font-weight: 600;
+		padding: 0.7rem 2.5rem;
+		border-radius: 12px;
+		border: none;
+		cursor: pointer;
+		box-shadow: none;
+		transition: background 150ms ease;
+	}
+
+	.bookBtn:hover {
+		background: #b91c1c; 
+	}
+}
+
+.upcoming {
+	border-radius: 14px;
+	padding: 1rem; 
+	position: relative;
+	width: 100%;
+}
+
+.upcomingInner {
+	margin-top: 1rem;
+}
+
+.upcomingCard {
+	background: #ffffff;
+	border-radius: 16px;
+	border: 1px solid rgba(239,68,68,0.04);
+	padding: 3rem 2.5rem ;
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.upcomingCardInner {
+	margin-top: 1rem;
+	border-radius: 12px;
+	padding: 0;
+	background: transparent;
+}
+
+.apptCard {
+	border-radius: 12px;
+	padding: 1rem;
+	background: #ffffff;
+	border: 1px solid rgba(239,68,68,0.06);
+	margin-bottom: 1rem;
+	box-shadow: 0 1px 0 rgba(16,24,40,0.02);
+
+	position: relative;
+
+	
+	svg {
+		width: 18px !important;
+		height: 18px !important;
+		flex-shrink: 0;
+	}
+
+}
+
+/* Layout helpers used by the component markup (migrated from Tailwind) */
+.apptHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.upcomingTitle {
+	font-size: 1rem;
+	font-weight: 600;
+	margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+	margin: 0;
+	color: #6b7280;
+	font-size: 0.95rem;
+}
+
+.stackSpacing {
+	margin-top: 1rem;
+}
+
+.stackSpacing > * + * {
+	margin-top: 1rem;
+}
+
+.apptBody {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.infoCol {
+	flex: 1 1 75%;
+	max-width: 75%;
+}
+
+.rightText {
+	text-align: right;
+	flex: 0 0 auto;
+}
+
+.fontMedium {
+	font-weight: 600;
+	color: #111827;
+}
+
+.marginTop3 { margin-top: 0.75rem; }
+
+.infoRow {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	color: #374151;
+	margin-bottom: 0.5rem;
+}
+
+.infoRow svg {
+	width: 18px !important;
+	height: 18px !important;
+	flex-shrink: 0;
+	display: inline-block;
+	color: #dc2626 !important; 
+}
+
+.welcomeBanner svg {
+	
+	width: 26px !important;
+	height: 26px !important;
+}
+
+.apptCard {
+	font-size: 14px;
+	color: #374151;
+}
+
+.bookBox h3 {
+	font-size: 1.125rem; 
+}
+
+.bookBox p {
+	color: #6b7280;
+}
+
+.deptBadge {
+	display: inline-block;
+	background: #ffffff;
+	color: #dc2626;
+	font-size: 0.85rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: 9999px;
+	border: 1px solid rgba(239,68,68,0.12);
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	box-shadow: none;
+}
+
+.warning {
+	background: #fffbeb;
+	border: 1px solid #fef3c7;
+	color: #92400e;
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.warnIcon {
+	display: inline-flex;
+	width: 28px;
+	height: 28px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+}
+
+.cancelBtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	color: #b91c1c;
+	background: #fff1f1; 
+	border: 1px solid rgba(185,28,28,0.06);
+	border-radius: 10px;
+	padding: 0.75rem 0.9rem;
+	text-align: center;
+	font-weight: 600;
+	cursor: pointer;
+	gap: 0.5rem;
+}
+
+.cancelIcon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 9999px;
+	border: 1px solid rgba(185,28,28,0.12);
+	background: #fff;
+	color: #b91c1c;
+	font-size: 12px;
+	line-height: 1;
+}
+
+.countBadge {
+	width: 28px;
+	height: 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9999px;
+	background: #fee2e2;
+	color: #b91c1c;
+	font-weight: 700;
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+}
+

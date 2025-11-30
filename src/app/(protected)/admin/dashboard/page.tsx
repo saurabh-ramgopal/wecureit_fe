@@ -6,11 +6,11 @@ import dynamic from 'next/dynamic'
 import styles from "./AdminDashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
-import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
+import { onAuthStateChanged, getIdTokenResult, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 
-const DoctorTable = dynamic(() => import('./doctors/DoctorTable').then(m => m.default ?? m), { ssr: false })
-const FacilityTable = dynamic(() => import('./facilities/FacilityTable').then(m => m.default ?? m), { ssr: false })
+const DoctorTable = dynamic(() => import('../../../../components/AdminDashboard/Doctors/DoctorTable/DoctorTable').then(m => m.default ?? m), { ssr: false })
+const FacilityTable = dynamic(() => import('../../../../components/AdminDashboard/Facilities/FacilityTable/FacilityTable').then(m => m.default ?? m), { ssr: false })
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -19,7 +19,6 @@ const AdminDashboard = () => {
   const [authorized, setAuthorized] = useState(false);
   const toastShownRef = useRef(false);
    useEffect(() => {
-    // Subscribe to auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         router.push("/admin/login");
@@ -27,7 +26,6 @@ const AdminDashboard = () => {
       }
 
       try {
-        // Get fresh token with claims
         const tokenResult = await user.getIdTokenResult(true);
         const role = tokenResult.claims.role;
 
@@ -48,7 +46,7 @@ const AdminDashboard = () => {
       }
     });
 
-    // Cleanup on unmount
+   
     return () => unsubscribe();
   }, [router]);
 
@@ -61,13 +59,37 @@ const AdminDashboard = () => {
     );
   }
   if (!authorized) return null; 
+  const handleSignOut = async () => {
+    setLoading(true);
+    try {
+      await signOut(auth).catch((e) => { console.warn('Firebase signOut failed', e); });
+  try { window.localStorage.removeItem('authToken'); window.localStorage.removeItem('userType'); } catch { /* ignore */ }
+      toast.success('Signed out');
+      router.push('/admin/login');
+    } catch (err) {
+      console.error('Sign out failed', err);
+      toast.error('Sign out failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={`${styles.themeAdmin} ${styles.wrapper}`}>
       <div className={styles.mainContent}>
-        <h1 className={styles.title}>Admin Portal</h1>
-        <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
+        <div className={styles.pageTop}>
+          <div>
+            <h1 className={styles.title}>Admin Portal</h1>
+            <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
+          </div>
+          <div style={{ marginLeft: 'auto' }}>
+            <button type="button" onClick={handleSignOut} className={styles.signOutBtn} aria-label="Sign out">
+              Sign Out
+            </button>
+          </div>
+        </div>
 
-        {/* Tabs */}
+        
         <div className={styles.tabGroup}>
         <button onClick={() => setTab("doctors")} className={`${styles.tabButton} ${tab === "doctors" ? styles.tabActive : ""}`} >
         <Stethoscope size={18} />
@@ -80,7 +102,6 @@ const AdminDashboard = () => {
     </button>
     </div>
 
-        {/* <div className={styles.tabContent}> */}
           <div className={styles.card}>
             {tab === "doctors" ? <DoctorTable /> : <FacilityTable />}
           </div>

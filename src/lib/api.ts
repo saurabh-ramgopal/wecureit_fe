@@ -182,8 +182,7 @@ export async function getDoctorById(doctorId: number) {
 // Master data
 // Assumption: backend exposes endpoints that return arrays of objects (various field names).
 export async function getStates() {
-  // GET /common/getState returns state_master list
-  return apiCall('/common/getState', { method: 'GET' });
+  return apiCall('/common/states/getAll', { method: 'GET' });
 }
 
 export async function getSpecialities() {
