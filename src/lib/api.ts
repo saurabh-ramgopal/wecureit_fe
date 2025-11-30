@@ -1,4 +1,3 @@
-
 import { getAuth } from "firebase/auth";
 import { UnauthorizedError } from "./apiErrors";
 import router from "next/router";
@@ -162,67 +161,3 @@ export async function setDoctorAvailability(availabilityData: DoctorAvailability
     body: JSON.stringify(availabilityData),
   });
 }
-
-// Login (backend authenticates and returns a token)
-// export async function login(email: string, password: string, userType: string) {
-//   let response: Response;
-//   try {
-//     response = await fetch(`${API_BASE_URL}/common/login`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({
-//         email,
-//         password,
-//         type: userType,
-//       }),
-//     });
-//   } catch (err) {
-//     // Network-level failure (server down, CORS, DNS, etc.)
-//     console.error('Network error while calling /common/login', err);
-//     throw new Error(`Network error: ${(err as Error).message || err}`);
-//   }
-
-//   if (!response.ok) {
-//     // Try to parse JSON error body, but fall back to raw text so we get server stack/HTML
-//     let bodyText = '';
-//     try {
-//       // attempt to parse JSON first
-//       const json = await response.json().catch(() => null);
-//       if (json && typeof json === 'object') {
-//         const j = json as Record<string, unknown>;
-//         const msgCandidate = j['message'] ?? j['reason'] ?? j['error'];
-//         throw new Error(String(msgCandidate ?? `Login failed (${response.status})`));
-//       }
-//       // if not JSON, read as text
-//       bodyText = await response.text().catch(() => '');
-//     } catch {
-//       // if json parsing threw, try to capture text
-//       bodyText = bodyText || (await response.text().catch(() => ''));
-//     }
-
-//     const snippet = bodyText ? ` Response body: ${bodyText.slice(0, 200)}` : '';
-//     throw new Error(`Login failed (${response.status})${snippet}`);
-//   }
-
-//   type LoginData = {
-//     token?: string;
-//     accessToken?: string;
-//     jwt?: string;
-//     name?: string;
-//     user?: { name?: string };
-//     [k: string]: unknown;
-//   };
-
-//   const loginData = (await response.json()) as LoginData;
-//   const token = loginData.token ?? loginData.accessToken ?? loginData.jwt ?? '';
-
-//   if (token && typeof window !== 'undefined') {
-//     localStorage.setItem('authToken', String(token));
-//     localStorage.setItem('userType', userType);
-//   }
-
-//   const userName = loginData.name ?? loginData.user?.name ?? email.split('@')[0];
-//   return { loginData, token, userName };
-// }

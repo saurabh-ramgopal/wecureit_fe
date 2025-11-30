@@ -35,7 +35,7 @@ export const useRoleAuth = ({ allowedRoles }: RoleAuthOptions): RoleAuthResult =
 
       try {
         // Get token and decode role
-        const tokenResult = await user.getIdTokenResult(true); // refresh token if needed
+        const tokenResult = await user.getIdTokenResult(); 
         const userRole = tokenResult.claims.role as Role;
         const uid =
           (tokenResult.claims.doctorMasterId as string | undefined) ||
