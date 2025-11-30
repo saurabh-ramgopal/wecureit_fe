@@ -40,6 +40,27 @@
   align-items: flex-start;
 }
 
+.pageTop {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.signOutBtn {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.signOutBtn:hover {
+  background: var(--bg-hover);
+}
+
 
 
 .container {

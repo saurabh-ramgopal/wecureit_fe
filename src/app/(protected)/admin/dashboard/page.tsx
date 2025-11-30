@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import styles from "./AdminDashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
-import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
+import { onAuthStateChanged, getIdTokenResult, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 
 const DoctorTable = dynamic(() => import('../../../../components/AdminDashboard/Doctors/DoctorTable/DoctorTable').then(m => m.default ?? m), { ssr: false })
@@ -59,11 +59,36 @@ const AdminDashboard = () => {
     );
   }
   if (!authorized) return null; 
+  const handleSignOut = async () => {
+    setLoading(true);
+    try {
+      await signOut(auth).catch((e) => { console.warn('Firebase signOut failed', e); });
+      // clear client-side session tokens
+  try { window.localStorage.removeItem('authToken'); window.localStorage.removeItem('userType'); } catch { /* ignore */ }
+      toast.success('Signed out');
+      router.push('/admin/login');
+    } catch (err) {
+      console.error('Sign out failed', err);
+      toast.error('Sign out failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={`${styles.themeAdmin} ${styles.wrapper}`}>
       <div className={styles.mainContent}>
-        <h1 className={styles.title}>Admin Portal</h1>
-        <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
+        <div className={styles.pageTop}>
+          <div>
+            <h1 className={styles.title}>Admin Portal</h1>
+            <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
+          </div>
+          <div style={{ marginLeft: 'auto' }}>
+            <button type="button" onClick={handleSignOut} className={styles.signOutBtn} aria-label="Sign out">
+              Sign Out
+            </button>
+          </div>
+        </div>
 
         
         <div className={styles.tabGroup}>
