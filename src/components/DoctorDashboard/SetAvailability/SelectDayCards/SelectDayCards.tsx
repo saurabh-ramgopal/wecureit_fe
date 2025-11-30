@@ -13,13 +13,23 @@ interface Day {
 type SelectDayCardsProps = {
   onDateSelect: (date: string) => void;
 };
-const generateCurrentWeek = (): Day[] => {
+const generateTwoWeeks = (): Day[] => {
   const today = new Date();
   const days: Day[] = [];
 
+  // Determine the upcoming Sunday (including today if it's Sunday)
+  const dayOfWeek = today.getDay(); // 0 = Sunday
+   const thisWeekSunday = new Date(today);
+  thisWeekSunday.setDate(today.getDate() - dayOfWeek);
+  
+  const startDate = new Date(thisWeekSunday);
+  startDate.setDate(thisWeekSunday.getDate() + 7);
+
+  // Generate 14 days starting from Sunday
   for (let i = 0; i < 14; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i+ 1);
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const month = date.toLocaleDateString('en-US', { month: 'short' });
     const dateNumber = date.getDate().toString();
@@ -32,8 +42,9 @@ const generateCurrentWeek = (): Day[] => {
   return days;
 };
 
+
 const SelectDayCards = ({onDateSelect} : SelectDayCardsProps) => {
-    const weekDays = generateCurrentWeek();
+    const weekDays = generateTwoWeeks();
     const [selectedDate, setSelectedDate] = useState<string>("");
     const handleDateSelect = (isoDate: string) => {
      setSelectedDate(isoDate);

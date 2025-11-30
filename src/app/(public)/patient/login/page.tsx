@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import styles from "./login.module.scss";
 
 export default function PatientLoginPage() {
   const [loading, setLoading] = useState(false);

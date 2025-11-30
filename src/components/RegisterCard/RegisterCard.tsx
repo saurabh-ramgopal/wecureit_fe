@@ -9,6 +9,7 @@ interface RegisterCardProps {
   description?: string;
   onSubmit?: (data: RegisterFormData) => void;
   loading?: boolean;
+   onBack?: () => void;
 }
 
 interface RegisterFormData {
@@ -26,7 +27,8 @@ export default function RegisterCard({
   title = "Create Account",
   description = "Join us and start your healthcare journey",
   onSubmit,
-  loading
+  loading,
+  onBack
 }: RegisterCardProps) {
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -231,6 +233,15 @@ const handleSubmit = (e: React.FormEvent) => {
                 >
                   Next <ArrowRight className={styles.buttonIcon} />
                 </button>
+                      {onBack && (
+                      <button 
+                        className={styles.backButton} 
+                        onClick={onBack}
+                        type="button"
+                      >
+                        ⬅ Back to Home
+                      </button>
+                    )}
               </>
             )}
 
@@ -301,8 +312,8 @@ const handleSubmit = (e: React.FormEvent) => {
                 </div>
               </>
             )}
-
-            <div className={styles.footer}>
+            
+            <div className={styles.footer}> 
               <h6>
                 Already have an account?{" "}
                 <a href="/patient/login" className={styles.link}>
@@ -311,6 +322,7 @@ const handleSubmit = (e: React.FormEvent) => {
               </h6>
             </div>
           </form>
+
         </div>
       </div>
     </div>

@@ -54,6 +54,7 @@ const PatientRegisterPage = () => {
         logo={<UserPlus size={45} />}
         onSubmit={handleRegister}
         loading={loading}
+        onBack={() => router.push("/")}
       />
     </div>
   )
