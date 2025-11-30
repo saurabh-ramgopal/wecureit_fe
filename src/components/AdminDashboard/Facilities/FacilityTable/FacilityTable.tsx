@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import { MapPin, Pencil, Trash2 } from "lucide-react";
-import styles from "../AdminDashboard.module.scss";
+import styles from "@/app/(protected)/admin/dashboard/AdminDashboard.module.scss";
 import localStyles from "./FacilityTable.module.scss";
-import AddFacility, { type Facility as AddFacilityType } from "./AddFacility";
-import { getFacilities, addOrUpdateFacility, deleteFacility, getSpecialities } from "../../../../../lib/api";
+import AddFacility, { type Facility as AddFacilityType } from "../AddFacility/AddFacility";
+import { getFacilities, addOrUpdateFacility, deleteFacility, getSpecialities } from "../../../../lib/api";
 
 
 const FacilityTable = () => {
@@ -80,8 +80,6 @@ const FacilityTable = () => {
                 names = [String(obj['speciality_name'])];
               }
 
-              // If the room has any non-GP speciality, don't include General Practice in the
-              // per-room speciality lists returned to the UI (keep GP only when it's the only one).
               const hasNonGp = names.some((n) => String(n) !== 'General Practice');
               const outIds = hasNonGp ? ids.filter((id, idx) => String(names[idx] ?? id) !== 'General Practice') : ids;
               const outNames = hasNonGp ? names.filter((n) => String(n) !== 'General Practice') : names;
@@ -143,7 +141,6 @@ const FacilityTable = () => {
           
           const rawStateCode = ff['stateCode'] ?? ff['state_code'] ?? ff['stateId'] ?? ff['state_master_id'] ?? null;
           const rawStateName = ff['stateName'] ?? ff['state_name'] ?? null;
-          // Determine facility-level specialties but omit General Practice when rooms have other specialties
           const facilitySpecialtiesRaw = facilitySpecNames.length > 0 ? facilitySpecNames : facilitySpecIds.map((id) => id);
           const parsedRoomsArr = Array.isArray(parsedRooms) ? parsedRooms as Record<string, unknown>[] : [];
           const facilityHasAnyRoomWithNonGp = parsedRoomsArr.some((r) => {
@@ -270,7 +267,6 @@ const FacilityTable = () => {
                 <button
                   className={styles.iconButton}
                   onClick={() => {
-                    // Debug: log the normalized facility when opening the edit modal
                     if (typeof console !== 'undefined' && typeof console.debug === 'function') {
                       console.debug('Opening AddFacility modal with facility:', f);
                     }
@@ -331,8 +327,6 @@ const FacilityTable = () => {
                   
                   let labels = Array.from(new Set([...(specialityNames.length ? specialityNames.map(String) : [] )]));
 
-                  // Only show General Practice when it is the only speciality for the room.
-                  // If the room has any non-GP speciality, do not show GP in the UI (GP is implicitly supported).
                   const hasNonGp = labels.some((lbl) => String(lbl) !== 'General Practice');
                   if (!hasNonGp) {
                     if (!labels.includes('General Practice')) labels.unshift('General Practice');
@@ -384,7 +378,11 @@ const FacilityTable = () => {
               
               const saved = await addOrUpdateFacility(backendPayload as Record<string, unknown>);
 
-              
+              // Log the backend response to help debug persistence issues
+              if (typeof console !== 'undefined' && typeof console.debug === 'function') {
+                console.debug('addOrUpdateFacility response', saved);
+              }
+
               const source = (saved && typeof saved === 'object') ? (saved as Record<string, unknown>) : (backendPayload as Record<string, unknown>);
               const id = source.facilityMasterId ?? source.facility_master_id ?? (backendPayload as Record<string, unknown>)['facilityMasterId'] ?? undefined;
 
@@ -407,7 +405,6 @@ const FacilityTable = () => {
                   return String(id);
                 });
 
-                // Filter out General Practice from per-room lists if there are other specialties.
                 const roomHasNonGp = sNames.some((nm) => String(nm) !== 'General Practice');
                 const outSList = roomHasNonGp ? sList.filter((id, idx) => String(sNames[idx]) !== 'General Practice') : sList;
                 const outSNames = roomHasNonGp ? sNames.filter((nm) => String(nm) !== 'General Practice') : sNames;
@@ -447,6 +444,13 @@ const FacilityTable = () => {
                 }
                 return sortFacilities(next);
               });
+
+              // Re-sync with server to ensure persistent state is reflected
+              try {
+                await refreshFacilities();
+              } catch (refreshErr) {
+                console.warn('refreshFacilities failed after save', refreshErr);
+              }
 
           
             } catch (err) {

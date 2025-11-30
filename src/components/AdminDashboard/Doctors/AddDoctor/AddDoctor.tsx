@@ -9,7 +9,7 @@ import {
   addDoctor,
   updateDoctorSpeciality,
   getDoctors,
-} from "../../../../../lib/api";
+} from "../../../../lib/api";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 

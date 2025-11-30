@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import styles from "../AdminDashboard.module.scss";
+import styles from "@/app/(protected)/admin/dashboard/AdminDashboard.module.scss";
 import localStyles from "./DoctorTable.module.scss";
 
-import AddDoctor, { type Doctor as AddDoctorType } from "./AddDoctor";
+import AddDoctor, { type Doctor as AddDoctorType } from "../AddDoctor/AddDoctor";
 import { Pencil, Trash2, UserPlus } from "lucide-react";
 
 import {
@@ -12,7 +12,7 @@ import {
   deleteDoctor,
   getStates,
   getSpecialities,
-} from "../../../../../lib/api";
+} from "../../../../lib/api";
 
 const normalizeGender = (v: unknown): string => {
   if (!v) return "";

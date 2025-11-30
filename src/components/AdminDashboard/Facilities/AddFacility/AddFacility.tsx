@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./AddFacility.module.scss";
 import { X, Info, Trash2 } from "lucide-react";
-import { getStates, getSpecialities } from "../../../../../lib/api";
+import { getStates, getSpecialities } from "../../../../lib/api";
 
 export type Facility = {
   facilityMasterId?: string;
@@ -336,8 +336,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         return found ? extractName(found) : String(id);
       });
 
-      // If the room has any non-GP specialties, do not include General Practice in that room's
-      // specialityList sent to the backend. If the room only has GP, include GP.
       const hasNonGpInRoom = namesForIds.some((n) => String(n) !== DEFAULT_SPECIALITY);
       const roomSpecIds = hasNonGpInRoom ? ids.filter((id, idx) => String(namesForIds[idx]) !== DEFAULT_SPECIALITY) : ids;
       const roomSpecNames = hasNonGpInRoom ? namesForIds.filter((n) => String(n) !== DEFAULT_SPECIALITY) : namesForIds;
@@ -348,19 +346,15 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
         hasAnyRoomOnlyGP = true;
       }
 
-      // collect non-GP ids for the ordered speciality list (top-level). Keep existing behaviour of
-      // adding the first non-default per room to the ordered list, avoiding duplicates.
       const nonDefault = ids.find((id) => {
         const label = (specialities.find((sp) => extractId(sp) === id) ? extractName(specialities.find((sp) => extractId(sp) === id)) : id);
         return label !== DEFAULT_SPECIALITY;
       });
       if (nonDefault) {
-        // avoid duplicates in the ordered list
         if (!specialityListOrdered.includes(String(nonDefault))) specialityListOrdered.push(String(nonDefault));
       }
     }
 
-    // Include GP in the facility-level specialityList only if at least one room is GP-only.
     if (gpId && hasAnyRoomOnlyGP) {
       specialityListOrdered.unshift(gpId);
     }
@@ -385,19 +379,36 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
     }
 
+    // Include several synonymous field names to increase compatibility with backend
+    // Some backends expect keys like `speciality`, `specialityIds`, or `specialities`.
     const backendPayload: Record<string, unknown> = {
       facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
       facilityName: facilityName,
-      
+
       stateCode: normalizedStateCode ?? undefined,
-      
+
       stateName: selectedStateName ?? undefined,
       noOfRooms: numRooms,
       facilityStreet,
       facilityCity,
+
+      // Primary list (ordered non-GP specialties, GP included first when needed)
       specialityList,
-      
-      roomDetails: roomDetailsStructured,
+
+      // Alternate/legacy keys the backend might accept
+      speciality: specialityList,
+      specialityIds: specialityList,
+      specialities: specialityList,
+
+      // Ensure each room entry also exposes ids/names under multiple keys
+      roomDetails: (roomDetailsStructured as Array<Record<string, unknown>>).map((rd) => ({
+        ...rd,
+        // some backends expect `specialityIds` instead of `specialityList`
+        specialityIds: rd['specialityList'] ?? rd['specialityIds'] ?? [],
+        // keep old keys as well
+        specialityList: rd['specialityList'],
+        specialityNames: rd['specialityNames'],
+      })),
     };
     
     console.debug('AddFacility outgoing payload', backendPayload);

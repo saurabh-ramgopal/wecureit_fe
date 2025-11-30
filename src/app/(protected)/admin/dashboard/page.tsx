@@ -9,8 +9,8 @@ import { auth } from "@/lib//firebase";
 import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
 import toast from "react-hot-toast";
 
-const DoctorTable = dynamic(() => import('./doctors/DoctorTable').then(m => m.default ?? m), { ssr: false })
-const FacilityTable = dynamic(() => import('./facilities/FacilityTable').then(m => m.default ?? m), { ssr: false })
+const DoctorTable = dynamic(() => import('../../../../components/AdminDashboard/Doctors/DoctorTable/DoctorTable').then(m => m.default ?? m), { ssr: false })
+const FacilityTable = dynamic(() => import('../../../../components/AdminDashboard/Facilities/FacilityTable/FacilityTable').then(m => m.default ?? m), { ssr: false })
 
 const AdminDashboard = () => {
   const router = useRouter();

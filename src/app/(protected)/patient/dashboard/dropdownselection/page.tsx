@@ -8,6 +8,7 @@ import BookingForm from "@/components/PatientDashboard/DropdownSelection/Dropdow
 import SelectionSummary from "@/components/PatientDashboard/DropdownSelection/SelectionSummary";
 import styles from "@/components/PatientDashboard/DropdownSelection/DropdownSelection.module.scss";
 
+
 export default function BookAppointmentPage() {
   const doctorsCount = 18;
   const facilitiesCount = 6;
@@ -54,7 +55,7 @@ export default function BookAppointmentPage() {
     <div className={styles.pageWrapper}>
       <div className={styles.pageInner}>
         <div className="mb-6">
-          <Link href="/patient/booking" className={styles.backLink}>← Back to Home</Link>
+          <Link href="/patient/dashboard" className={styles.backLink}>← Back to Home</Link>
         </div>
 
         <h1 className={styles.pageTitle}>Book an Appointment</h1>
