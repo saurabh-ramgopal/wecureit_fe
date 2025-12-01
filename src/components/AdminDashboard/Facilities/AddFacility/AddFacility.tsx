@@ -359,10 +359,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const specialityList = specialityListOrdered;
 
     const ff = facility as Record<string, unknown> | undefined;
-  // selectedStateObj not needed for minimal payload
-
-    
-    // Intentionally omit state normalization: we will not send state fields in the minimal payload
 
     const rawIsActive = ff?.['isActive'] ?? ff?.['is_active'] ?? ff?.['active'];
     let normalizedIsActive: boolean | undefined = undefined;
@@ -377,7 +373,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
     }
 
-    // Build explicit payload shapes for create vs update to ensure exact keys
     const createPayload: Record<string, unknown> = {
       facilityName: facilityName,
       noOfRooms: numRooms,

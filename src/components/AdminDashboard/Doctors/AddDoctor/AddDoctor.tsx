@@ -134,8 +134,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    // For create mode we require name/email/password. For edit mode we only update speciality.
     if (mode === 'create') {
       if (!fullName.trim()) return setError("Full name is required.");
       if (!email.trim()) return setError("Email is required.");
@@ -181,7 +179,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
 
         let firebaseUid: string;
         try {
-          // Create a secondary app so creating a new user doesn't replace the currently signed-in admin
           const secondaryAppName = `secondary-${Date.now()}`;
           const secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
           const secondaryAuth = getAuth(secondaryApp);
@@ -190,12 +187,10 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
           try {
             await signOut(secondaryAuth);
           } catch {
-            /* ignore */
           }
           try {
             await deleteApp(secondaryApp);
           } catch {
-            /* ignore */
           }
         } catch (err: unknown) {
           const code = ((err as { code?: string })?.code) ?? '';
@@ -213,7 +208,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
           specialityList: [...allSpecialities],
           doctorStateSpeciality,
           firebaseUid,
-          // password is intentionally not sent to backend; Firebase handles authentication
         });
       } else {
         await updateDoctorSpeciality({
@@ -364,13 +358,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
             </div>
           ))}
 
-          {/* <div className={styles.infoNote}>
-            <Info size={16} />
-            <p>
-              Doctors will later assign their own facilities from the Doctor
-              Portal.
-            </p>
-          </div> */}
 
           {error && <div className={styles.errorMessage}>{error}</div>}
 
