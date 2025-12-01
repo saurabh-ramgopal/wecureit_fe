@@ -125,6 +125,18 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     return String(candidate);
   };
 
+  const getFacilityIdFromRecord = (rec: Record<string, unknown> | undefined): string | undefined => {
+    if (!rec) return undefined;
+    const tryKeys = ['facilityMasterId', 'facility_master_id', 'facilityId', 'facility_id', 'id'];
+    for (const k of tryKeys) {
+      const v = rec[k];
+      if (v === undefined || v === null) continue;
+      if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
+      return extractId(v);
+    }
+    return undefined;
+  };
+
 
   const parseRoomEntry = (entry: unknown): string[] => {
     if (entry === undefined || entry === null) return ['General Practice'];
@@ -391,7 +403,10 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       else if (ff['stateName']) resolvedStateCode = String(ff['stateName']);
     }
 
+    const resolvedFacilityId = getFacilityIdFromRecord(ff) ?? undefined;
+
     const createPayload: Record<string, unknown> = {
+      facility_master_id: resolvedFacilityId ?? undefined,
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
@@ -401,7 +416,8 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     };
 
     const updatePayload: Record<string, unknown> = {
-      facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
+      // send only the DB column name we use: facility_master_id
+      facility_master_id: resolvedFacilityId ?? undefined,
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
