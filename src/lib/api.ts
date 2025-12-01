@@ -30,7 +30,6 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
     if (response.status === 401) {
       throw new UnauthorizedError(); 
     }
-    // Try to capture JSON error body, otherwise read text so we get stack traces
     let bodyText = '';
     try {
       const json = await response.json().catch(() => null);
@@ -38,15 +37,12 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
         const j = json as Record<string, unknown>;
         const msgCandidate = j['message'] ?? j['error'] ?? j['reason'];
         if (msgCandidate) throw new Error(String(msgCandidate));
-        // fallback to stringified JSON
         bodyText = JSON.stringify(json);
       } else {
         bodyText = await response.text().catch(() => '');
       }
     } catch (err) {
-      // If parsing threw (or we intentionally threw with message), capture text if possible
       bodyText = (bodyText && String(bodyText)) || (await response.text().catch(() => ''));
-      // If we previously threw with a meaningful message, rethrow it
       if (err instanceof Error && err.message) throw err;
     }
 
@@ -60,7 +56,7 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
 export async function handleApiCall<T>(apiFunc: () => Promise<T>): Promise<T | null> {
   try {
     return await apiFunc();
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof UnauthorizedError) {
       const auth = getAuth();
       const user = auth.currentUser;
@@ -80,13 +76,11 @@ export async function handleApiCall<T>(apiFunc: () => Promise<T>): Promise<T | n
   }
 }
 
-// Public API calls (no auth required)
+
 export async function getDoctors() {
-  // Use protected apiCall so Authorization header is attached when token exists
   return apiCall('/admin/getAllDoctors', { method: 'GET' });
 }
 
-// Protected API calls
 export async function getPatientById(patientId: number) {
   return apiCall(`/patient/getById?patientId=${patientId}`, {
     method: 'GET',
@@ -100,8 +94,7 @@ export async function updatePatient(patientData: Record<string, unknown>) {
   });
 }
 
-// Master data
-// Assumption: backend exposes endpoints that return arrays of objects (various field names).
+
 export async function getStates() {
   return apiCall('/common/states/getAll', { method: 'GET' });
 }
@@ -117,7 +110,6 @@ export async function getSpecialities() {
 
 // Admin: add or update doctor
 export async function addDoctor(doctorData: Record<string, unknown>) {
-  // backend exposes POST /admin/addDoctor
   return apiCall('/admin/addDoctor', {
     method: 'POST',
     body: JSON.stringify(doctorData),
@@ -211,4 +203,10 @@ export async function saveNotes(saveNotesData: SaveNotesRequest): Promise<boolea
     method: 'POST',
     body: JSON.stringify(saveNotesData),
   });
+}
+
+export async function login(email: string, password: string) {
+  const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
+  const auth = getAuth();
+  return signInWithEmailAndPassword(auth, email, password);
 }
