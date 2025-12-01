@@ -104,6 +104,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const candidate =
       it["id"] ??
       it["stateCode"] ??
+      it["state_code"] ??
       it["specialityMasterId"] ??
       it["speciality_master_id"] ??
       it["speciality_id"] ??
@@ -344,11 +345,12 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
 
       const nonDefault = ids.find((id) => {
-        const label = (specialities.find((sp) => extractId(sp) === id) ? extractName(specialities.find((sp) => extractId(sp) === id)) : id);
+        const foundSp = specialities.find((sp) => extractId(sp) === id);
+        const label = foundSp ? extractName(foundSp) : id;
         return label !== DEFAULT_SPECIALITY;
       });
       if (nonDefault) {
-        if (!specialityListOrdered.includes(String(nonDefault))) specialityListOrdered.push(String(nonDefault));
+        specialityListOrdered.push(String(nonDefault));
       }
     }
 
@@ -373,11 +375,28 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
     }
 
+    let resolvedStateCode: string | undefined = undefined;
+    if (selectedState) resolvedStateCode = selectedState;
+    if (!resolvedStateCode && address) {
+      const parts = address.split(',').map((p) => p.trim()).filter(Boolean);
+      const last = parts.length ? parts[parts.length - 1] : '';
+      if (last && Array.isArray(states) && states.length > 0) {
+        const match = states.find((s) => extractName(s).toLowerCase() === String(last).toLowerCase());
+        if (match) resolvedStateCode = extractId(match);
+      }
+    }
+    if (!resolvedStateCode && ff) {
+      if (ff['stateCode']) resolvedStateCode = String(ff['stateCode']);
+      else if (ff['state_code']) resolvedStateCode = String(ff['state_code']);
+      else if (ff['stateName']) resolvedStateCode = String(ff['stateName']);
+    }
+
     const createPayload: Record<string, unknown> = {
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
       isActive: normalizedIsActive ?? undefined,
+      stateCode: resolvedStateCode || undefined,
       specialityList,
     };
 
@@ -387,6 +406,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
       isActive: normalizedIsActive ?? undefined,
+      stateCode: resolvedStateCode ?? (ff?.['stateCode'] as string | undefined) ?? undefined,
       specialityList,
     };
 
