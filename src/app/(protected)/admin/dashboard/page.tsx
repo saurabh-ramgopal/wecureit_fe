@@ -6,9 +6,12 @@ import dynamic from 'next/dynamic'
 import styles from "./AdminDashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { useRoleAuth } from "@/hooks/useRoleAuth";
-
-const DoctorTable = dynamic(() => import('./doctors/DoctorTable').then(m => m.default ?? m), { ssr: false })
-const FacilityTable = dynamic(() => import('./facilities/FacilityTable').then(m => m.default ?? m), { ssr: false })
+import { auth } from "@/lib//firebase"; 
+import { onAuthStateChanged, getIdTokenResult, signOut } from "firebase/auth";
+import toast from "react-hot-toast";
+import { logoutUser } from '@/lib/auth';
+const DoctorTable = dynamic(() => import('../../../../components/AdminDashboard/Doctors/DoctorTable/DoctorTable').then(m => m.default ?? m), { ssr: false })
+const FacilityTable = dynamic(() => import('../../../../components/AdminDashboard/Facilities/FacilityTable/FacilityTable').then(m => m.default ?? m), { ssr: false })
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -23,13 +26,25 @@ const AdminDashboard = () => {
     );
   }
   if (!authorized) return null; 
+    const handleSignOut = async () => {
+     logoutUser("/doctor/login");
+    };
   return (
     <div className={`${styles.themeAdmin} ${styles.wrapper}`}>
       <div className={styles.mainContent}>
-        <h1 className={styles.title}>Admin Portal</h1>
-        <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
+        <div className={styles.pageTop}>
+          <div>
+            <h1 className={styles.title}>Admin Portal</h1>
+            <p className={styles.subtitle}>Manage doctors, facilities, and room specialties</p>
+          </div>
+          <div style={{ marginLeft: 'auto' }}>
+            <button type="button" onClick={handleSignOut} className={styles.signOutBtn} aria-label="Sign out">
+              Sign Out
+            </button>
+          </div>
+        </div>
 
-        {/* Tabs */}
+        
         <div className={styles.tabGroup}>
         <button onClick={() => setTab("doctors")} className={`${styles.tabButton} ${tab === "doctors" ? styles.tabActive : ""}`} >
         <Stethoscope size={18} />
@@ -42,7 +57,6 @@ const AdminDashboard = () => {
     </button>
     </div>
 
-        {/* <div className={styles.tabContent}> */}
           <div className={styles.card}>
             {tab === "doctors" ? <DoctorTable /> : <FacilityTable />}
           </div>

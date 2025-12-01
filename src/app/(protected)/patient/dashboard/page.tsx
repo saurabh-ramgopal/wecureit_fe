@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
@@ -10,10 +10,10 @@ import styles from './patientdashboard.module.scss';
 import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboardHeader/PatientDashboardHeader";
 import MyProfile from "@/components/PatientDashboard/MyProfile/MyProfile";
 import { useRoleAuth } from "@/hooks/useRoleAuth";
-type Props = {
-}
+import PatientHome from '../../../../components/PatientDashboard/PatientHome/PatientHome';
 
-const PatientDashboardPage: NextPage<Props> = () => {
+
+const PatientDashboardPage: NextPage = () => {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("Home");
 
@@ -44,7 +44,7 @@ const PatientDashboardPage: NextPage<Props> = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className="btn btn-ghost"
+            className="btn btn-primary"
             aria-label="Sign out"
           >
             Sign Out
@@ -56,7 +56,7 @@ const PatientDashboardPage: NextPage<Props> = () => {
       onTabClick={handleTabClick} 
     />
       <div className={styles.contentArea}>
-        {activeTab === "Home" }
+        {activeTab === "Home" && <PatientHome />}
 
         {activeTab === "My Profile" && <MyProfile />}
 

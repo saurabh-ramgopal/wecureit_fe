@@ -1,4 +1,4 @@
-/* Styles moved from inline styles in FacilityTable.tsx */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
@@ -14,7 +14,7 @@
   transition: transform 160ms ease, box-shadow 160ms ease;
   will-change: transform, box-shadow;
 }
-/* subtle lift on hover to indicate interactivity */
+
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 8px 24px rgba(14, 30, 37, 0.12);
@@ -28,7 +28,7 @@
 .facilityName {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 1rem; /* Slightly smaller */
+  font-size: 1rem; 
 }
 .stateRow {
   color: var(--text-secondary);
@@ -71,7 +71,7 @@
   margin: 0.25rem 0;
 }
 
-/* Per-room card inside the facility card */
+
 .roomCard {
   margin-bottom: 0.6rem;
   padding: 0.45rem 0.25rem;

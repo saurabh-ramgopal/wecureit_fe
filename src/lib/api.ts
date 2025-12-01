@@ -30,8 +30,28 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
     if (response.status === 401) {
       throw new UnauthorizedError(); 
     }
-    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
-    throw new Error(errorData.message || `API error: ${response.statusText}`);
+    // Try to capture JSON error body, otherwise read text so we get stack traces
+    let bodyText = '';
+    try {
+      const json = await response.json().catch(() => null);
+      if (json && typeof json === 'object') {
+        const j = json as Record<string, unknown>;
+        const msgCandidate = j['message'] ?? j['error'] ?? j['reason'];
+        if (msgCandidate) throw new Error(String(msgCandidate));
+        // fallback to stringified JSON
+        bodyText = JSON.stringify(json);
+      } else {
+        bodyText = await response.text().catch(() => '');
+      }
+    } catch (err) {
+      // If parsing threw (or we intentionally threw with message), capture text if possible
+      bodyText = (bodyText && String(bodyText)) || (await response.text().catch(() => ''));
+      // If we previously threw with a meaningful message, rethrow it
+      if (err instanceof Error && err.message) throw err;
+    }
+
+    const snippet = bodyText ? ` Response body: ${String(bodyText).slice(0, 2000)}` : '';
+    throw new Error(`API error: ${response.status} ${response.statusText}.${snippet}`);
   }
 
   return response.json() as Promise<T>;
@@ -83,8 +103,7 @@ export async function updatePatient(patientData: Record<string, unknown>) {
 // Master data
 // Assumption: backend exposes endpoints that return arrays of objects (various field names).
 export async function getStates() {
-  // GET /common/getState returns state_master list
-  return apiCall('/common/getState', { method: 'GET' });
+  return apiCall('/common/states/getAll', { method: 'GET' });
 }
 
 export async function getSpecialities() {
@@ -123,7 +142,13 @@ export async function updateDoctorSpeciality(payload: Record<string, unknown>) {
 
 // Facilities
 export async function getFacilities() {
-  return apiCall('/common/facility/getAll', { method: 'GET' });
+  try {
+    return await apiCall('/common/facility/getAll', { method: 'GET' });
+  } catch (err) {
+    // Log the error and return an empty array so the frontend can continue gracefully
+    console.error('getFacilities failed, returning empty array', err);
+    return [] as unknown as Promise<unknown>;
+  }
 }
 
 export async function addOrUpdateFacility(facilityData: Record<string, unknown>) {
