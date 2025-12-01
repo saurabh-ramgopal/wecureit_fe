@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef} from "react";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -23,7 +23,7 @@ export const useRoleAuth = ({ allowedRoles }: RoleAuthOptions): RoleAuthResult =
   const [userId, setUserId] = useState<string>();
   const [role, setRole] = useState<Role>();
   const router = useRouter();
-
+  const hasShownToast = useRef(false);
    useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -49,8 +49,11 @@ export const useRoleAuth = ({ allowedRoles }: RoleAuthOptions): RoleAuthResult =
         if (allowedRoles.includes(userRole)) {
           setAuthorized(true);
         } else {
-          toast.error(`You are logged in as ${userRole}. Not authorized.`);
-          router.push(`/${userRole}/login`);
+            if (userRole && !hasShownToast.current) {
+            toast.error(`You are logged in as ${userRole}. Not authorized.`);
+            hasShownToast.current = true;
+            }
+            router.replace(`/`);
         }
       } catch (err) {
         console.error("Error checking auth:", err);
@@ -61,7 +64,7 @@ export const useRoleAuth = ({ allowedRoles }: RoleAuthOptions): RoleAuthResult =
       }
     });
 
-    return () => unsubscribe(); // cleanup listener on unmount
+    return () => unsubscribe(); 
   }, [allowedRoles, router]);
 
   return { authorized, loading, userId, role };

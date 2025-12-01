@@ -22,7 +22,7 @@ const SelectFacilityCards = ({  doctor, onSelectFacility, selectedFacilityId}: S
 
     const fetchFacilities = async () => {
       try {
-        const data = await getDoctorFacilities(29366);
+        const data = await getDoctorFacilities(doctor.doctorId);
         if (mounted) setFacilities(data);
       } catch (err: unknown) {
         if (mounted)

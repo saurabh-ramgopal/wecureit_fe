@@ -297,7 +297,7 @@ const handleSubmit = (e: React.FormEvent) => {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className={styles.backButton}
+                    className={styles.backButton_step2}
                   >
                     <ArrowLeft className={styles.buttonIcon} /> Back
                   </button>

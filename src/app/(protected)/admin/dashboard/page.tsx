@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   }
   if (!authorized) return null; 
     const handleSignOut = async () => {
-     logoutUser("/doctor/login");
+     logoutUser("/admin/login");
     };
   return (
     <div className={`${styles.themeAdmin} ${styles.wrapper}`}>

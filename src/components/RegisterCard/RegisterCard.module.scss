@@ -177,7 +177,7 @@
 /* ============ BUTTONS ============ */
 .nextButton,
 .registerButton,
-.backButton {
+.backButton_step2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -212,7 +212,7 @@
   }
 }
 
-.backButton {
+.backButton_step2 {
   background: var(--bg-light, #fef2f2);
   color: var(--text-primary, #374151);
 

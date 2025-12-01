@@ -33,7 +33,7 @@ const DoctorDashboardPage: NextPage<Props> = () => {
     useEffect(() => {
      if (!userId) return;
 
-    const numericId = Number(1006);
+    const numericId = Number(userId);
     if (isNaN(numericId)) {
       console.error("Invalid doctorId");
       return;
@@ -73,7 +73,7 @@ const DoctorDashboardPage: NextPage<Props> = () => {
           console.log("Mapped doctor past appointments:", doctorPastAppointments);
 
 
-          const savedAvailabilityRes = await getSavedDoctorAvailability(1006);
+          const savedAvailabilityRes = await getSavedDoctorAvailability(numericId);
           const savedAvailabilityData: SaveAvailabilityResponse = savedAvailabilityRes;
           setSavedAvailability(savedAvailabilityData);
           console.log("Fetched saved availability:", savedAvailabilityRes);
