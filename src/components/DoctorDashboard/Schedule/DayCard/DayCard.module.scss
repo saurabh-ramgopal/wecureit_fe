@@ -3,7 +3,7 @@
   border: 1px solid var(--border-light, #ccc); // add border
   border-radius: 8px;
   padding: 1rem;
-  min-width: 220px;       // width of each card
+  min-width: 300px;       // width of each card
   flex: 0 0 auto;         // prevent shrinking
   display: flex;
   flex-direction: column;
@@ -26,51 +26,86 @@
     margin: 0;
   }
 
-  &__location {
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    font-weight: 500;
-    margin-top: 0.25rem;
-  }
-
-  &__total-hours {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-  }
-
-  &__appointments {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    overflow-y: auto; /* optional scroll if many appointments */
-  }
-
-&__no-appointments-center {
+ &__location {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 100%; 
-  text-align: center;
-  color: var(--text-secondary, #666);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-top: 0.25rem;
 
-  .day-card__clock-icon {
-    color: var(--text-secondary, #666);
+  svg {
+    margin-right: 0.25rem; // space between icon and text
   }
+}
 
-  p {
-    margin: 0;
-    font-size: 0.9rem;
+&__total-hours {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+
+  svg {
+    margin-right: 0.25rem; 
   }
 }
 &__details {
   margin-top: 1.75rem;
   display: flex;
-  flex-direction: column; // stack vertically
-  gap: 0.25rem;           // space between the two lines
+  flex-direction: column; 
+  gap: 0.25rem;
   font-size: 0.85rem;
   color: var(--text-secondary, #666);
 }
+
+&__appointments{
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; 
+  margin-top: 0.5rem;
+ .appointment-card {
+  background-color: var(--bg-card, #FFFFFF);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-small, 0.25rem);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;;
+
+  .appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .appointment-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+      align-items: center;
+  }
+
+  .appointment-duration {
+    background-color: var(--light, #bcf4f9);
+    color: var(--primary, #0891B2);
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    
+  }
+  }
+
+  .appointment-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6B7280);
+  }
+
+  .appointment-reason {
+    font-size: 0.8rem;
+    color: var(--text-muted, #9CA3AF);
+  }
 }
+}
+}
+

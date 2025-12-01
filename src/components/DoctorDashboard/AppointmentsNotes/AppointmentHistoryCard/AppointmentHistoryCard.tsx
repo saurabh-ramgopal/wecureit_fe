@@ -1,10 +1,10 @@
 import React from "react";
 import styles from "./AppointmentHistoryCard.module.scss";
-import {AppointmentHistory} from '@/types/doctor';
+import {DoctorPastAppointmentsUI} from '@/types/doctor';
 import { User, Calendar, Clock, FileText } from "lucide-react";
 
 interface AppointmentHistoryCardProps {
-  appointmentHistory: AppointmentHistory;
+  appointmentHistory: DoctorPastAppointmentsUI;
 }
 
 const AppointmentHistoryCard = ({ appointmentHistory }: AppointmentHistoryCardProps) => {
@@ -15,9 +15,9 @@ const AppointmentHistoryCard = ({ appointmentHistory }: AppointmentHistoryCardPr
             <User className={styles['appointmentHistory-card__icon']} size={15} />
             <h4 >{appointmentHistory.patientName}</h4>
           </div>
-        <span className={`appointmentHistory-card__status ${appointmentHistory.status.toLowerCase()}`}>
+        {/* <span className={`appointmentHistory-card__status ${appointmentHistory.status.toLowerCase()}`}>
           {appointmentHistory.status}
-        </span>
+        </span> */}
       </div>
 
       <div className={styles['appointmentHistory-card__details']}>

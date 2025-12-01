@@ -31,7 +31,7 @@ const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate
        {selectedDate && (
         <>
           <SetAvailabilityHeader title={`Set Facility for ${selectedDate}`} />
-          <SelectFacilityCards selectedDate={selectedDate} selectedFacilityId={selectedFacilityId} doctor={doctor} onSelectFacility={handleFacilityChange} />
+          <SelectFacilityCards selectedFacilityId={selectedFacilityId} doctor={doctor} onSelectFacility={handleFacilityChange} />
           {selectedFacilityId && (
             <>
                <SetAvailabilityHeader title={'Select Working Hours (Minimum 4 hours)'} />
@@ -50,7 +50,7 @@ const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate
     <div className={styles['setavailability-card']}>
        <SetAvailabilityHeader title = 'Saved Availability Summary'
        subtitle='Review your saved availability' />
-       <SavedAvailabilitySummary  />
+       <SavedAvailabilitySummary savedlist={availabilityList}  />
     </div>
     </>
   );

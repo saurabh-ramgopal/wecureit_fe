@@ -14,19 +14,6 @@ export interface Day {
   appointments: Appointment[];
 }
 
-
-export interface AppointmentHistory {
-  patientName: string;
-  age?: string; // optional
-  gender?: string; // optional
-  status: string; // e.g., "Completed"
-  date: string;   // e.g., "Sunday, November 2, 2025"
-  time: string;   // e.g., "13:00 - 13:45"
-  duration: string; // "45 min"
-  complaint: string; // "Post-surgery follow-up"
-  location: string; // "Downtown Medical Center"
-}
-
 // Speciality type
 export type Speciality = {
   specialityId: string;      // use this consistently
@@ -89,7 +76,7 @@ export interface FacilityAvailability {
   availableEndTime: string;     // format: HH:mm:ss
 }
 
-export interface DoctorAvailabilityRequest {
+export interface DoctorAvailability {
   doctorId: number;
   facilityList: FacilityAvailability[];
 }
@@ -101,3 +88,93 @@ export interface FacilityAvailabilityUI extends FacilityAvailability {
   facilityStreet?: string;  // optional
   stateName?: string;       // optional
 }
+
+
+
+
+export interface PatientMaster {
+  patientMasterId: number;
+  patientName: string;
+  patientEmail: string;
+  patientDob: string; // YYYY-MM-DD
+  patientGender: string;
+  patientPhone: string;
+  patientAddress: string;
+}
+
+export interface DoctorMaster {
+  doctorMasterId: number;
+  doctorName: string;
+  doctorEmail: string;
+  doctorGender: string;
+  isActive: boolean;
+}
+
+export interface StateCode {
+  stateCode: string;
+  stateName: string;
+}
+
+export interface FacilityMaster {
+  facilityMasterId: string;
+  facilityName: string;
+  noOfRooms: number | null;
+  facilityStreet: string;
+  stateCode: StateCode;
+  isActive: boolean;
+}
+
+export interface DoctorFacilityAvailability {
+  dfAvailabilityId: string;
+  doctorMaster: DoctorMaster;
+  facilityMaster: FacilityMaster;
+  availableDate: string; // YYYY-MM-DD
+  availableStartTime: string; // HH:mm:ss
+  availableEndTime: string;   // HH:mm:ss
+  isActive: boolean | null;
+  isFilled: boolean | null;
+}
+
+export interface SpecialityMaster {
+  specialityMasterId: string;
+  specialityName: string;
+}
+
+export interface DoctorScheduleAPIAppointment {
+  appointmentId: number;
+  duration: number; // in minutes
+  date: string; // YYYY-MM-DD
+  patientMaster: PatientMaster;
+  doctorFacilityAvailability: DoctorFacilityAvailability;
+  startTime: string; // HH:mm:ss
+  endTime: string;   // HH:mm:ss
+  appointmentNotes: string | null;
+  specialityMaster: SpecialityMaster | null;
+  doctorMaster: DoctorMaster | null;
+}
+export type DoctorScheduleAPIResponse = DoctorScheduleAPIAppointment[];
+
+
+
+export interface ScheduleDayUI {
+  shortDate: string;      // e.g., "Thu, Dec 01"
+  fullDate: string;       // e.g., "December 1, 2025"
+  location: string;       // e.g., "Bethesda Health Center"
+  totalHours: string;     // e.g., "1.0 hours"
+  appointments: Appointment[];
+}
+
+export type ScheduleUI = ScheduleDayUI[];
+
+export interface DoctorPastAppointmentsUI {
+  patientName: string;
+  age: string;         
+  gender: string;   
+  date: string;        
+  time: string;         
+  duration: string;    
+  complaint: string;
+  location: string;
+}
+
+

@@ -7,14 +7,14 @@ import DoctorSchedule from "@/components/DoctorDashboard/Schedule/DoctorSchedule
 import SetDoctorAvailability from '@/components/DoctorDashboard/SetAvailability/SetDoctorAvailabilityView/SetDoctorAvailabilityView';
 import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentNotesView/AppointmentNotesView';
 import { useRoleAuth } from "@/hooks/useRoleAuth";
-import { getDoctorById, setDoctorAvailability } from '@/lib/api';
-import { mapDoctorAPIToDoctor } from '@/utils/mapper';
-import { Doctor, FacilitySpeciality } from '@/types/doctor';
+import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability } from '@/lib/api';
+import { mapDoctorAPIToDoctor, mapDoctorPastAppointments, mapDoctorSchedule } from '@/utils/mapper';
+import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, DoctorScheduleAPIResponse, ScheduleDayUI,FacilityAvailabilityUI } from '@/types/doctor';
 import { logoutUser } from '@/lib/auth';
 import { LogOut } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { calculateDiffHours, convertTo24HourWithSeconds } from '@/utils/utils';
-import { DoctorAvailabilityRequest, FacilityAvailabilityUI } from "@/types/doctor";
+
 
 type Props = {
 }
@@ -27,12 +27,13 @@ const DoctorDashboardPage: NextPage<Props> = () => {
     const [availabilityList, setAvailabilityList] = useState<FacilityAvailabilityUI[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [selectedFacility, setSelectedFacility] = useState<FacilityAvailabilityUI>({facilityId: "",  availableDate: "", availableStartTime: "", availableEndTime: "", facilityName: "",  speciality: [],  facilityStreet: "",  stateName: ""});
-
-
+    const [doctorSchedule, setDoctorSchedule] = useState<ScheduleDayUI[]>([]);
+    const [doctorPastAppointments, setDoctorPastAppointments] = useState<DoctorPastAppointmentsUI[]>([]);
+    const [savedAvailability, setSavedAvailability] = useState<DoctorAvailability>({doctorId: 0, facilityList: []});
     useEffect(() => {
      if (!userId) return;
 
-    const numericId = Number(userId);
+    const numericId = Number(1006);
     if (isNaN(numericId)) {
       console.error("Invalid doctorId");
       return;
@@ -52,9 +53,42 @@ const DoctorDashboardPage: NextPage<Props> = () => {
     } finally {
       setIsDoctorLoading(false);
     }
+  }
+
+
+    const fetchDoctorScheduleAndAppointments = async () => {
+      try {
+          setIsDoctorLoading(true);
+          const scheduleRes = await getDoctorSchedule(numericId);
+          const scheduleData: DoctorScheduleAPIResponse = scheduleRes;
+          setDoctorSchedule(mapDoctorSchedule(scheduleData));
+          console.log("Fetched doctor schedule:", scheduleRes);
+          console.log("Mapped doctor schedule:", doctorSchedule);
+
+
+          const appointmentsRes = await getDoctorPastAppointments(numericId);
+          const appointmentData: DoctorScheduleAPIResponse = appointmentsRes;
+          setDoctorPastAppointments(mapDoctorPastAppointments(appointmentData));
+          console.log("Fetched doctor past appointments:", appointmentsRes);
+          console.log("Mapped doctor past appointments:", doctorPastAppointments);
+
+
+          const savedAvailabilityRes = await getSavedDoctorAvailability(29366);
+          const savedAvailabilityData: DoctorAvailability = savedAvailabilityRes;
+          setSavedAvailability(savedAvailabilityData);
+          console.log("Fetched saved availability:", savedAvailabilityRes);
+
+      } catch (error) {
+        console.error("Failed to fetch schedule:", error);
+      } finally {
+        setIsDoctorLoading(false);
+      }
   };
 
-  fetchDoctor();
+  (async () => {
+    await fetchDoctor();
+    await fetchDoctorScheduleAndAppointments();
+  })();
   }, [userId]);
 
    const onDateChange = (date: string) => {
@@ -104,7 +138,7 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
 
 }
 const handleSaveAvailability = async () => {
-  const payload: DoctorAvailabilityRequest = {
+  const payload: DoctorAvailability = {
     doctorId: doctor.doctorId,
     facilityList: availabilityList.map((item) => ({
       facilityId: item.facilityId,
@@ -176,9 +210,9 @@ const handleSaveAvailability = async () => {
       onTabClick={handleTabClick} 
     />
       <div>
-        {activeTab === "My Schedule" && <DoctorSchedule/>}
+        {activeTab === "My Schedule" && <DoctorSchedule doctorScheduleList = {doctorSchedule}/>}
         {activeTab === "Set Availability" && <SetDoctorAvailability onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} />}
-        {activeTab === "Appointments & Notes" && <AppointmentNotesView/>}
+        {activeTab === "Appointments & Notes" && <AppointmentNotesView doctorPastAppointments={doctorPastAppointments} />}
       </div>
   </div>
   );

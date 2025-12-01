@@ -15,24 +15,7 @@ const ScheduleHeader = ({ currentWeek, onWeekChange }: ScheduleHeaderProps) => {
           View your upcoming appointments with location and time details
         </p>
       </div>
-      <div className={styles['schedule-header__buttons']}>
-        <button
-          className={`${styles['week-button']} ${currentWeek === 1 ? 'active' : ''}`}
-          onClick={() => onWeekChange(1)}
-           disabled={currentWeek === 1}
-        >
-            <span className={styles['arrow']}>&lt;</span>
-            <span className={styles['week-text']}>Week 1</span>
-        </button>
-        <button
-          className={`${styles['week-button']} ${currentWeek === 2 ? 'active' : ''}`}
-          onClick={() => onWeekChange(2)}
-             disabled={currentWeek === 2}
-        >
-                 <span className={styles['week-text']}>Week 2</span>
-                 <span className={styles['arrow']}>&gt;</span>
-        </button>
-      </div>
+     
     </div>
   );
 };

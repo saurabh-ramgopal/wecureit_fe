@@ -6,14 +6,13 @@ import styles from './SelectFacilityCards.module.scss';
 
 
 type SelectFacilityCardsProps = {
-  selectedDate: string;
   doctor: Doctor;
   onSelectFacility: (facility: FacilityAvailabilityUI) => void;
   selectedFacilityId: string;
 };
 
 
-const SelectFacilityCards = ({ selectedDate, doctor, onSelectFacility, selectedFacilityId}: SelectFacilityCardsProps) => {
+const SelectFacilityCards = ({  doctor, onSelectFacility, selectedFacilityId}: SelectFacilityCardsProps) => {
   const [facilities, setFacilities] = useState<FacilityAPIResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +22,7 @@ const SelectFacilityCards = ({ selectedDate, doctor, onSelectFacility, selectedF
 
     const fetchFacilities = async () => {
       try {
-        const data = await getDoctorFacilities(doctor.doctorId);
+        const data = await getDoctorFacilities(29366);
         if (mounted) setFacilities(data);
       } catch (err: unknown) {
         if (mounted)

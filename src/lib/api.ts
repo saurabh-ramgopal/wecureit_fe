@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { UnauthorizedError } from "./apiErrors";
 import router from "next/router";
-import { DoctorAPIResponse, DoctorAvailabilityRequest, FacilityAPIResponse } from "@/types/doctor"; 
+import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse } from "@/types/doctor"; 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -155,9 +155,28 @@ export async function getDoctorFacilities(doctorId: number): Promise<FacilityAPI
   });
 }
 
-export async function setDoctorAvailability(availabilityData: DoctorAvailabilityRequest) {
+export async function setDoctorAvailability(availabilityData: DoctorAvailability) {
   return apiCall('/doctor/availability/add', {
     method: 'POST',
     body: JSON.stringify(availabilityData),
+  });
+}
+
+export async function getDoctorSchedule(doctorId: number): Promise<DoctorScheduleAPIResponse> {
+  return apiCall(`/doctor/appointments/getNextTwoWeeks?doctorId=${doctorId}`, {
+    method: 'GET',
+  });
+}
+
+export async function getDoctorPastAppointments(doctorId: number): Promise<DoctorScheduleAPIResponse>  {
+  return apiCall(`/doctor/appointments/getAllPast?doctorId=${doctorId}`, { 
+    method: 'GET',
+  });
+}
+
+
+export async function getSavedDoctorAvailability(doctorId: number) : Promise<DoctorAvailability> {
+  return apiCall(`/doctor/availability/getSummary?doctorId=${doctorId}`, { 
+    method: 'GET',
   });
 }
