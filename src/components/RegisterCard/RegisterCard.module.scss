@@ -177,7 +177,7 @@
 /* ============ BUTTONS ============ */
 .nextButton,
 .registerButton,
-.backButton {
+.backButton_step2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -212,7 +212,7 @@
   }
 }
 
-.backButton {
+.backButton_step2 {
   background: var(--bg-light, #fef2f2);
   color: var(--text-primary, #374151);
 
@@ -253,6 +253,23 @@ margin-top: 0.9375rem;
   }
 }
 
+.backButton {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.25em;
+  border-radius: var(--radius-small, 0.5rem);
+  font-weight: var(--fw-medium, 500);
+  color: var(--text-primary, #1f2937);
+  background: transparent;
+  border: 1px solid var(--border-default, #ccc);
+  cursor: pointer;
+  transition: var(--transition-base, all 0.2s);
+
+  &:hover {
+    background: var(--bg-disabled, #f3f4f6);
+    border-color: var(--primary);
+  }
+}
 /* ============ RESPONSIVE ============ */
 @media (max-width: 480px) {
   .card {

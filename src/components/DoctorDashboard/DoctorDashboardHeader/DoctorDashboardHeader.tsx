@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './DoctorDashboardHeader.scss';
+import React from 'react';
+import styles from './DoctorDashboardHeader.module.scss';
 import { Calendar, Clock, FileText, LucideIcon } from 'lucide-react';
 
 interface Tab {
@@ -11,7 +11,7 @@ interface DoctorDashboardHeaderProps {
   activeTab: string;
   onTabClick: (tabId: string) => void;
 }
-const DoctorDashboardHeader: React.FC<DoctorDashboardHeaderProps> = ({activeTab, onTabClick}) => {
+const DoctorDashboardHeader = ({activeTab, onTabClick}: DoctorDashboardHeaderProps) => {
 
 
   const tabs: Tab[] = [
@@ -21,17 +21,17 @@ const DoctorDashboardHeader: React.FC<DoctorDashboardHeaderProps> = ({activeTab,
   ];
 
   return (
-  <div className="tab-navigation">
+  <div className={styles['tab-navigation']}>
     {tabs.map((tab) => {
       const IconComponent = tab.icon;
       return (
         <button
           key={tab.id}
-          className={`tab-button ${activeTab === tab.label ? 'active' : ''}`}
+          className={`${styles['tab-button']} ${activeTab === tab.label ? styles['active'] : ''}`}
           onClick={() => onTabClick(tab.label)}
         >
-          <IconComponent className="tab-icon" size={18} />
-          <span className="tab-label">{tab.label}</span>
+          <IconComponent  className={styles['tab-icon']}  size={18} />
+          <span className={styles['tab-label']}>{tab.label}</span>
         </button>
       );
     })}

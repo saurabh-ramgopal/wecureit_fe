@@ -301,11 +301,9 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    let facilityStreet = address;
-    let facilityCity = '';
+  let facilityStreet = address;
     if (address && address.includes(',')) {
       const parts = address.split(',').map((p) => p.trim()).filter(Boolean);
-      facilityCity = parts.length > 1 ? parts[parts.length - 1] : '';
       facilityStreet = parts.slice(0, parts.length - 1).join(', ');
     }
 
@@ -361,49 +359,43 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const specialityList = specialityListOrdered;
 
     const ff = facility as Record<string, unknown> | undefined;
-    const selectedStateObj = states.find((s) => extractId(s) === selectedState);
-    const selectedStateName = selectedStateObj ? extractName(selectedStateObj) : undefined;
 
-    
-    let normalizedStateCode: string | undefined = undefined;
-    if (selectedState && typeof selectedState === 'string') {
-      try {
-        const parsed = JSON.parse(selectedState);
-        
-        normalizedStateCode = String(parsed.stateCode ?? parsed.code ?? parsed.id ?? parsed.state_id ?? parsed.stateCode ?? parsed.stateMasterId ?? parsed.state_master_id ?? '');
-        if (!normalizedStateCode) normalizedStateCode = undefined;
-      } catch {
-        
-        normalizedStateCode = selectedState;
+    const rawIsActive = ff?.['isActive'] ?? ff?.['is_active'] ?? ff?.['active'];
+    let normalizedIsActive: boolean | undefined = undefined;
+    if (rawIsActive !== undefined && rawIsActive !== null) {
+      if (typeof rawIsActive === 'boolean') normalizedIsActive = rawIsActive;
+      else if (typeof rawIsActive === 'string') {
+        const s = rawIsActive.trim().toLowerCase();
+        if (s === 'true' || s === '1') normalizedIsActive = true;
+        else if (s === 'false' || s === '0') normalizedIsActive = false;
+      } else {
+        normalizedIsActive = Boolean(rawIsActive);
       }
     }
 
-    const backendPayload: Record<string, unknown> = {
+    const createPayload: Record<string, unknown> = {
+      facilityName: facilityName,
+      noOfRooms: numRooms,
+      facilityStreet: facilityStreet || undefined,
+      isActive: normalizedIsActive ?? undefined,
+      specialityList,
+    };
+
+    const updatePayload: Record<string, unknown> = {
       facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
       facilityName: facilityName,
-
-      stateCode: normalizedStateCode ?? undefined,
-
-      stateName: selectedStateName ?? undefined,
       noOfRooms: numRooms,
-      facilityStreet,
-      facilityCity,
-
-      
+      facilityStreet: facilityStreet || undefined,
+      isActive: normalizedIsActive ?? undefined,
       specialityList,
-
-      speciality: specialityList,
-      specialityIds: specialityList,
-      specialities: specialityList,
-
-      roomDetails: (roomDetailsStructured as Array<Record<string, unknown>>).map((rd) => ({
-        ...rd,
-        specialityIds: rd['specialityList'] ?? rd['specialityIds'] ?? [],
-        specialityList: rd['specialityList'],
-        specialityNames: rd['specialityNames'],
-      })),
     };
-    
+
+    const chosen = facility ? updatePayload : createPayload;
+    // strip undefined keys (but preserve explicit false)
+    const backendPayload: Record<string, unknown> = Object.fromEntries(
+      Object.entries(chosen).filter(([, v]) => v !== undefined)
+    );
+
     console.debug('AddFacility outgoing payload', backendPayload);
 
     if (onSubmit) onSubmit(backendPayload);
@@ -458,29 +450,31 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
             </div>
 
             <div className={styles.row}>
-              <div className={styles.field}>
-                <label>State *</label>
-                <select
-                  id="facility-state-select"
-                  aria-label="Select state"
-                  value={selectedState}
-                  onChange={(e) => {
-                    if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select onChange ->', (e.target as HTMLSelectElement).value);
-                    setSelectedState(e.target.value);
-                  }}
-                  onClick={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select clicked'); }}
-                  onMouseDown={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select mousedown'); }}
-                  onFocus={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select focus'); }}
-                  required
-                >
-                  <option value="">Select state</option>
-                  {states.map((s, i) => (
-                    <option key={i} value={extractId(s)}>
-                      {extractName(s)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                {!facility && (
+                  <div className={styles.field}>
+                    <label>State *</label>
+                    <select
+                      id="facility-state-select"
+                      aria-label="Select state"
+                      value={selectedState}
+                      onChange={(e) => {
+                        if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select onChange ->', (e.target as HTMLSelectElement).value);
+                        setSelectedState(e.target.value);
+                      }}
+                      onClick={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select clicked'); }}
+                      onMouseDown={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select mousedown'); }}
+                      onFocus={() => { if (typeof console !== 'undefined' && typeof console.debug === 'function') console.debug('State select focus'); }}
+                      required
+                    >
+                      <option value="">Select state</option>
+                      {states.map((s, i) => (
+                        <option key={i} value={extractId(s)}>
+                          {extractName(s)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               <div className={styles.field}>
                 <label>Number of Rooms *</label>
                 <input

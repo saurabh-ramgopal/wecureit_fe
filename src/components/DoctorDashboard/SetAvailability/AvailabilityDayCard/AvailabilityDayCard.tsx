@@ -1,24 +1,28 @@
 import React from 'react';
-import './AvailabilityDayCard.scss';
+import styles from './AvailabilityDayCard.module.scss';
 
 interface Day {
   dayName: string;
   dateNumber: string;
   month: string;
+  formattedDate: string;
+ 
 }
-
-interface SetAvailabilityDayCardProps {
+type SetAvailabilityDayCardProps = {
   day: Day;
-}
+  onDateSelect: (date: string) => void;
+  selected?: boolean; 
+};
 
-const AvailabilityDayCard: React.FC<SetAvailabilityDayCardProps> = ({ day }) => {
+const AvailabilityDayCard = ({ day, onDateSelect, selected} : SetAvailabilityDayCardProps) => {
+
   return (
-    <div className="setavailability-day-card">
-      <div className="setavailability-day-card__header">
+    <div className={`${styles['setavailability-day-card']} ${selected ? styles['selected'] : ''}`}  onClick={() => onDateSelect(day.formattedDate)}>
+      <div className={styles['setavailability-day-card__header']}>
         <h4>{day.dayName}</h4>
-        <p className="setavailability-day-card__date">
-          <span className="date-number">{day.dateNumber}</span>
-          <span className="month">{day.month}</span>
+        <p className={styles['setavailability-day-card__date']}>
+          <span className={styles['date-number']}>{day.dateNumber}</span>
+          <span className={styles['month']}>{day.month}</span>
         </p>
       </div>
     </div>

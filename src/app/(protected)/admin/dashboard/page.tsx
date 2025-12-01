@@ -5,51 +5,18 @@ import { Stethoscope, Building2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import styles from "./AdminDashboard.module.scss";
 import { useRouter } from "next/navigation";
+import { useRoleAuth } from "@/hooks/useRoleAuth";
 import { auth } from "@/lib//firebase"; 
 import { onAuthStateChanged, getIdTokenResult, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
-
+import { logoutUser } from '@/lib/auth';
 const DoctorTable = dynamic(() => import('../../../../components/AdminDashboard/Doctors/DoctorTable/DoctorTable').then(m => m.default ?? m), { ssr: false })
 const FacilityTable = dynamic(() => import('../../../../components/AdminDashboard/Facilities/FacilityTable/FacilityTable').then(m => m.default ?? m), { ssr: false })
 
 const AdminDashboard = () => {
   const router = useRouter();
   const [tab, setTab] = useState<"doctors" | "facilities">("doctors");
-  const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
-  const toastShownRef = useRef(false);
-   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/admin/login");
-        return;
-      }
-
-      try {
-        const tokenResult = await user.getIdTokenResult(true);
-        const role = tokenResult.claims.role;
-
-        if (role === "admin") {
-          setAuthorized(true);
-        } else {
-          if (!toastShownRef.current) {
-            toast.error(`You are logged in as ${role}. Only Admin can access this page.`);
-            toastShownRef.current = true;
-          }
-          router.push("/admin/login");
-        }
-      } catch (error) {
-        console.error("Error fetching token:", error);
-        router.push("/admin/login");
-      } finally {
-        setLoading(false);
-      }
-    });
-
-   
-    return () => unsubscribe();
-  }, [router]);
-
+  const { authorized, loading, userId, role } = useRoleAuth({ allowedRoles: ['admin'] });
 
   if (loading) {
     return (
@@ -59,21 +26,9 @@ const AdminDashboard = () => {
     );
   }
   if (!authorized) return null; 
-  const handleSignOut = async () => {
-    setLoading(true);
-    try {
-      await signOut(auth).catch((e) => { console.warn('Firebase signOut failed', e); });
-  try { window.localStorage.removeItem('authToken'); window.localStorage.removeItem('userType'); } catch { /* ignore */ }
-      toast.success('Signed out');
-      router.push('/admin/login');
-    } catch (err) {
-      console.error('Sign out failed', err);
-      toast.error('Sign out failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    const handleSignOut = async () => {
+     logoutUser("/admin/login");
+    };
   return (
     <div className={`${styles.themeAdmin} ${styles.wrapper}`}>
       <div className={styles.mainContent}>
