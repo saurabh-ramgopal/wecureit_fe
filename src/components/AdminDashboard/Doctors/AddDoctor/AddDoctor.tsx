@@ -10,8 +10,9 @@ import {
   updateDoctorSpeciality,
   getDoctors,
 } from "../../../../lib/api";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signOut, getAuth } from "firebase/auth";
+import { firebaseConfig } from "@/lib/firebase";
+import { initializeApp, deleteApp } from "firebase/app";
 
 export interface License {
   stateCode: string;
@@ -64,11 +65,6 @@ const extractName = (item: unknown) => {
 };
 
 
-const generatePassword = () =>
-  Array.from(window.crypto.getRandomValues(new Uint8Array(12)))
-    .map((b) => (b % 36).toString(36))
-    .join("") + "A1!";
-
 
 const AddDoctor: React.FC<AddDoctorModalProps> = ({
   mode = "create",
@@ -88,6 +84,7 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
   const [specialities, setSpecialities] = useState<Array<Record<string, unknown>>>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [password, setPassword] = useState<string>('');
 
   useEffect(() => {
     getStates().then((res) => Array.isArray(res) && setStates(res));
@@ -103,11 +100,13 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
       setEmail(doctor.email ?? "");
       setGender(doctor.gender ?? "");
       setLicenses(normalizeLicenses(doctor.licenses));
+      setPassword('');
     } else if (mode === "create") {
       setFullName("");
       setEmail("");
       setGender("");
       setLicenses([{ stateCode: "", specialityIds: [] }]);
+      setPassword('');
     }
   }, [mode, doctor]);
 
@@ -135,9 +134,11 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!fullName.trim()) return setError("Full name is required.");
-    if (!email.trim()) return setError("Email is required.");
+    if (mode === 'create') {
+      if (!fullName.trim()) return setError("Full name is required.");
+      if (!email.trim()) return setError("Email is required.");
+      if (!password || password.length < 6) return setError('Password is required and must be at least 6 characters.');
+    }
 
     const validLicense = licenses.some(
       (l) =>
@@ -178,12 +179,19 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
 
         let firebaseUid: string;
         try {
-          const userCred = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            generatePassword()
-          );
+          const secondaryAppName = `secondary-${Date.now()}`;
+          const secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
+          const secondaryAuth = getAuth(secondaryApp);
+          const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
           firebaseUid = userCred.user.uid;
+          try {
+            await signOut(secondaryAuth);
+          } catch {
+          }
+          try {
+            await deleteApp(secondaryApp);
+          } catch {
+          }
         } catch (err: unknown) {
           const code = ((err as { code?: string })?.code) ?? '';
           if (typeof code === 'string' && code.includes('email-already-in-use')) {
@@ -243,6 +251,8 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Dr. John Smith"
+                disabled={mode === 'edit'}
+                readOnly={mode === 'edit'}
               />
             </div>
 
@@ -253,19 +263,33 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="john.smith@hospital.com"
+                disabled={mode === 'edit'}
+                readOnly={mode === 'edit'}
               />
             </div>
           </div>
 
           <div className={styles.field}>
             <label>Gender *</label>
-            <select value={gender} onChange={(e) => setGender(e.target.value)}>
+            <select value={gender} onChange={(e) => setGender(e.target.value)} disabled={mode === 'edit'}>
               <option value="">Select gender</option>
               <option>Female</option>
               <option>Male</option>
               <option>Other</option>
             </select>
           </div>
+
+          {mode === 'create' && (
+            <div className={styles.field}>
+              <label>Password *</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Set a password for doctor"
+              />
+            </div>
+          )}
 
           
           <div className={styles.licenseHeader}>
@@ -334,13 +358,6 @@ const AddDoctor: React.FC<AddDoctorModalProps> = ({
             </div>
           ))}
 
-          <div className={styles.infoNote}>
-            <Info size={16} />
-            <p>
-              Doctors will later assign their own facilities from the Doctor
-              Portal.
-            </p>
-          </div>
 
           {error && <div className={styles.errorMessage}>{error}</div>}
 

@@ -11,10 +11,12 @@ const FacilityTable = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [facilities, setFacilities] = useState<AddFacilityType[]>([]);
   const [selectedFacility, setSelectedFacility] = useState<AddFacilityType | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   
 
   const refreshFacilities = useCallback(async () => {
     try {
+      setLoadError(null);
       const res = await getFacilities();
       
       if (Array.isArray(res)) {
@@ -174,6 +176,8 @@ const FacilityTable = () => {
       } else console.warn('getFacilities returned non-array', res);
     } catch (err) {
       console.error('Failed to fetch facilities', err);
+      setLoadError(String((err as Error)?.message ?? err ?? 'Failed to load facilities'));
+      setFacilities([]);
     }
   }, []);
 
@@ -245,6 +249,13 @@ const FacilityTable = () => {
           + Add Facility
         </button>
       </div>
+
+      {loadError && (
+        <div style={{ background: '#ffe9e9', color: '#6b1b1b', padding: 12, borderRadius: 6, marginBottom: 12 }}>
+          <strong>Failed to load facilities:</strong> {String(loadError)}
+          <button style={{ marginLeft: 12 }} onClick={() => void refreshFacilities()}>Retry</button>
+        </div>
+      )}
 
       
       <div className={localStyles.grid}>
@@ -388,8 +399,7 @@ const FacilityTable = () => {
                 ? JSON.parse(JSON.stringify(source.roomDetails))
                 : (Array.isArray((backendPayload as Record<string, unknown>).roomDetails) ? JSON.parse(JSON.stringify((backendPayload as Record<string, unknown>).roomDetails)) : []);
 
-              
-              const normalizedRooms = (rawRoomDetails as Record<string, unknown>[]).map((rd) => {
+              let normalizedRooms = (rawRoomDetails as Record<string, unknown>[]).map((rd) => {
                 const sList = Array.isArray(rd['specialityList']) ? (rd['specialityList'] as unknown[]).map(String) : (Array.isArray(rd['specialityIds']) ? (rd['specialityIds'] as unknown[]).map(String) : []);
 
                 const sNames = sList.map((id) => {
@@ -412,7 +422,28 @@ const FacilityTable = () => {
                   specialityList: outSList,
                   specialityNames: outSNames,
                 } as unknown;
-              });
+                });
+
+                // If no roomDetails were returned/sent, synthesize per-room details from specialityList and noOfRooms
+                if ((!normalizedRooms || normalizedRooms.length === 0)) {
+                  const num = Number(source.noOfRooms ?? source.noOf_rooms ?? (backendPayload as Record<string, unknown>).noOfRooms ?? 1) || 1;
+                  const sListRaw = Array.isArray(source.specialityList) ? (source.specialityList as unknown[]).map(String) : (Array.isArray((backendPayload as Record<string, unknown>).specialityList) ? ((backendPayload as Record<string, unknown>).specialityList as unknown[]).map(String) : []);
+                  const synth: unknown[] = [];
+                  for (let i = 1; i <= num; i++) {
+                    const idx = i - 1;
+                    const sp = sListRaw[idx];
+                    const ids = sp ? [String(sp)] : [];
+                    const names = ids.map((id) => {
+                      const found = specialityMaster.find((spm) => String(spm['specialityMasterId'] ?? spm['speciality_master_id'] ?? spm['id'] ?? spm['code'] ?? '') === String(id));
+                      return found ? String(found['specialityName'] ?? found['speciality_name'] ?? found['name'] ?? id) : String(id);
+                    });
+                    const hasNonGp = names.some((n) => String(n) !== 'General Practice');
+                    const outIds = hasNonGp ? ids.filter((id, idx2) => String(names[idx2]) !== 'General Practice') : ids;
+                    const outNames = hasNonGp ? names.filter((n) => String(n) !== 'General Practice') : names;
+                    synth.push({ roomNumber: i, roomLabel: `Room ${i}`, specialityList: outIds, specialityNames: outNames });
+                  }
+                  normalizedRooms = synth;
+                }
 
               const stateDisplay = source.stateName ?? source.state ?? source.state_name ?? source.facilityCity ?? (backendPayload as Record<string, unknown>)?.facilityCity ?? (backendPayload as Record<string, unknown>)?.stateName ?? (backendPayload as Record<string, unknown>)?.state ?? (backendPayload as Record<string, unknown>)?.state_name ?? '';
 
