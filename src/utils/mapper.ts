@@ -104,6 +104,7 @@ export const mapDoctorPastAppointments = (
     const formattedTime = `${appt.startTime.slice(0, 5)} - ${appt.endTime.slice(0, 5)}`;
 
     return {
+      appointmentId: String(appt.appointmentId),
       patientName: appt.patientMaster.patientName,
       age: `${age}`,
       gender: appt.patientMaster.patientGender,

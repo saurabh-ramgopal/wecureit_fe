@@ -34,7 +34,8 @@ const SavedAvailabilitySummary = ({ savedlist }: SavedAvailabilitySummaryProps) 
 
   return (
     <div>
-  <div className={styles['saved-grid']}>
+       {savedlist && savedlist.length > 0 ? (
+     <div className={styles['saved-grid']}>
       {savedlist.map((item, index) => (
         <div key={index} className={styles['saved-card']}>
         <div className={styles['saved-dates']}>
@@ -73,6 +74,9 @@ const SavedAvailabilitySummary = ({ savedlist }: SavedAvailabilitySummaryProps) 
         </div>
       ))}
     </div>
+     ) : (
+    <p>No saved availability.</p>
+     )}
     </div>
 );
 }

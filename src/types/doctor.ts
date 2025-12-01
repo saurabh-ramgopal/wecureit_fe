@@ -85,8 +85,9 @@ export interface DoctorAvailability {
 export interface FacilityAvailabilityUI extends FacilityAvailability {
   facilityName: string;
   speciality?: FacilitySpeciality[];
-  facilityStreet?: string;  // optional
-  stateName?: string;       // optional
+  facilityStreet?: string; 
+  stateName?: string;   
+  stateCode?: string;
 }
 
 
@@ -167,6 +168,7 @@ export interface ScheduleDayUI {
 export type ScheduleUI = ScheduleDayUI[];
 
 export interface DoctorPastAppointmentsUI {
+  appointmentId: string;  
   patientName: string;
   age: string;         
   gender: string;   
@@ -177,4 +179,12 @@ export interface DoctorPastAppointmentsUI {
   location: string;
 }
 
+export interface SaveNotesRequest{
+appointmentId: string;
+appointmentNote: string;
+}
 
+export interface SaveAvailabilityResponse {
+  doctorId: number;
+  facilityList: FacilityAvailabilityUI[];
+}

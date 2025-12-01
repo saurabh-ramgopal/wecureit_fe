@@ -7,9 +7,9 @@ import DoctorSchedule from "@/components/DoctorDashboard/Schedule/DoctorSchedule
 import SetDoctorAvailability from '@/components/DoctorDashboard/SetAvailability/SetDoctorAvailabilityView/SetDoctorAvailabilityView';
 import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentNotesView/AppointmentNotesView';
 import { useRoleAuth } from "@/hooks/useRoleAuth";
-import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability } from '@/lib/api';
+import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability, saveNotes } from '@/lib/api';
 import { mapDoctorAPIToDoctor, mapDoctorPastAppointments, mapDoctorSchedule } from '@/utils/mapper';
-import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, DoctorScheduleAPIResponse, ScheduleDayUI,FacilityAvailabilityUI } from '@/types/doctor';
+import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, DoctorScheduleAPIResponse, ScheduleDayUI,FacilityAvailabilityUI, SaveAvailabilityResponse } from '@/types/doctor';
 import { logoutUser } from '@/lib/auth';
 import { LogOut } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -29,7 +29,7 @@ const DoctorDashboardPage: NextPage<Props> = () => {
     const [selectedFacility, setSelectedFacility] = useState<FacilityAvailabilityUI>({facilityId: "",  availableDate: "", availableStartTime: "", availableEndTime: "", facilityName: "",  speciality: [],  facilityStreet: "",  stateName: ""});
     const [doctorSchedule, setDoctorSchedule] = useState<ScheduleDayUI[]>([]);
     const [doctorPastAppointments, setDoctorPastAppointments] = useState<DoctorPastAppointmentsUI[]>([]);
-    const [savedAvailability, setSavedAvailability] = useState<DoctorAvailability>({doctorId: 0, facilityList: []});
+    const [savedAvailability, setSavedAvailability] = useState<SaveAvailabilityResponse | null>(null);
     useEffect(() => {
      if (!userId) return;
 
@@ -73,8 +73,8 @@ const DoctorDashboardPage: NextPage<Props> = () => {
           console.log("Mapped doctor past appointments:", doctorPastAppointments);
 
 
-          const savedAvailabilityRes = await getSavedDoctorAvailability(29366);
-          const savedAvailabilityData: DoctorAvailability = savedAvailabilityRes;
+          const savedAvailabilityRes = await getSavedDoctorAvailability(1006);
+          const savedAvailabilityData: SaveAvailabilityResponse = savedAvailabilityRes;
           setSavedAvailability(savedAvailabilityData);
           console.log("Fetched saved availability:", savedAvailabilityRes);
 
@@ -91,7 +91,7 @@ const DoctorDashboardPage: NextPage<Props> = () => {
   })();
   }, [userId]);
 
-   const onDateChange = (date: string) => {
+    const onDateChange = (date: string) => {
     console.log("Selected date from child:", date);
     setSelectedDate(date);
   };
@@ -137,6 +137,21 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
   toast.success("Availability added to draft list!" );
 
 }
+
+const handleSaveNotes= async (appointmentID: string,  notes: string ) => {
+    const payload = {
+    appointmentId: appointmentID,
+    appointmentNote: notes,
+  };
+  try {
+  await saveNotes(payload);
+  toast.success("Notes Saved Successfully!");
+} catch (error) {
+  console.error("Failed to save notes:", error);
+  toast.error("Failed to save notes");
+}   
+}
+
 const handleSaveAvailability = async () => {
   const payload: DoctorAvailability = {
     doctorId: doctor.doctorId,
@@ -149,10 +164,13 @@ const handleSaveAvailability = async () => {
   };
   console.log("Saving availability with payload:", payload);
   try {
+    
     const response = await setDoctorAvailability(payload);
-
+  
     toast.success("Availability saved successfully!");
+
     console.log("Set availability response:", response);
+    setAvailabilityList([]);
     return response;
 
   } catch (err) {
@@ -211,8 +229,8 @@ const handleSaveAvailability = async () => {
     />
       <div>
         {activeTab === "My Schedule" && <DoctorSchedule doctorScheduleList = {doctorSchedule}/>}
-        {activeTab === "Set Availability" && <SetDoctorAvailability onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} />}
-        {activeTab === "Appointments & Notes" && <AppointmentNotesView doctorPastAppointments={doctorPastAppointments} />}
+        {activeTab === "Set Availability" && <SetDoctorAvailability onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} savedAvailabilityList={savedAvailability?.facilityList || []}  />}
+        {activeTab === "Appointments & Notes" && <AppointmentNotesView doctorPastAppointments={doctorPastAppointments} onSaveNotes={handleSaveNotes} />}
       </div>
   </div>
   );

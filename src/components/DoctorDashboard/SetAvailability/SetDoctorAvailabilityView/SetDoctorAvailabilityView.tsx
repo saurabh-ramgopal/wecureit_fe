@@ -18,10 +18,11 @@ type SetDoctorAvailabilityProps = {
     onDelete: (index: number) => void;
     availabilityList: FacilityAvailabilityUI[];
     handleSaveAvailabilitySubmit: () => void;
+    savedAvailabilityList: FacilityAvailabilityUI[];
 
 }
 
-const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate, selectedFacilityId, onDateChange, handleFacilityChange, onDelete, availabilityList, handleSaveAvailabilitySubmit} : SetDoctorAvailabilityProps) => {
+const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate, selectedFacilityId, onDateChange, handleFacilityChange, onDelete, availabilityList, handleSaveAvailabilitySubmit, savedAvailabilityList} : SetDoctorAvailabilityProps) => {
   return (
     <>
     <div className={styles['setavailability-card']}>
@@ -50,7 +51,7 @@ const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate
     <div className={styles['setavailability-card']}>
        <SetAvailabilityHeader title = 'Saved Availability Summary'
        subtitle='Review your saved availability' />
-       <SavedAvailabilitySummary savedlist={availabilityList}  />
+       <SavedAvailabilitySummary savedlist={savedAvailabilityList}  />
     </div>
     </>
   );

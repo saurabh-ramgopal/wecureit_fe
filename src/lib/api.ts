@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { UnauthorizedError } from "./apiErrors";
 import router from "next/router";
-import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse } from "@/types/doctor"; 
+import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse } from "@/types/doctor"; 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -175,8 +175,15 @@ export async function getDoctorPastAppointments(doctorId: number): Promise<Docto
 }
 
 
-export async function getSavedDoctorAvailability(doctorId: number) : Promise<DoctorAvailability> {
+export async function getSavedDoctorAvailability(doctorId: number) : Promise<SaveAvailabilityResponse> {
   return apiCall(`/doctor/availability/getSummary?doctorId=${doctorId}`, { 
     method: 'GET',
+  });
+}
+
+export async function saveNotes(saveNotesData: SaveNotesRequest): Promise<boolean> {
+  return apiCall(`/doctor/appointments/addNote`, {
+    method: 'POST',
+    body: JSON.stringify(saveNotesData),
   });
 }
