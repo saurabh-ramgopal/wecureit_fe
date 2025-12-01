@@ -1,6 +1,6 @@
  'use client'
 import React, { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import toast from "react-hot-toast";
@@ -17,7 +17,8 @@ const PatientDashboardPage: NextPage = () => {
     const [authorized, setAuthorized] = useState(false);
     const [activeTab, setActiveTab] = useState("Home");
     const toastShownRef = useRef(false);
-      useEffect(() => {
+
+    useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         router.push("/patient/login");
@@ -47,6 +48,18 @@ const PatientDashboardPage: NextPage = () => {
 
     return () => unsubscribe();
   }, [router]);
+
+  // // Respect `?tab=...` query param so other pages can deep-link into a specific tab
+  // const searchParams = useSearchParams();
+  // useEffect(() => {
+  //   try {
+  //     const tab = searchParams?.get('tab');
+  //     if (tab) setActiveTab(tab);
+  //   } catch (e) {
+  //     // ignore
+  //   }
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [searchParams]);
 
 
   if (loading) {

@@ -4,6 +4,10 @@
 }
 .dashboardHeaderSection {
   padding: 1rem 1rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 
   .portalTitle {
     font-size: 28px;
@@ -104,8 +108,8 @@
 /* Content area to the right of the left tab block */
 .contentArea {
   /* leave space for left tab: left offset (40px) + tab width (270px) + gap (30px) = 340px */
-  margin-left: 500px;
-  margin-top: 30px; /* align roughly with the tab block vertical position */
+  margin-left: 300px;
+  margin-top: 25px; /* align roughly with the tab block vertical position */
   padding: 0 1rem;
 }
 
@@ -115,5 +119,41 @@
     margin-left: 0;
     margin-top: 12px;
     padding-top: 0;
+  }
+}
+
+/* When the viewport is reduced (e.g. DevTools docked) move the left tab into flow
+   so it won't overlap the content area. This covers medium widths between the
+   desktop layout and the mobile stacked layout. */
+@media (max-width: 1200px) {
+  .patientDashboard {
+    :global(.tab-navigation) {
+      position: static;
+      top: auto;
+      left: auto;
+      right: auto;
+      width: 100%;
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: none;
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      overflow-x: auto;
+
+      :global(.tab-button) {
+        margin: 0 6px;
+        width: auto;
+        max-width: none;
+        padding: 8px 12px;
+      }
+      :global(.tab-button .tab-label) {
+        display: inline-block;
+      }
+    }
+  }
+
+  .contentArea {
+    margin-left: 0;
   }
 }
