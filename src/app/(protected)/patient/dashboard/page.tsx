@@ -91,7 +91,7 @@ const PatientDashboardPage: NextPage = () => {
           <button
             type="button"
             onClick={handleSignOut}
-            className="btn btn-ghost"
+            className="btn btn-primary"
             aria-label="Sign out"
           >
             Sign Out
