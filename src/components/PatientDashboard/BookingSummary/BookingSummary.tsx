@@ -44,7 +44,7 @@ const ConfirmAppointment: React.FC = () => {
             </div>
           </section>
 
-          <section className={styles.card + ' ' + styles.paymentCard}>
+          {/* <section className={styles.card + ' ' + styles.paymentCard}>
             <h3 className={styles.cardTitle}>Payment Method</h3>
             <p className={styles.cardNote}>Payment will be collected at the facility</p>
 
@@ -53,17 +53,17 @@ const ConfirmAppointment: React.FC = () => {
               <div className={styles.noCardText}>No card saved</div>
               <button className={styles.addCardBtn}>Add Card</button>
             </div>
-          </section>
+          </section> */}
         </div>
 
         <aside className={styles.rightCol}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryHeader}><span className={styles.dollarIcon}>$</span> Cost Summary</div>
 
-            <div className={styles.alertBox}>
+            {/* <div className={styles.alertBox}>
               <span className={styles.alertIcon}>!</span>
               <div>Please add a payment card to complete your booking.</div>
-            </div>
+            </div> */}
 
             <div className={styles.totalsList}>
               <div className={styles.row}><div>Consultation Fee (15 min)</div><div>$75.00</div></div>

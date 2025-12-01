@@ -215,7 +215,15 @@ const MyProfile: React.FC = () => {
                                                             <button className="btn btn-primary" onClick={async () => {
                                                                 try {
                                                                     setLoading(true);
+
                                                                     const newVal = String(editing.value ?? myProfileData.email);
+                                                                    console.log('Validating email:', editing.value);
+                                                                    // require a Gmail address (ends with @gmail.com) and basic local-part presence
+                                                                    if (!/^[^\s@]+@gmail\.com$/i.test(newVal)) {
+                                                                        alert('Please enter a valid Gmail address ending with @gmail.com');
+                                                                        setLoading(false);
+                                                                        return;
+                                                                    }
                                                                     // PATCH may accept partial body with only email
                                                                     const updated = await updatePatient({ email: newVal });
                                                                     // backend may echo updated fields; fallback to newVal
@@ -248,8 +256,18 @@ const MyProfile: React.FC = () => {
                                                                 try {
                                                                     setLoading(true);
                                                                     const newVal = String(editing.value ?? myProfileData.phone);
-                                                                    const updated = await updatePatient({ phone: newVal });
-                                                                    setMyProfileData(prev => ({ ...prev, phone: updated.patientPhone ?? newVal }));
+
+                                                                    // basic US phone number validation (10 digits)
+                                                                    const cleaned = newVal.replace(/\D/g, '');  //Remove spaces
+                                                                    // console.log('Validating phone:', cleaned);
+                                                                    if (!/^\d{10}$/.test(cleaned)) {
+                                                                        alert('Please enter a valid 10-digit US phone number.');
+                                                                        setLoading(false);
+                                                                        return;
+                                                                    }
+                
+                                                                    const updated = await updatePatient({ phone: cleaned });
+                                                                    setMyProfileData(prev => ({ ...prev, phone: updated.patientPhone ?? cleaned }));
                                                                     setEditing({ field: null, value: null });
                                                                 } catch (err: unknown) {
                                                                     console.error('Failed to update phone', err);
