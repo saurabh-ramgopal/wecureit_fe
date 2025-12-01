@@ -1,54 +1,69 @@
-import React from "react";
-import "./AppointmentHistoryCard.scss";
-import {AppointmentHistory} from '../../../../types/schedule';
+import React, { useState } from "react";
+import styles from "./AppointmentHistoryCard.module.scss";
+import {DoctorPastAppointmentsUI} from '@/types/doctor';
 import { User, Calendar, Clock, FileText } from "lucide-react";
-
+import NotePopup from "../NotePopup/NotePopup";
+import { on } from "events";
 interface AppointmentHistoryCardProps {
-  appointmentHistory: AppointmentHistory;
+  appointmentHistory: DoctorPastAppointmentsUI;
+  onSaveNotes: (id: string, notes: string) => void;
 }
 
-const AppointmentHistoryCard: React.FC<AppointmentHistoryCardProps> = ({ appointmentHistory }) => {
+const AppointmentHistoryCard = ({ appointmentHistory, onSaveNotes }: AppointmentHistoryCardProps) => {
+   const [isPopupOpen, setIsPopupOpen] = useState(false);
+   
+  const handleOpenPopup = () => setIsPopupOpen(true);
+  const handleClosePopup = () => setIsPopupOpen(false);
+
+
   return (
-    <div className="appointmentHistory-card">
-      <div className="appointmentHistory-card__header">
-           <div className="appointmentHistory-card__name-container">
-            <User className="appointmentHistory-card__icon" size={15} />
+    <div className={styles['appointmentHistory-card']}>
+      <div className={styles['appointmentHistory-card__header']}>
+           <div className={styles['appointmentHistory-card__name-container']}>
+            <User className={styles['appointmentHistory-card__icon']} size={15} />
             <h4 >{appointmentHistory.patientName}</h4>
           </div>
-        <span className={`appointmentHistory-card__status ${appointmentHistory.status.toLowerCase()}`}>
+        {/* <span className={`appointmentHistory-card__status ${appointmentHistory.status.toLowerCase()}`}>
           {appointmentHistory.status}
-        </span>
+        </span> */}
       </div>
 
-      <div className="appointmentHistory-card__details">
-        <p className="appointmentHistory-card__age-gender">
+      <div className={styles['appointmentHistory-card__details']}>
+        <p className={styles['appointmentHistory-card__age-gender']}>
           {appointmentHistory.age && appointmentHistory.gender && `${appointmentHistory.age} years • ${appointmentHistory.gender}`}
         </p>
-        <div className="appointmentHistory-card__datetime">
-         <div className="appointmentHistory-card__linedate">
-              <Calendar className="appointmentHistory-card__icon" size={15} />
+        <div className={styles['appointmentHistory-card__datetime']}>
+         <div className={styles['appointmentHistory-card__linedate']}>
+              <Calendar className={styles['appointmentHistory-card__icon']} size={15} />
               <span>{appointmentHistory.date}</span>
             </div>
-            <div className="appointmentHistory-card__lineduration">
-               <div className="appointmentHistory-card__time">
-              <Clock className="appointmentHistory-card__icon" size={15} />
+            <div className={styles['appointmentHistory-card__lineduration']}>
+               <div className={styles['appointmentHistory-card__time']}>
+              <Clock className={styles['appointmentHistory-card__icon']} size={15} />
               <span>{appointmentHistory.time}</span>
               </div>
-                <span className="appointmentHistory-card__duration">
+                <span className={styles['appointmentHistory-card__duration']}>
                   {appointmentHistory.duration}
                 </span>
             </div>
         </div>
-       <div className="appointmentHistory-card__complaint">
-          <p className="complaint-label">Chief Complaint:</p>
-          <p className="complaint-text">{appointmentHistory.complaint}</p>
+       <div className={styles['appointmentHistory-card__complaint']}>
+          <p className={styles['complaint-label']}>Chief Complaint:</p>
+          <p className={styles['complaint-text']}>{appointmentHistory.complaint}</p>
         </div>
-        <p className="appointmentHistory-card__location">📍 {appointmentHistory.location}</p>
+        <p className={styles['appointmentHistory-card__location']}>📍 {appointmentHistory.location}</p>
       </div>
-      <button className="appointmentHistory-card__addnote-btn">
-        <FileText className="appointmentHistory-card__icon" size={16} />
+      <button className={styles['appointmentHistory-card__addnote-btn']}
+       onClick={handleOpenPopup} >
+        <FileText className={styles['appointmentHistory-card__icon']} size={16} />
         Add Note
       </button>
+      <NotePopup
+        patientDetails={appointmentHistory}
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+        onSave={onSaveNotes}
+      />
     </div>
   );
 };

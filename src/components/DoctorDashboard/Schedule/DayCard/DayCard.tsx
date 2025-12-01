@@ -1,45 +1,42 @@
 import React from 'react';
 // import AppointmentCard from './AppointmentCard';
-import './DayCard.scss';
-import {Day} from "../../../../types/schedule"
-import { Clock } from 'lucide-react';
+import styles from './DayCard.module.scss';
+import {ScheduleDayUI} from "../../../../types/doctor"
+import { Clock ,MapPin} from 'lucide-react';
 interface DayCardProps {
-  day: Day;
+  schedule: ScheduleDayUI; // now expects your UI-friendly schedule object
 }
 
-const DayCard: React.FC<DayCardProps> = ({ day }) => {
-    const hasAppointments = day.appointments.length > 0;
+const DayCard = ({ schedule }: DayCardProps) => {
   return (
-    <div className="day-card">
-      <div className="day-card__header">
-        <h3 className="day-card__short-date">{day.shortDate}</h3>
-        <p className="day-card__full-date">{day.fullDate}</p>
-     {hasAppointments && (
-    <div className="day-card__details">
-      <p className="day-card__location">{day.location}</p>
-      <p className="day-card__total-hours">{day.totalHours} total</p>
-    </div>
-  )}
-      </div> 
-
-      {hasAppointments ? (
-        
-        <div className="day-card__appointments">
-          {day.appointments.map((appt) => (
-            <div key={appt.id} className="appointment-card">
-              <p className="appointment-name">{appt.patientName}</p>
-              <p className="appointment-time">{appt.time}</p>
-              <p className="appointment-duration">{appt.duration}</p>
-              {appt.reason && <p className="appointment-reason">{appt.reason}</p>}
+     <div className={styles['day-card']}>
+      <div className={styles['day-card__header']}>
+        <h3 className={styles['day-card__short-date']}>{schedule.shortDate}</h3>
+        <p className={styles['day-card__full-date']}>{schedule.fullDate}</p>
+        <div className={styles['day-card__details']}>
+              <p className={styles['day-card__location']}>
+                <MapPin size={16} style={{ marginRight: '0.5rem', color:'var(--primary)' }} />
+                {schedule.location}
+              </p>
+              <p className={styles['day-card__total-hours']}>
+                <Clock size={16} style={{ marginRight: '0.5rem' }} />
+                {schedule.totalHours} total
+              </p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="day-card__no-appointments-center">
-          <Clock size={40} className="day-card__clock-icon" />
-          <p>No appointments</p>
-        </div>
-      )}
+      </div>
+
+      <div className={styles['day-card__appointments']}>
+        {schedule.appointments.map((appt) => (
+          <div key={appt.id} className={styles['appointment-card']}>
+            <div className={styles['appointment-header']}>
+              <p className={styles['appointment-name']}>{appt.patientName}</p>
+              <span className={styles['appointment-duration']}>{appt.duration}</span>
+            </div>
+            <p className={styles['appointment-time']}>{appt.time}</p>
+            {appt.reason && <p className={styles['appointment-reason']}>{appt.reason}</p>}
+          </div>
+        ))}
+      </div>
     </div>
 
   );

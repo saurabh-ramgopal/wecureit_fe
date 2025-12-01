@@ -1,45 +1,34 @@
-import firebase from "firebase/compat/app";
-import { convertSegmentPathToStaticExportFilename } from "next/dist/shared/lib/segment-cache/segment-value-encoding";
+import { getAuth } from "firebase/auth";
+import { UnauthorizedError } from "./apiErrors";
+import router from "next/router";
+import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse } from "@/types/doctor"; 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-// Read auth token issued by backend from localStorage
-function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('authToken');
+async function getFirebaseToken(): Promise<string | null> {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return null;
+  return user.getIdToken(); 
 }
 
-// Helper to get auth headers from a stored token (backend-issued)
-function getAuthHeaders(): HeadersInit {
-  const token = getStoredToken();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  return headers;
-}
-
-// Generic API call wrapper
 export async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const headers = getAuthHeaders();
+  const token = await getFirebaseToken();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
-    headers: {
-      ...headers,
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Token expired or invalid - redirect to login
-      if (typeof window !== 'undefined') window.location.href = '/login';
-      throw new Error('Authentication required');
+      throw new UnauthorizedError(); 
     }
     // Try to capture JSON error body, otherwise read text so we get stack traces
     let bodyText = '';
@@ -68,114 +57,33 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
   return response.json() as Promise<T>;
 }
 
+export async function handleApiCall<T>(apiFunc: () => Promise<T>): Promise<T | null> {
+  try {
+    return await apiFunc();
+  } catch (err: any) {
+    if (err instanceof UnauthorizedError) {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        router.push("/"); 
+        return null;
+      }
+      const tokenResult = await user.getIdTokenResult();
+      const role = tokenResult.claims.role || "patient"; 
+
+      if (role === "admin") router.push("/admin/login");
+      else if (role === "doctor") router.push("/doctor/login");
+      else router.push("/patient/login");
+      return null;
+    }
+    throw err;
+  }
+}
+
 // Public API calls (no auth required)
 export async function getDoctors() {
   // Use protected apiCall so Authorization header is attached when token exists
   return apiCall('/admin/getAllDoctors', { method: 'GET' });
-}
-
-// Patient registration (backend handles password hashing / storage)
-export async function registerPatient(data: {
-  email: string;
-  fullName: string;
-  phone: string;
-  dob: string;
-  gender: string;
-  firebaseUid: string,
-}) {
-  const response = await fetch(`${API_BASE_URL}/patient/registration`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: data.email,
-      name: data.fullName,
-      phone: data.phone,
-      dob: data.dob,
-      gender: data.gender,
-      firebaseUid: data.firebaseUid
-    }),
-  });
-
-  if (!response.ok) {
-    const errorData = (await response.json().catch(() => ({}))) as { message?: string };
-    throw new Error(errorData.message || 'Registration failed');
-  }
-  console.log(response);
-  return response.json();
-}
-
-// Login (backend authenticates and returns a token)
-export async function login(email: string, password: string, userType: string) {
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE_URL}/common/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        type: userType,
-      }),
-    });
-  } catch (err) {
-    // Network-level failure (server down, CORS, DNS, etc.)
-    console.error('Network error while calling /common/login', err);
-    throw new Error(`Network error: ${(err as Error).message || err}`);
-  }
-
-  if (!response.ok) {
-    // Try to parse JSON error body, but fall back to raw text so we get server stack/HTML
-    let bodyText = '';
-    try {
-      // attempt to parse JSON first
-      const json = await response.json().catch(() => null);
-      if (json && typeof json === 'object') {
-        const j = json as Record<string, unknown>;
-        const msgCandidate = j['message'] ?? j['reason'] ?? j['error'];
-        throw new Error(String(msgCandidate ?? `Login failed (${response.status})`));
-      }
-      // if not JSON, read as text
-      bodyText = await response.text().catch(() => '');
-    } catch {
-      // if json parsing threw, try to capture text
-      bodyText = bodyText || (await response.text().catch(() => ''));
-    }
-
-    const snippet = bodyText ? ` Response body: ${bodyText.slice(0, 200)}` : '';
-    throw new Error(`Login failed (${response.status})${snippet}`);
-  }
-
-  type LoginData = {
-    token?: string;
-    accessToken?: string;
-    jwt?: string;
-    name?: string;
-    user?: { name?: string };
-    [k: string]: unknown;
-  };
-
-  const loginData = (await response.json()) as LoginData;
-  const token = loginData.token ?? loginData.accessToken ?? loginData.jwt ?? '';
-
-  if (token && typeof window !== 'undefined') {
-    localStorage.setItem('authToken', String(token));
-    localStorage.setItem('userType', userType);
-  }
-
-  const userName = loginData.name ?? loginData.user?.name ?? email.split('@')[0];
-  return { loginData, token, userName };
-}
-
-// Logout
-export async function logout() {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userType');
-  }
 }
 
 // Protected API calls
@@ -189,13 +97,6 @@ export async function updatePatient(patientData: Record<string, unknown>) {
   return apiCall('/patient/addOrUpdate', {
     method: 'POST',
     body: JSON.stringify(patientData),
-  });
-}
-
-// Doctor API calls
-export async function getDoctorById(doctorId: number) {
-  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
-    method: 'GET',
   });
 }
 
@@ -265,3 +166,49 @@ export async function deleteFacility(payload: Record<string, unknown>) {
 }
 
 
+// Doctor Dashboard APIs
+
+export async function getDoctorById(doctorId: number) : Promise<DoctorAPIResponse> {
+  return apiCall(`/doctor/getById?doctorId=${doctorId}`, {
+    method: 'GET',
+  });
+}
+
+export async function getDoctorFacilities(doctorId: number): Promise<FacilityAPIResponse[]> {
+  return apiCall<FacilityAPIResponse[]>(`/doctor/facilities/getById?doctorId=${doctorId}`, {
+    method: "GET",
+  });
+}
+
+export async function setDoctorAvailability(availabilityData: DoctorAvailability) {
+  return apiCall('/doctor/availability/add', {
+    method: 'POST',
+    body: JSON.stringify(availabilityData),
+  });
+}
+
+export async function getDoctorSchedule(doctorId: number): Promise<DoctorScheduleAPIResponse> {
+  return apiCall(`/doctor/appointments/getNextTwoWeeks?doctorId=${doctorId}`, {
+    method: 'GET',
+  });
+}
+
+export async function getDoctorPastAppointments(doctorId: number): Promise<DoctorScheduleAPIResponse>  {
+  return apiCall(`/doctor/appointments/getAllPast?doctorId=${doctorId}`, { 
+    method: 'GET',
+  });
+}
+
+
+export async function getSavedDoctorAvailability(doctorId: number) : Promise<SaveAvailabilityResponse> {
+  return apiCall(`/doctor/availability/getSummary?doctorId=${doctorId}`, { 
+    method: 'GET',
+  });
+}
+
+export async function saveNotes(saveNotesData: SaveNotesRequest): Promise<boolean> {
+  return apiCall(`/doctor/appointments/addNote`, {
+    method: 'POST',
+    body: JSON.stringify(saveNotesData),
+  });
+}

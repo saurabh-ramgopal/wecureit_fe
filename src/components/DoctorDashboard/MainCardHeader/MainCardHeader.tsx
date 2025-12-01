@@ -1,19 +1,19 @@
 import React from 'react';
-import './MainCardHeader.scss';
+import styles from './MainCardHeader.module.scss';
 
 interface SetAvailabilityHeaderProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }
 
-const MainCardHeader: React.FC<SetAvailabilityHeaderProps> = ({ title, subtitle }) => {
+const MainCardHeader = ({ title, subtitle }: SetAvailabilityHeaderProps) => {
   return (
-    <div className="maincard-header">
-      <div className="maincard-header__text">
-        <h2 className="maincard-header__title">{title}</h2>
-        <p className="maincard-header__subtitle">
-         {subtitle}
-        </p>
+    <div className={styles['maincard-header']}>
+      <div className={styles['maincard-header__text']}>
+        <h2 className={styles['maincard-header__title']}>{title}</h2>
+          {subtitle && (
+      <p className={styles['maincard-header__subtitle']}>{subtitle}</p>
+          )}
       </div>
     </div>
   );

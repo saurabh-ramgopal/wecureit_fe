@@ -1,6 +1,5 @@
 'use client';
 import LoginCard from '@/components/LoginCard/LoginCard';
-import { login } from '@/lib/api';
 import { Stethoscope } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
@@ -34,6 +33,7 @@ const DoctorLoginPage = () => {
               }
       
         };    
+
   return (
     <div className="theme-doctor">
     <LoginCard

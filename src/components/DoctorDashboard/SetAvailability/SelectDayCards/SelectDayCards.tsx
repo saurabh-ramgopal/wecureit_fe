@@ -1,36 +1,60 @@
-import React from 'react';
+import React, { useState , useEffect} from 'react';
 import AvailabilityDayCard from '../AvailabilityDayCard/AvailabilityDayCard';
-import './SelectDayCards.scss';
+import styles from './SelectDayCards.module.scss';
 
 interface Day {
   dayName: string;   // "Wed"
   dateNumber: string; // "17"
   month: string;      // "Nov"
+  formattedDate: string; // "Wed, Nov 17"
+  isoDate: string;
+  
 }
-
-const generateCurrentWeek = (): Day[] => {
+type SelectDayCardsProps = {
+  onDateSelect: (date: string) => void;
+};
+const generateTwoWeeks = (): Day[] => {
   const today = new Date();
   const days: Day[] = [];
 
+  // Determine the upcoming Sunday (including today if it's Sunday)
+  const dayOfWeek = today.getDay(); // 0 = Sunday
+   const thisWeekSunday = new Date(today);
+  thisWeekSunday.setDate(today.getDate() - dayOfWeek);
+  
+  const startDate = new Date(thisWeekSunday);
+  startDate.setDate(thisWeekSunday.getDate() + 7);
+
+  // Generate 14 days starting from Sunday
   for (let i = 0; i < 14; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const month = date.toLocaleDateString('en-US', { month: 'short' });
     const dateNumber = date.getDate().toString();
-    days.push({ dayName, month, dateNumber });
+    const formattedDate = `${dayName}, ${month} ${dateNumber}`;
+    const isoDate = date.toISOString().split("T")[0];
+
+    days.push({ dayName, month, dateNumber, formattedDate, isoDate });
   }
 
   return days;
 };
 
-const SelectDayCards: React.FC = () => {
-  const weekDays = generateCurrentWeek();
+
+const SelectDayCards = ({onDateSelect} : SelectDayCardsProps) => {
+    const weekDays = generateTwoWeeks();
+    const [selectedDate, setSelectedDate] = useState<string>("");
+    const handleDateSelect = (isoDate: string) => {
+     setSelectedDate(isoDate);
+     onDateSelect(isoDate); 
+  };
 
   return (
-  <div className="setavailability-grid">
+  <div className={styles['setavailability-grid']}>
       {weekDays.map((day, i) => (
-        <AvailabilityDayCard key={i} day={day} />
+        <AvailabilityDayCard key={i} day={day} onDateSelect={() => handleDateSelect(day.isoDate)} selected={selectedDate === day.isoDate} />
       ))}
     </div>
   );

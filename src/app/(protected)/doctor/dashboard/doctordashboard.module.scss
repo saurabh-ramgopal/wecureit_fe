@@ -3,12 +3,49 @@
   min-height: 100vh;
 }
 .dashboardHeaderSection {
-  padding: 1rem 1rem 1rem;
+  padding: 2rem 0.3rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  .portalTitle {
-    font-size: 28px;
-    font-weight: 600;
-    color: #0891B2;
-    text-align: center;
-  }
+  .doctorInfo {
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+
+}
+.welcomeText {
+  font-size: 20px;
+  color: var(--text-primary);
+}
+.specialitiesText {
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px; // space between icon & text
+
+  background-color: var(--primary);
+  color: var(--text-white);
+  padding: 10px 20px;
+  border-radius: var(--radius-medium);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.25s ease;
+   &:hover {
+      background-color: var(--bg-hover, #06B6D4);
+    }
+}
+
+.logoutIcon {
+  display: flex;
+  align-items: center;
+}
+
 }
