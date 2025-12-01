@@ -60,7 +60,7 @@ const PatientDashboardPage: NextPage = () => {
   //   }
   // // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [searchParams]);
-
+  const { authorized, loading, userId, role } = useRoleAuth({ allowedRoles: ['patient'] });
 
   if (loading) {
     return (
