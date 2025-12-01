@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./PatientHome.module.scss";
 import { FiCalendar, FiClock, FiMapPin } from "react-icons/fi";
@@ -26,10 +26,77 @@ const sampleAppointments: Appointment[] = [
   },
 ];
 
+
 export default function PatientHome() {
   const router = useRouter();
   const handleBook = () => router.push("/patient/dashboard/dropdownselection");
   const handleCancel = (id: string) => console.log("Cancel appointment", id);
+
+
+  // Function to get patient ID from localStorage or Firebase token claims
+  const getPatientId = async (): Promise<string | null> => {
+        // 1) quick-local check (set this at login)
+        const fromStorage = window.localStorage.getItem('patientId');
+        if (fromStorage) return fromStorage;
+        try {
+          const { getAuth } = await import('firebase/auth');
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (user) {
+            const token = await user.getIdTokenResult();
+            // assuming backend set `patientMasterId` as a custom claim
+            const claimId = token.claims.patientMasterId;
+            if (claimId) return String(claimId);
+          }
+        } catch (e) {
+          // ignore if firebase isn't configured here; fallback remains localStorage
+          console.warn('Failed to get patientId from Firebase token claims', e);
+        }
+
+        return null;
+    };
+
+  const getCardAvailability = async () : Promise<boolean> => {
+
+    // Simulate an API call to check card availability
+    const patientId = await getPatientId();
+    if (!patientId) {
+      // no patient id available; treat as no card available
+      return false;
+    }
+    const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080').replace(/\/$/, '');
+    
+    const cardUrl = `${apiBase}/cards/getcards?patientId=${encodeURIComponent(patientId)}`;
+    const cardRes =  await fetch (cardUrl, { credentials: 'include'});
+
+    if (!cardRes.ok) {
+        throw new Error(`Server returned ${cardRes.status}`);
+    }
+    const cardData = await cardRes.json();
+    console.log('Fetched card data:', cardData);
+    if (cardData.length > 0) {
+      return true;
+    }
+    return false;
+  };
+
+  const [hasCard, setHasCard] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const available = await getCardAvailability();
+        if (mounted) setHasCard(available);
+      } catch (e) {
+        console.error('Error checking card availability', e);
+        if (mounted) setHasCard(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  },);
 
   return (
     <div className={styles.container}>
@@ -38,29 +105,34 @@ export default function PatientHome() {
         <p>Manage your appointments and health information</p>
       </div>
 
-      <div className={styles.bookBox}>
-        <svg
-          aria-hidden
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
 
-        <h3>Need to see a doctor?</h3>
-        <p>Book an appointment with our specialists</p>
+      {hasCard ? (
+          <>
+            <div className={styles.bookBox}>
+        
+              <h3>Need to see a doctor?</h3>
+              <p>Book an appointment with our specialists</p>
 
-        <button onClick={handleBook} className={styles.bookBtn}>
-          Book New Appointment
-        </button>
-      </div>
+              <button onClick={handleBook} className={styles.bookBtn}>
+                Book New Appointment
+              </button>
+            </div>
+          </>
+        ): (
+          <>
+            <div className={styles.bookBox}>
+        
+
+              <h3>Need to see a doctor?</h3>
+              <p>Please add a card in your profile to book an appointment.</p>
+
+              {/* <button onClick={() => router.push('/patient/dashboard?tab=MyProfile')} className={styles.bookBtn}>
+                Add Card
+              </button> */}
+            </div>
+          </>
+        )}
+      
 
       <div className={styles.upcoming}>
         <div className={styles.upcomingCard}>

@@ -16,7 +16,14 @@ const MyProfile: React.FC = () => {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
+    const [editing, setEditing] = useState<{ field: 'email' | 'phone' | null, value: string | null }>({ field: null, value: null });
+    const [card, setCard] = useState({
+        ccNumber: '',
+        ccExpiry: '',
+        cvv: '',
+    });
+    const [cardEditing, setCardEditing] = useState(false);
+    
 
     const getPatientId = async (): Promise<string | null> => {
         // 1) quick-local check (set this at login)
@@ -115,12 +122,12 @@ const MyProfile: React.FC = () => {
                 
                 const res = await fetch(url, { credentials: 'include' });
                 
-                if (!res.ok) {
-                    // attempt to capture body for debugging
-                    throw new Error(`Server returned ${res.status}`);
-                }
+                // if (!res.ok) {
+                //     // attempt to capture body for debugging
+                //     throw new Error(`Server returned ${res.status}`);
+                // }
                 const data = await res.json();
-
+                // console.log('Fetched patient profile data:', data);
                 // Fetch card info separately
                 const cardUrl = `${apiBase}/cards/getcards?patientId=${encodeURIComponent(patientId)}`;
                 const cardRes =  await fetch (cardUrl, { credentials: 'include'});
@@ -158,13 +165,7 @@ const MyProfile: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const [editing, setEditing] = useState<{ field: 'email' | 'phone' | null, value: string | null }>({ field: null, value: null });
-    const [card, setCard] = useState({
-        ccNumber: '',
-        ccExpiry: '',
-        cvv: '',
-    });
-    const [cardEditing, setCardEditing] = useState(false);
+    
 
     // const maskCard = (num: string) => {
     //     const cleaned = String(num).replace(/\D/g, '');
