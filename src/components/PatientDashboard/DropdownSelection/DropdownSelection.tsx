@@ -28,58 +28,58 @@ export default function BookingForm({
   setSelectedSpecialty,
 }: Props) {
   return (
-      <div className="space-y-8">
-      <div className={styles.field}>
-        <label className={styles.labelWithIcon}>
-          <FiUser className="text-red-600" />
-          <span>Select Doctor</span>
-        </label>
-        <select
-          value={selectedDoctor}
-          onChange={(e) => setSelectedDoctor(e.target.value)}
-          className={styles.selectInput}
-        >
-          <option value="">Choose a doctor</option>
-          {/* placeholder options - value set to display label so summary shows name */}
-          <option value="Dr. Sarah Johnson">Dr. Sarah Johnson</option>
-          <option value="Dr. Amit Patel">Dr. Amit Patel</option>
-        </select>
-        <div className="text-sm text-gray-600 mt-2">{doctorsCount} doctors available</div>
-      </div>
+      <div className={styles.selectionGrid}>
+  <div className={styles.field}>
+    <label className={styles.labelWithIcon}>
+      <FiUser className="text-red-600" />
+      <span>Select Doctor</span>
+    </label>
+    <select
+      value={selectedDoctor}
+      onChange={(e) => setSelectedDoctor(e.target.value)}
+      className={styles.selectInput}
+    >
+      <option value="">Choose a doctor</option>
+      <option value="Dr. Sarah Johnson">Dr. Sarah Johnson</option>
+      <option value="Dr. Amit Patel">Dr. Amit Patel</option>
+    </select>
+    <div className={styles.countText}>{doctorsCount} doctors available</div>
+  </div>
 
-      <div className={styles.field}>
-        <label className={styles.labelWithIcon}>
-          <FiMapPin className="text-red-600" />
-          <span>Select Facility</span>
-        </label>
-        <select
-          value={selectedFacility}
-          onChange={(e) => setSelectedFacility(e.target.value)}
-          className={styles.selectInput}
-        >
-          <option value="">Choose a facility</option>
-          <option value="Downtown Medical Center">Downtown Medical Center</option>
-          <option value="Westside Clinic">Westside Clinic</option>
-        </select>
-        <div className="text-sm text-gray-600 mt-2">{facilitiesCount} facilities available</div>
-      </div>
+  <div className={styles.field}>
+    <label className={styles.labelWithIcon}>
+      <FiMapPin className="text-red-600" />
+      <span>Select Facility</span>
+    </label>
+    <select
+      value={selectedFacility}
+      onChange={(e) => setSelectedFacility(e.target.value)}
+      className={styles.selectInput}
+    >
+      <option value="">Choose a facility</option>
+      <option value="Downtown Medical Center">Downtown Medical Center</option>
+      <option value="Westside Clinic">Westside Clinic</option>
+    </select>
+    <div className={styles.countText}>{facilitiesCount} facilities available</div>
+  </div>
 
-      <div className={styles.field}>
-        <label className={styles.labelWithIcon}>
-          <FaStethoscope className="text-red-600" />
-          <span>Select Specialty</span>
-        </label>
-        <select
-          value={selectedSpecialty}
-          onChange={(e) => setSelectedSpecialty(e.target.value)}
-          className={styles.selectInput}
-        >
-          <option value="">Choose a specialty</option>
-          <option value="General Practice">General Practice</option>
-          <option value="Cardiology">Cardiology</option>
-        </select>
-        <div className={styles.countText}>{specialtiesCount} specialties available</div>
-      </div>
-    </div>
+  <div className={styles.field}>
+    <label className={styles.labelWithIcon}>
+      <FaStethoscope className="text-red-600" />
+      <span>Select Specialty</span>
+    </label>
+    <select
+      value={selectedSpecialty}
+      onChange={(e) => setSelectedSpecialty(e.target.value)}
+      className={styles.selectInput}
+    >
+      <option value="">Choose a specialty</option>
+      <option value="General Practice">General Practice</option>
+      <option value="Cardiology">Cardiology</option>
+    </select>
+    <div className={styles.countText}>{specialtiesCount} specialties available</div>
+  </div>
+</div>
+
   );
 }

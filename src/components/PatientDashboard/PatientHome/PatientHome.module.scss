@@ -1,303 +1,272 @@
 .container {
-	width: 100%;
-	padding: 1rem 1.5rem;
+  width: 100%;
 }
 
 .container > * + * {
-  margin-top: 1.5rem; 
+  margin-top: var(--space-xl, 2rem); 
 }
 
 .welcomeBanner {
-		border-radius: 18px;
-		padding: 2.5rem 3rem;
-		background: var(--patient-welcome-bg, #fff6f6);
-		border: 1px solid rgba(239, 68, 68, 0.12);
-		color: var(--patient-welcome-color, #b91c1c);
-		min-height: 110px; 
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		box-shadow: 0 1px 0 rgba(16,24,40,0.02);
+  border-radius: var(--radius-xlarge, 1.125rem);
+  padding: var(--space-md, 0.5rem) var(--space-large, 2rem) var(--space-xl, 3rem) var(--space-large, 2rem);
+  background: var(--bg-light, var(--bg-page, #fff6f6));
+  border: 1px solid var(--border-light, rgba(239,68,68,0.12));
+  color: var(--primary, #dc2626);
+  min-height: 110px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
-		h2 {
-				font-size: 42px;
-				line-height: 1.02;
-				font-weight: 700;
-				color: #dc2626;
-				margin: 0 0 0.5rem 0;
-		}
+  h2 {
+    font-size: var(--fs-h2, 2.5rem);
+    line-height: 1.86;
+    font-weight: var(--fw-bold, 700);
+    color: var(--primary, #dc2626);  }
 
-		p {
-			margin: 0;
-			font-size: 20px;
-			color: #6b6b6b;
-			opacity: 0.95;
-		}
+  p {
+    margin: 0;
+    font-size: var(--fs-h5, 1.5rem);
+    color: var(--text-secondary, #6b7280);
+    opacity: 0.95;
+  }
 }
 
 .bookBox {
-	border-radius: 14px;
-	padding: 3rem 2.5rem;
-	box-shadow: 0 1px 0 rgba(16,24,40,0.04), 0 6px 16px rgba(16,24,40,0.04);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	min-height: 200px;
-	width: 100%;
-	background: #ffffff;
-	border: 1px solid rgba(15,23,42,0.04);
+  border-radius: var(--radius-medium, 0.5rem);
+  padding: var(--space-xl, 3rem) var(--space-large, 2.5rem);
+  border: 1px solid var(--border-light, #FECACA); 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 200px;
+  width: 100%;
+  background: var(--bg-card, #ffffff);
 
-	
-	svg {
-		width: 56px !important;
-		height: 56px !important;
-		flex-shrink: 0;
-		color: #dc2626;
-		margin-bottom: 1rem;
-	}
+  svg {
+    width: 56px !important;
+    height: 56px !important;
+    flex-shrink: 0;
+    color: var(--primary, #dc2626);
+    margin-bottom: var(--space-sm, 0.5rem);
+  }
 
-	h3 {
-		margin-top: 0.6rem;
-		font-size: 1.25rem; 
-		color: #111827;
-		font-weight: 600;
-	}
+  h3 {
+    margin-top: var(--space-xxs, 0.25rem);
+    font-size: var(--fs-h4, 1.25rem); 
+    color: var(--text-primary, #111827);
+    font-weight: var(--fw-semibold, 600);
+  }
 
-	p {
-		margin-top: 0.5rem;
-		font-size: 1rem; 
-		color: #6b7280;
-	}
+  p {
+    margin-top: var(--space-xs, 0.25rem);
+    font-size: var(--fs-h5, 1rem); 
+    color: var(--text-secondary, #6b7280);
+  }
 
-	
-	.bookBtn {
-		margin-top: 1.25rem;
-		background: #dc2626;
-		color: #ffffff;
-		font-weight: 600;
-		padding: 0.7rem 2.5rem;
-		border-radius: 12px;
-		border: none;
-		cursor: pointer;
-		box-shadow: none;
-		transition: background 150ms ease;
-	}
+  .bookBtn {
+    margin-top: var(--space-sm, 0.75rem);
+    background: var(--primary, #dc2626);
+    color: var(--text-white, #ffffff);
+    font-weight: var(--fw-semibold, 600);
+	font-size: var(--fs-h6, 1.125rem);
+    padding: 0.7rem 2.5rem;
+    border-radius: var(--radius-medium, 0.65rem);
+    border: none;
+    cursor: pointer;
+    box-shadow: none;
+  }
 
-	.bookBtn:hover {
-		background: #b91c1c; 
-	}
+  .bookBtn:hover {
+    background: var(--dark, #b91c1c);
+  }
 }
 
 .upcoming {
-	border-radius: 14px;
-	padding: 1rem; 
-	position: relative;
-	width: 100%;
+  border-radius: var(--radius-medium, 0.5rem);
+  padding: var(--space-md, 1rem); 
+  position: relative;
+  width: 100%;
 }
 
 .upcomingInner {
-	margin-top: 1rem;
+  margin-top: var(--space-sm, 1rem);
 }
 
 .upcomingCard {
-	background: #ffffff;
-	border-radius: 16px;
-	border: 1px solid rgba(239,68,68,0.04);
-	padding: 3rem 2.5rem ;
-	position: relative;
-	width: 100%;
-	box-sizing: border-box;
+  background: var(--bg-card, #ffffff);
+  border-radius: var(--radius-medium, 0.5rem);
+  border: 1px solid var(--border-light, rgba(239,68,68,0.04));
+  padding: var(--space-xxl, 3rem) var(--space-xl, 2.5rem);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .upcomingCardInner {
-	margin-top: 1rem;
-	border-radius: 12px;
-	padding: 0;
-	background: transparent;
+  margin-top: var(--space-sm, 1rem);
+  border-radius: var(--radius-small, 0.65rem);
+  padding: 0;
+  background: transparent;
 }
 
 .apptCard {
-	border-radius: 12px;
-	padding: 1rem;
-	background: #ffffff;
-	border: 1px solid rgba(239,68,68,0.06);
-	margin-bottom: 1rem;
-	box-shadow: 0 1px 0 rgba(16,24,40,0.02);
+  border-radius: var(--radius-small, 0.65rem);
+  padding: var(--space-sm, 1rem);
+  background: var(--bg-card, #ffffff);
+  border: 1px solid rgba(var(--primary-rgb,239,68,68),0.06);
+  margin-bottom: var(--space-sm, 1rem);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+  position: relative;
 
-	position: relative;
-
-	
-	svg {
-		width: 18px !important;
-		height: 18px !important;
-		flex-shrink: 0;
-	}
-
+  svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0;
+  }
 }
 
-/* Layout helpers used by the component markup (migrated from Tailwind) */
+/* Layout helpers */
 .apptHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .upcomingTitle {
-	font-size: 1rem;
-	font-weight: 600;
-	margin: 0 0 0.25rem 0;
+  font-size: var(--fs-body, 1rem);
+  font-weight: var(--fw-semibold, 600);
+  margin: 0 0 var(--space-xxs, 0.25rem) 0;
 }
 
 .subtitle {
-	margin: 0;
-	color: #6b7280;
-	font-size: 0.95rem;
+  margin: 0;
+  color: var(--text-secondary, #6b7280);
+  font-size: var(--fs-label, 0.875rem);
 }
 
 .stackSpacing {
-	margin-top: 1rem;
+  margin-top: var(--space-sm, 1rem);
 }
 
 .stackSpacing > * + * {
-	margin-top: 1rem;
+  margin-top: var(--space-sm, 1rem);
 }
 
 .apptBody {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm, 1rem);
 }
 
 .infoCol {
-	flex: 1 1 75%;
-	max-width: 75%;
+  flex: 1 1 75%;
+  max-width: 75%;
 }
 
 .rightText {
-	text-align: right;
-	flex: 0 0 auto;
+  text-align: right;
+  flex: 0 0 auto;
 }
 
 .fontMedium {
-	font-weight: 600;
-	color: #111827;
+  font-weight: var(--fw-semibold, 600);
+  color: var(--text-primary, #111827);
 }
 
-.marginTop3 { margin-top: 0.75rem; }
+.marginTop3 { margin-top: var(--space-m, 0.75rem); }
 
 .infoRow {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	color: #374151;
-	margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.75rem);
+  color: var(--text-primary, #374151);
+  margin-bottom: var(--space-xs, 0.5rem);
 }
 
 .infoRow svg {
-	width: 18px !important;
-	height: 18px !important;
-	flex-shrink: 0;
-	display: inline-block;
-	color: #dc2626 !important; 
-}
-
-.welcomeBanner svg {
-	
-	width: 26px !important;
-	height: 26px !important;
-}
-
-.apptCard {
-	font-size: 14px;
-	color: #374151;
-}
-
-.bookBox h3 {
-	font-size: 1.125rem; 
-}
-
-.bookBox p {
-	color: #6b7280;
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0;
+  display: inline-block;
+  color: var(--primary, #dc2626) !important; 
 }
 
 .deptBadge {
-	display: inline-block;
-	background: #ffffff;
-	color: #dc2626;
-	font-size: 0.85rem;
-	padding: 0.25rem 0.6rem;
-	border-radius: 9999px;
-	border: 1px solid rgba(239,68,68,0.12);
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	box-shadow: none;
+  display: inline-block;
+  background: var(--bg-card, #ffffff);
+  color: var(--primary, #dc2626);
+  font-size: var(--fs-small, 0.85rem);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(var(--primary-rgb,239,68,68),0.12);
+  position: absolute;
+  top: var(--space-sm, 1rem);
+  right: var(--space-sm, 1rem);
 }
 
 .warning {
-	background: #fffbeb;
-	border: 1px solid #fef3c7;
-	color: #92400e;
-	border-radius: 8px;
-	padding: 0.75rem 1rem;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
+  background: var(--status-light-warning, #FEF3C7);
+  border: 1px solid var(--status-light-warning, #FEF3C7);
+  color: var(--status-warning, #F59E0B);
+  border-radius: var(--radius-small, 0.65rem);
+  padding: var(--space-xs, 0.75rem) var(--space-md, 1rem);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 0.5rem);
 }
 
 .warnIcon {
-	display: inline-flex;
-	width: 28px;
-	height: 28px;
-	align-items: center;
-	justify-content: center;
-	border-radius: 8px;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-small, 0.65rem);
 }
 
 .cancelBtn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-	color: #b91c1c;
-	background: #fff1f1; 
-	border: 1px solid rgba(185,28,28,0.06);
-	border-radius: 10px;
-	padding: 0.75rem 0.9rem;
-	text-align: center;
-	font-weight: 600;
-	cursor: pointer;
-	gap: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--text-error, #b91c1c);
+  background: var(--status-light-error, #FEE2E2);
+  border: 1px solid rgba(var(--text-error-rgb,185,28,28),0.06);
+  border-radius: var(--radius-small, 0.65rem);
+  padding: var(--space-xs, 0.75rem) var(--space-sm, 0.9rem);
+  text-align: center;
+  font-weight: var(--fw-semibold, 600);
+  cursor: pointer;
+  gap: var(--space-xs, 0.5rem);
 }
 
 .cancelIcon {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 22px;
-	height: 22px;
-	border-radius: 9999px;
-	border: 1px solid rgba(185,28,28,0.12);
-	background: #fff;
-	color: #b91c1c;
-	font-size: 12px;
-	line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(var(--text-error-rgb,185,28,28),0.12);
+  background: var(--text-white, #fff);
+  color: var(--text-error, #b91c1c);
+  font-size: var(--fs-small, 12px);
+  line-height: 1;
 }
 
 .countBadge {
-	width: 28px;
-	height: 28px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 9999px;
-	background: #fee2e2;
-	color: #b91c1c;
-	font-weight: 700;
-	position: absolute;
-	top: 0.75rem;
-	right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--status-light-error, #FEE2E2);
+  color: var(--text-error, #b91c1c);
+  font-weight: var(--fw-bold, 700);
+  position: absolute;
+  top: var(--space-xs, 0.75rem);
+  right: var(--space-xs, 0.75rem);
 }
-
