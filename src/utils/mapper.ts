@@ -1,4 +1,5 @@
 import { DoctorAPIResponse, Doctor, Speciality, DoctorScheduleAPIResponse, DoctorPastAppointmentsUI} from '@/types/doctor';
+import {formatPlainDate} from "../utils/utils"
 
 export const mapDoctorAPIToDoctor = (apiDoctor: DoctorAPIResponse): Doctor => ({
   doctorId: apiDoctor.doctorMasterId,
@@ -50,25 +51,13 @@ export const mapDoctorSchedule = (apiData: DoctorScheduleAPIResponse) => {
         patientName: a.patientMaster.patientName,
         duration: `${a.duration} min`,
         time: `${a.startTime.slice(0,5)} - ${a.endTime.slice(0,5)}`,
-        reason: a.appointmentNotes || 'N/A'
       }));
 
-      const dateObj = new Date(dateStr);
-     const options: Intl.DateTimeFormatOptions = { 
-        weekday: 'short',  
-        month: 'short',    
-        day: 'numeric' 
-      };
-
-      const fullOptions: Intl.DateTimeFormatOptions = { 
-          month: 'long', 
-          day: 'numeric', 
-          year: 'numeric' 
-        };
+     const { shortDate, fullDate } = formatPlainDate(dateStr);
 
       return {
-        shortDate: dateObj.toLocaleDateString('en-US', options),
-        fullDate: dateObj.toLocaleDateString('en-US', fullOptions),
+        shortDate,
+        fullDate,
         location: appts[0].doctorFacilityAvailability.facilityMaster.facilityName,
         totalHours: `${totalHours.toFixed(1)} hours`,
         appointments
@@ -92,26 +81,17 @@ export const mapDoctorPastAppointments = (
       return new Date(diff).getUTCFullYear() - 1970;
     })();
 
-    // Format date → "Sunday, November 2, 2025"
-    const formattedDate = new Date(appt.date).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-
-    // Format time → "13:00 - 13:45"
-    const formattedTime = `${appt.startTime.slice(0, 5)} - ${appt.endTime.slice(0, 5)}`;
-
+     const formattedDate = formatPlainDate(appt.date);
+      const formattedTime = `${appt.startTime.slice(0,5)} - ${appt.endTime.slice(0,5)}`;
     return {
       appointmentId: String(appt.appointmentId),
       patientName: appt.patientMaster.patientName,
       age: `${age}`,
       gender: appt.patientMaster.patientGender,
-      date: formattedDate,
+      date: formattedDate.fullDate,
       time: formattedTime,
       duration: `${appt.duration} min`,
-      complaint: "N/A",
+      complaint: appt.appointmentNotes,
       location: appt.doctorFacilityAvailability.facilityMaster.facilityName,
     };
   });

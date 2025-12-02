@@ -4,6 +4,7 @@
   gap: 1rem;                             // space between cards
   padding: 0.3rem 0;
 
+
   @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr); // 3 cards per row on smaller screens
   }
@@ -15,4 +16,12 @@
   @media (max-width: 480px) {
     grid-template-columns: 1fr;           // 1 card per row on mobile
   }
+}
+
+  .no-appointments {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
 }

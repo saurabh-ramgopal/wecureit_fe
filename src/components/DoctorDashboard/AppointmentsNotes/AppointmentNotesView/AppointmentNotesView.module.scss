@@ -5,11 +5,26 @@
   padding: 1rem 1.5rem;
   margin-top: 1.5rem;
   border: 2px solid var(--border-light);
-    &__list {
+
+  &__list {
     margin-top: 1.5rem;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+
+    &__list_empty {
+      display: flex;             
+      justify-content: center;   
+      align-items: center;       
+      height: 200px;             
+    }
+  }
+
+  &__no-appointments {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
   }
 }
-

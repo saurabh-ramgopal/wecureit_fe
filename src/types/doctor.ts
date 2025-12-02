@@ -175,8 +175,8 @@ export interface DoctorPastAppointmentsUI {
   date: string;        
   time: string;         
   duration: string;    
-  complaint: string;
   location: string;
+  complaint: string | null;
 }
 
 export interface SaveNotesRequest{
@@ -187,4 +187,9 @@ appointmentNote: string;
 export interface SaveAvailabilityResponse {
   doctorId: number;
   facilityList: FacilityAvailabilityUI[];
+}
+
+export interface FormattedDate{
+ shortDate: string; // e.g., "Mon, Jan 1"
+  fullDate: string;  // e.g., "January 1, 2024"
 }
