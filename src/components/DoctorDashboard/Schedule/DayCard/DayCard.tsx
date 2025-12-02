@@ -13,6 +13,7 @@ const DayCard = ({ schedule }: DayCardProps) => {
       <div className={styles['day-card__header']}>
         <h3 className={styles['day-card__short-date']}>{schedule.shortDate}</h3>
         <p className={styles['day-card__full-date']}>{schedule.fullDate}</p>
+        </div>
         <div className={styles['day-card__details']}>
               <p className={styles['day-card__location']}>
                 <MapPin size={16} style={{ marginRight: '0.5rem', color:'var(--primary)' }} />
@@ -23,8 +24,6 @@ const DayCard = ({ schedule }: DayCardProps) => {
                 {schedule.totalHours} total
               </p>
             </div>
-      </div>
-
       <div className={styles['day-card__appointments']}>
         {schedule.appointments.map((appt) => (
           <div key={appt.id} className={styles['appointment-card']}>
@@ -33,12 +32,11 @@ const DayCard = ({ schedule }: DayCardProps) => {
               <span className={styles['appointment-duration']}>{appt.duration}</span>
             </div>
             <p className={styles['appointment-time']}>{appt.time}</p>
-            {appt.reason && <p className={styles['appointment-reason']}>{appt.reason}</p>}
+     
           </div>
         ))}
       </div>
-    </div>
-
+      </div>
   );
 };
 

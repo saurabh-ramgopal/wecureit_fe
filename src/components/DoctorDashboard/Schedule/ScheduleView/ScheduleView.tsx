@@ -8,8 +8,14 @@ interface ScheduleViewProps {
 }
 
 const ScheduleView = ({ schedule }: ScheduleViewProps) => {
-  // Slice the schedule array to get 7 days per week
-  const weekDays = schedule || [];
+  
+  if (!schedule || schedule.length === 0) {
+    return (
+      <p  className={styles['no-appointments']}>
+        No appointments booked yet.
+      </p>
+    );
+  }
 
   return (
     <div className={styles['schedule-view']}>

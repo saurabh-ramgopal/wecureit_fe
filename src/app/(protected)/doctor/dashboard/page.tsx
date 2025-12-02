@@ -9,7 +9,7 @@ import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes
 import { useRoleAuth } from "@/hooks/useRoleAuth";
 import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability, saveNotes } from '@/lib/api';
 import { mapDoctorAPIToDoctor, mapDoctorPastAppointments, mapDoctorSchedule } from '@/utils/mapper';
-import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, DoctorScheduleAPIResponse, ScheduleDayUI,FacilityAvailabilityUI, SaveAvailabilityResponse } from '@/types/doctor';
+import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, ScheduleDayUI,FacilityAvailabilityUI, SaveAvailabilityResponse } from '@/types/doctor';
 import { logoutUser } from '@/lib/auth';
 import { LogOut } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -30,67 +30,99 @@ const DoctorDashboardPage: NextPage<Props> = () => {
     const [doctorSchedule, setDoctorSchedule] = useState<ScheduleDayUI[]>([]);
     const [doctorPastAppointments, setDoctorPastAppointments] = useState<DoctorPastAppointmentsUI[]>([]);
     const [savedAvailability, setSavedAvailability] = useState<SaveAvailabilityResponse | null>(null);
-    useEffect(() => {
-     if (!userId) return;
+    
+     const handleTabClick = async (tabLabel: string) => {
+      setActiveTab(tabLabel);
+      try {
+          switch (tabLabel) {
+            case "My Schedule":
+              await fetchDoctorSchedule(Number(userId));
+              break;
+            case "Set Availability":
+              await fetchSavedAvailability(Number(userId));
+              break;
+            case "Appointments & Notes":
+              await fetchPastAppointments(Number(userId));
+              break;
+            default:
+              break;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch data for tab "${tabLabel}":`, error);
+        }
 
-    const numericId = Number(userId);
-    if (isNaN(numericId)) {
-      console.error("Invalid doctorId");
-      return;
-    }
-
-     const fetchDoctor = async () => {
+  };
+    const fetchDoctor = async (doctorId: number) => {
     try {
-      setIsDoctorLoading(true);
-
-      const response = await getDoctorById(numericId); 
+      const response = await getDoctorById(doctorId); 
       const mappedDoctor = mapDoctorAPIToDoctor(response);
       setDoctor(mappedDoctor);
       console.log("Fetched doctor:", mappedDoctor);
 
     } catch (error) {
       console.error("Failed to fetch doctor:", error);
-    } finally {
-      setIsDoctorLoading(false);
-    }
+    } 
   }
+        
+   const fetchDoctorSchedule = async (doctorId: number) =>{
+    try{
+      const scheduleRes = await getDoctorSchedule(doctorId);
+      const mappedSchedule = mapDoctorSchedule(scheduleRes);
+      console.log("Fetched doctor schedule", scheduleRes);
+      console.log("Mapped doctor schedule:", mappedSchedule);
+      setDoctorSchedule(mappedSchedule);
+    }
+    catch(error){
+       console.error("Failed to fetch doctor schedule:", error);
+    }
+   }
+  
+   const fetchPastAppointments = async(doctorId : number) =>{
+    try{
+      const appointmentsRes = await getDoctorPastAppointments(doctorId);
+      const mappedAppointments = mapDoctorPastAppointments(appointmentsRes);
+      console.log("Fetched past appointments", appointmentsRes);
+      console.log("Mapped doctor past appointments:", mappedAppointments);
+      setDoctorPastAppointments(mappedAppointments);
+    }
+    catch(error){
+         console.error("Failed to fetch doctor past appointments:", error);
+    }
+   }
+   const fetchSavedAvailability = async(doctorId: number) =>{
+    try{
+      const savedAvailabilityRes = await getSavedDoctorAvailability(doctorId);
+      console.log("Fetched saved availability:", savedAvailabilityRes);
+      setSavedAvailability(savedAvailabilityRes);
+    }
+    catch(error){
+     console.error("Failed to fetch doctor saved availability:", error);
+    }
+   }
 
+  useEffect(() => {
+          if (!userId) return;
+          const numericId = Number(userId);
+          if (isNaN(numericId)) {
+            console.error("Invalid doctorId");
+            return;
+          }
+          const fetchData = async () => {
+            setIsDoctorLoading(true);
+            try {
+              await fetchDoctor(numericId);              
+              await fetchDoctorSchedule(numericId);      
+              await fetchPastAppointments(numericId);    
+              await fetchSavedAvailability(numericId);
+            } catch (error) {
+              console.error("Failed to fetch doctor data:", error);
+            } finally {
+              setIsDoctorLoading(false); 
+            }
+          };
 
-    const fetchDoctorScheduleAndAppointments = async () => {
-      try {
-          setIsDoctorLoading(true);
-          const scheduleRes = await getDoctorSchedule(numericId);
-          const scheduleData: DoctorScheduleAPIResponse = scheduleRes;
-          setDoctorSchedule(mapDoctorSchedule(scheduleData));
-          console.log("Fetched doctor schedule:", scheduleRes);
-          console.log("Mapped doctor schedule:", doctorSchedule);
-
-
-          const appointmentsRes = await getDoctorPastAppointments(numericId);
-          const appointmentData: DoctorScheduleAPIResponse = appointmentsRes;
-          setDoctorPastAppointments(mapDoctorPastAppointments(appointmentData));
-          console.log("Fetched doctor past appointments:", appointmentsRes);
-          console.log("Mapped doctor past appointments:", doctorPastAppointments);
-
-
-          const savedAvailabilityRes = await getSavedDoctorAvailability(numericId);
-          const savedAvailabilityData: SaveAvailabilityResponse = savedAvailabilityRes;
-          setSavedAvailability(savedAvailabilityData);
-          console.log("Fetched saved availability:", savedAvailabilityRes);
-
-      } catch (error) {
-        console.error("Failed to fetch schedule:", error);
-      } finally {
-        setIsDoctorLoading(false);
-      }
-  };
-
-  (async () => {
-    await fetchDoctor();
-    await fetchDoctorScheduleAndAppointments();
-  })();
-  }, [userId]);
-
+          fetchData();
+        }, [userId]);
     const onDateChange = (date: string) => {
     console.log("Selected date from child:", date);
     setSelectedDate(date);
@@ -171,6 +203,9 @@ const handleSaveAvailability = async () => {
 
     console.log("Set availability response:", response);
     setAvailabilityList([]);
+    fetchSavedAvailability(doctor.doctorId).catch(err => {
+    console.error("Failed to refresh saved availability:", err);
+  });
     return response;
 
   } catch (err) {
@@ -196,10 +231,7 @@ const handleSaveAvailability = async () => {
     );
   }
   if (!authorized) return null; 
-    const handleTabClick = (tabLabel: string) => {
-    setActiveTab(tabLabel);
-    console.log("Active Tab:", tabLabel);
-  };
+   
   return (
      <div className={`${styles.doctorDashboard} theme-doctor`} style={{ background: 'var(--bg-page)' }}>
        <div className={styles.dashboardHeaderSection}>
