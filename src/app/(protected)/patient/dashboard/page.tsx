@@ -1,6 +1,6 @@
  'use client'
 import React, { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "@/lib//firebase"; 
 import { logoutUser } from "@/lib/auth";
 import { onAuthStateChanged, getIdTokenResult, signOut } from "firebase/auth";
@@ -16,8 +16,51 @@ import PatientHome from '../../../../components/PatientDashboard/PatientHome/Pat
 const PatientDashboardPage: NextPage = () => {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("Home");
+    const toastShownRef = useRef(false);
 
-     const { authorized, loading, userId, role } = useRoleAuth({ allowedRoles: ['patient'] });
+    useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.push("/patient/login");
+        return;
+      }
+
+      try {
+        const tokenResult = await user.getIdTokenResult(true);
+        const role = tokenResult.claims.role;
+
+        if (role === "patient") {
+          setAuthorized(true);
+        } else {
+         if (!toastShownRef.current) {
+            toast.error(`You are logged in as ${role}. Only Patient can access this page.`);
+            toastShownRef.current = true;
+          }
+          router.push("/patient/login");
+        }
+      } catch (error) {
+        console.error("Error fetching token:", error);
+        router.push("/patient/login");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  // // Respect `?tab=...` query param so other pages can deep-link into a specific tab
+  // const searchParams = useSearchParams();
+  // useEffect(() => {
+  //   try {
+  //     const tab = searchParams?.get('tab');
+  //     if (tab) setActiveTab(tab);
+  //   } catch (e) {
+  //     // ignore
+  //   }
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [searchParams]);
+  const { authorized, loading, userId, role } = useRoleAuth({ allowedRoles: ['patient'] });
 
   if (loading) {
     return (

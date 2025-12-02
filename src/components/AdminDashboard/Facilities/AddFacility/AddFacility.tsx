@@ -104,6 +104,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const candidate =
       it["id"] ??
       it["stateCode"] ??
+      it["state_code"] ??
       it["specialityMasterId"] ??
       it["speciality_master_id"] ??
       it["speciality_id"] ??
@@ -122,6 +123,18 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     if (candidate === undefined || candidate === null) return String(item);
     if (typeof candidate === "object") return JSON.stringify(candidate);
     return String(candidate);
+  };
+
+  const getFacilityIdFromRecord = (rec: Record<string, unknown> | undefined): string | undefined => {
+    if (!rec) return undefined;
+    const tryKeys = ['facilityMasterId', 'facility_master_id', 'facilityId', 'facility_id', 'id'];
+    for (const k of tryKeys) {
+      const v = rec[k];
+      if (v === undefined || v === null) continue;
+      if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
+      return extractId(v);
+    }
+    return undefined;
   };
 
 
@@ -344,11 +357,12 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
 
       const nonDefault = ids.find((id) => {
-        const label = (specialities.find((sp) => extractId(sp) === id) ? extractName(specialities.find((sp) => extractId(sp) === id)) : id);
+        const foundSp = specialities.find((sp) => extractId(sp) === id);
+        const label = foundSp ? extractName(foundSp) : id;
         return label !== DEFAULT_SPECIALITY;
       });
       if (nonDefault) {
-        if (!specialityListOrdered.includes(String(nonDefault))) specialityListOrdered.push(String(nonDefault));
+        specialityListOrdered.push(String(nonDefault));
       }
     }
 
@@ -373,20 +387,42 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       }
     }
 
+    let resolvedStateCode: string | undefined = undefined;
+    if (selectedState) resolvedStateCode = selectedState;
+    if (!resolvedStateCode && address) {
+      const parts = address.split(',').map((p) => p.trim()).filter(Boolean);
+      const last = parts.length ? parts[parts.length - 1] : '';
+      if (last && Array.isArray(states) && states.length > 0) {
+        const match = states.find((s) => extractName(s).toLowerCase() === String(last).toLowerCase());
+        if (match) resolvedStateCode = extractId(match);
+      }
+    }
+    if (!resolvedStateCode && ff) {
+      if (ff['stateCode']) resolvedStateCode = String(ff['stateCode']);
+      else if (ff['state_code']) resolvedStateCode = String(ff['state_code']);
+      else if (ff['stateName']) resolvedStateCode = String(ff['stateName']);
+    }
+
+    const resolvedFacilityId = getFacilityIdFromRecord(ff) ?? undefined;
+
     const createPayload: Record<string, unknown> = {
+      facility_master_id: resolvedFacilityId ?? undefined,
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
       isActive: normalizedIsActive ?? undefined,
+      stateCode: resolvedStateCode || undefined,
       specialityList,
     };
 
     const updatePayload: Record<string, unknown> = {
-      facilityMasterId: ff?.['facilityMasterId'] ?? undefined,
+      // send only the DB column name we use: facility_master_id
+      facility_master_id: resolvedFacilityId ?? undefined,
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
       isActive: normalizedIsActive ?? undefined,
+      stateCode: resolvedStateCode ?? (ff?.['stateCode'] as string | undefined) ?? undefined,
       specialityList,
     };
 

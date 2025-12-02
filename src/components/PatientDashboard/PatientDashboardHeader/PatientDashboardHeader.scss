@@ -9,9 +9,9 @@
   /* make the tabs a compact left block instead of full width */
   /* increased width and moved farther right as requested */
   width: 290px;
-  margin-top: 6px;
+  margin-top: 3px;
   /* large inset from the card edge */
-  margin-left: 200px;
+  margin-left: 20px;
   /* white background so the small block reads as a separate card */
   background: var(--text-white);
   border: 1px solid var(--border-light);
@@ -35,7 +35,7 @@
     width: calc(100% - 28px);
     max-width: 250px;
     /* inset so buttons aren't flush against wrapper */
-    margin-left: 16px;
+    margin-left: 2px;
     padding: 0.9rem 1rem;
     font-size: 16px;
     font-weight: 600;
