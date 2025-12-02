@@ -406,7 +406,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     const resolvedFacilityId = getFacilityIdFromRecord(ff) ?? undefined;
 
     const createPayload: Record<string, unknown> = {
-      facility_master_id: resolvedFacilityId ?? undefined,
+      facilityMasterId: resolvedFacilityId ?? undefined,
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
@@ -416,8 +416,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     };
 
     const updatePayload: Record<string, unknown> = {
-      // send only the DB column name we use: facility_master_id
-      facility_master_id: resolvedFacilityId ?? undefined,
+      facilityMasterId: resolvedFacilityId ?? undefined,
       facilityName: facilityName,
       noOfRooms: numRooms,
       facilityStreet: facilityStreet || undefined,
@@ -427,7 +426,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
     };
 
     const chosen = facility ? updatePayload : createPayload;
-    // strip undefined keys (but preserve explicit false)
     const backendPayload: Record<string, unknown> = Object.fromEntries(
       Object.entries(chosen).filter(([, v]) => v !== undefined)
     );
