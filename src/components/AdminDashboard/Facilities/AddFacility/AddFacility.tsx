@@ -327,8 +327,7 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
   const gpEntry = specialities.find((sp) => extractName(sp) === DEFAULT_SPECIALITY);
   const gpId = gpEntry ? extractId(gpEntry) : DEFAULT_SPECIALITY;
 
-  const specialityListOrdered: string[] = [];
-  let hasAnyRoomOnlyGP = false;
+    const specialityListOrdered: string[] = [];
 
     for (let roomNumber = 1; roomNumber <= Math.max(1, Number(numRooms) || 1); roomNumber++) {
       const rawNames = Array.isArray(roomConfig[roomNumber]) && roomConfig[roomNumber].length > 0
@@ -351,11 +350,14 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       const roomSpecNames = hasNonGpInRoom ? namesForIds.filter((n) => String(n) !== DEFAULT_SPECIALITY) : namesForIds;
 
       roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: roomSpecIds, specialityNames: roomSpecNames });
-
+      // If the room only has General Practice, add the GP id/code once for this room.
       if (roomSpecNames.length === 1 && String(roomSpecNames[0]) === DEFAULT_SPECIALITY) {
-        hasAnyRoomOnlyGP = true;
+        if (gpId) specialityListOrdered.push(String(gpId));
+        else specialityListOrdered.push(DEFAULT_SPECIALITY);
+        continue;
       }
 
+      // Otherwise, pick the first non-default speciality for this room and add its id/code.
       const nonDefault = ids.find((id) => {
         const foundSp = specialities.find((sp) => extractId(sp) === id);
         const label = foundSp ? extractName(foundSp) : id;
@@ -364,10 +366,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       if (nonDefault) {
         specialityListOrdered.push(String(nonDefault));
       }
-    }
-
-    if (gpId && hasAnyRoomOnlyGP) {
-      specialityListOrdered.unshift(gpId);
     }
 
     const specialityList = specialityListOrdered;
