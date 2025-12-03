@@ -427,20 +427,41 @@ const FacilityTable = () => {
                 // If no roomDetails were returned/sent, synthesize per-room details from specialityList and noOfRooms
                 if ((!normalizedRooms || normalizedRooms.length === 0)) {
                   const num = Number(source.noOfRooms ?? source.noOf_rooms ?? (backendPayload as Record<string, unknown>).noOfRooms ?? 1) || 1;
-                  const sListRaw = Array.isArray(source.specialityList) ? (source.specialityList as unknown[]).map(String) : (Array.isArray((backendPayload as Record<string, unknown>).specialityList) ? ((backendPayload as Record<string, unknown>).specialityList as unknown[]).map(String) : []);
+                  const sListRaw = Array.isArray(source.specialityList)
+                    ? (source.specialityList as unknown[]).map(String)
+                    : (Array.isArray((backendPayload as Record<string, unknown>).specialityList)
+                      ? ((backendPayload as Record<string, unknown>).specialityList as unknown[]).map(String)
+                      : []);
+
+                  // If the facility-level speciality list contains only a single General Practice entry
+                  // we should apply that 'GEN' to all rooms (i.e., repeat it num times). Otherwise
+                  // we map available entries by index to rooms (existing behaviour).
+                  const normalizeIdToName = (id: string) => {
+                    const found = specialityMaster.find((spm) => {
+                      const candidate = String(spm['specialityMasterId'] ?? spm['speciality_master_id'] ?? spm['id'] ?? spm['code'] ?? '');
+                      return candidate === String(id) || String(spm['specialityName'] ?? spm['speciality_name'] ?? spm['name'] ?? '').toLowerCase() === String(id).toLowerCase();
+                    });
+                    return found ? String(found['specialityName'] ?? found['speciality_name'] ?? found['name'] ?? id) : String(id);
+                  };
+
+                  const isSingleGp = sListRaw.length === 1 && ((): boolean => {
+                    if (!sListRaw[0]) return false;
+                    const candidate = String(sListRaw[0]);
+                    const nm = normalizeIdToName(candidate).toLowerCase();
+                    return nm === 'general practice' || candidate.toLowerCase() === 'gen' || candidate.toLowerCase() === 'general practice' || candidate.toLowerCase() === 'gp';
+                  })();
+
                   const synth: unknown[] = [];
                   for (let i = 1; i <= num; i++) {
                     const idx = i - 1;
-                    const sp = sListRaw[idx];
-                    const ids = sp ? [String(sp)] : [];
-                    const names = ids.map((id) => {
-                      const found = specialityMaster.find((spm) => String(spm['specialityMasterId'] ?? spm['speciality_master_id'] ?? spm['id'] ?? spm['code'] ?? '') === String(id));
-                      return found ? String(found['specialityName'] ?? found['speciality_name'] ?? found['name'] ?? id) : String(id);
-                    });
+                    // If facility-level list is a single GP, apply that to every room.
+                    const spCandidate = sListRaw[idx] ?? (isSingleGp ? sListRaw[0] : undefined);
+                    const ids = spCandidate ? [String(spCandidate)] : [];
+                    const names = ids.map((id) => normalizeIdToName(id));
                     const hasNonGp = names.some((n) => String(n) !== 'General Practice');
                     const outIds = hasNonGp ? ids.filter((id, idx2) => String(names[idx2]) !== 'General Practice') : ids;
                     const outNames = hasNonGp ? names.filter((n) => String(n) !== 'General Practice') : names;
-                    synth.push({ roomNumber: i, roomLabel: `Room ${i}`, specialityList: outIds, specialityNames: outNames });
+                    synth.push({ roomNumber: i, roomLabel: `Room ${i}`, specialityIds: outIds, specialityNames: outNames });
                   }
                   normalizedRooms = synth;
                 }
