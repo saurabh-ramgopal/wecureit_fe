@@ -69,12 +69,19 @@ export default function AppointmentConfirmationPage() {
           endTime: ctx.selectedTimeSlot?.end ?? '',
           specialityMasterId: ctx.selectedSpecialty?.specialityMasterId ?? '',
         };
-         const response = await bookAppointment(request);
+         await bookAppointment(request);
+            
         toast.success('Booking confirmed successfully!');
 
-      // Redirect to success or booking list page
-      router.push('/patient/dashboard');
-
+        await router.push('/patient/dashboard');
+          // Clear context after navigation
+          ctx.setSelectedDoctor(null);
+          ctx.setSelectedFacility(null);
+          ctx.setSelectedSpecialty(null);
+          ctx.setSelectedDate(null);
+          ctx.setSelectedDuration(null);
+          ctx.setSelectedTimeSlot(null);
+          ctx.setSelectedAvailabilityId(null);
 
 
     } catch (error) {
