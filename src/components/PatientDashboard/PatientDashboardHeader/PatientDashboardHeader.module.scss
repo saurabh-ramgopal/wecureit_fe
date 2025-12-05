@@ -1,0 +1,102 @@
+.tabNavigation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* prevent the nav from stretching to fill sibling grid rows */
+  align-self: start;
+  max-height: fit-content;
+  margin-left: 0.5rem;
+  margin-top: 2rem;
+  background: var(--bg-card, var(--text-white));
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md, 0.75rem);
+  box-shadow: var(--shadow-sm);
+  padding: 0.9rem;
+  width: 100%;   // use full width of its container
+  max-width: 270px; // restrict max width on desktop
+  box-sizing: border-box;
+
+  .tabButton {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0.9rem 1rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md, 0.75rem);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    color: var(--text-primary);
+    transition: background var(--transition-fast), transform var(--transition-fast);
+
+    &:hover {
+      background: var(--bg-hover);
+      transform: translateX(4px);
+    }
+
+    &.active {
+      background: var(--primary);
+      color: var(--text-white);
+      justify-content: center;
+      transform: none;
+    }
+
+    .tabIcon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      color: inherit;
+      flex-shrink: 0; // don’t shrink the icon
+    }
+
+    .tabLabel {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /* ===== Responsive: tablet / mobile ===== */
+  @media (max-width: 1024px) {
+     flex-direction: row;         
+    width: 100%;
+    max-width: none;
+    gap: 0.5rem;
+    margin-left: 0;
+    margin-top: 0;
+    padding: 0.5rem 0;
+    border-radius: var(--radius-large, 0.625rem);      
+    box-shadow: none;
+    overflow-x: auto;
+
+    .tabButton {
+      flex: 0 0 auto;            
+      justify-content: center;
+      width: auto;
+      .tabLabel {
+        display: inline;      
+      }
+      .tabIcon {
+        font-size: 18px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.25rem;
+    .tabButton {
+      padding: 0.5rem 0.75rem;
+      font-size: 14px;
+    }
+  }
+}

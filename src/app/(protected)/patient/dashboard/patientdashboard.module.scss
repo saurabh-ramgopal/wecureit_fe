@@ -1,159 +1,54 @@
 .patientDashboard {
-  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 20% 80%;  // left = navigation, right = content
+  grid-template-rows: auto;
+  gap: 1.5rem;
   min-height: 100vh;
-}
-.dashboardHeaderSection {
-  padding: 1rem 1rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
+  padding: 2rem 4rem;
+  align-items: start;
 
-  .portalTitle {
-    font-size: 28px;
-    font-weight: 600;
-    color: #b20816;
-    text-align: center;
+  /* --- Navigation (first child of grid) --- */
+  > :first-child {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    padding-left: 0.75rem;  // small left spacing
+    padding-top: 0.5rem;
   }
-}
 
-/* Left-centric small tab block styling applied to the header's .tab-navigation */
-.patientDashboard {
-  position: relative;
-
-  /* scope global header classes only inside this container */
-  :global(.tab-navigation) {
-    /* make it a compact card on the right */
-    position: absolute;
-    top: 110px; /* vertical position - adjust if needed */
-    left: 20px; /* distance from the left edge of the container */
-    width: 270px;
-    background: var(--text-white);
-    border: 1px solid var(--border-light);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: var(--shadow-sm);
-    z-index: 10;
-
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    /* tab buttons inside the header (global class .tab-button) */
-    :global(.tab-button) {
-      width: calc(100% - 24px);
-      max-width: 240px;
-      margin: 0 auto; /* center the buttons inside the block */
-      padding: 0.8rem 1rem;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      border-radius: 6px;
-      background: transparent;
-      transition: background var(--transition-fast), transform var(--transition-fast);
-    }
-
-    /* active tab: center contents and use primary color */
-    :global(.tab-button.active) {
-      background: var(--primary);
-      color: var(--text-white);
-      justify-content: center;
-    }
-
-    /* icon and label tweaks */
-    :global(.tab-button .tab-icon) {
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    :global(.tab-button .tab-label) {
-      display: inline-block;
-      width: calc(100% - 40px);
-      text-align: left;
-      font-weight: 600;
-      font-size: 16px;
-    }
-
-    /* on small screens convert to top horizontal bar */
-    @media (max-width: 768px) {
-      position: static;
-      right: auto;
-      top: auto;
-      width: 100%;
-      padding: 6px;
-      border-radius: 9999px;
-      display: flex;
-      flex-direction: row;
-      overflow-x: auto;
-
-      :global(.tab-button) {
-        margin: 0 6px;
-        padding: 8px 12px;
-        justify-content: center;
-      }
-
-      :global(.tab-button .tab-label) {
-        display: none;
-      }
-    }
-  }
-}
-
-/* Content area to the right of the left tab block */
-.contentArea {
-  /* leave space for left tab: left offset (40px) + tab width (270px) + gap (30px) = 340px */
-  margin-left: 300px;
-  margin-top: 25px; /* align roughly with the tab block vertical position */
-  padding: 0 1rem;
-}
-
-@media (max-width: 1024px) {
-  /* On smaller screens where the tab block becomes static/horizontal, remove left margin */
+  /* --- Content --- */
   .contentArea {
-    margin-left: 0;
-    margin-top: 12px;
-    padding-top: 0;
+    grid-column: 2 / 3;
+    grid-row: 1;
+    padding-left: 1.25rem;   
+    padding-right: 1.25rem; 
+    padding-top: 0;          
+    margin-top: 2rem;     
   }
-}
 
-/* When the viewport is reduced (e.g. DevTools docked) move the left tab into flow
-   so it won't overlap the content area. This covers medium widths between the
-   desktop layout and the mobile stacked layout. */
-@media (max-width: 1200px) {
-  .patientDashboard {
-    :global(.tab-navigation) {
-      position: static;
-      top: auto;
-      left: auto;
-      right: auto;
-      width: 100%;
-      padding: 8px;
-      border-radius: 10px;
-      box-shadow: none;
-      display: flex;
-      flex-direction: row;
-      gap: 8px;
-      overflow-x: auto;
+  /* ===== Responsive ===== */
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;      // full width
+    grid-template-rows: auto auto;   // nav becomes first row
+    gap: 1rem;
 
-      :global(.tab-button) {
-        margin: 0 6px;
-        width: auto;
-        max-width: none;
-        padding: 8px 12px;
-      }
-      :global(.tab-button .tab-label) {
-        display: inline-block;
-      }
+    > :first-child {
+      grid-column: 1 / -1;
+      grid-row: 1;                   // nav on top
+      padding-left: 0;               // remove side padding in mobile
+    }
+
+    .contentArea {
+      grid-column: 1 / -1;           // content full width
+      grid-row: 2;
+      padding: 1.5rem 0;
     }
   }
 
-  .contentArea {
-    margin-left: 0;
+  @media (max-width: 480px) {
+    padding: 1rem;
+
+    .contentArea {
+      padding: 1rem 0;
+    }
   }
 }

@@ -52,3 +52,16 @@ export const formatPlainDate = (dateStr: string): FormattedDate => {
 
   return { shortDate, fullDate };
 };
+
+export const formatTime = (t: string) => {
+  if (!t) return '';
+  const [hhStr, mmStr] = t.split(':');
+  const hh = parseInt(hhStr ?? '0', 10);
+  const mm = parseInt(mmStr ?? '0', 10);
+
+  const ampm = hh >= 12 ? 'PM' : 'AM';
+  let hour12 = hh % 12;
+  if (hour12 === 0) hour12 = 12;
+
+  return `${String(hour12).padStart(2, '0')}:${String(mm).padStart(2, '0')} ${ampm}`;
+};

@@ -1,206 +1,117 @@
 .confirmWrap {
-  padding: 28px;
-  background: transparent;
+  padding-left: var(--space-md, 1rem);
+  background: var(--bg-page);
   min-height: 100%;
   font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  color: #22303b;
-}
-
-.pageContainer {
-  max-width: 1180px;
-  margin: 28px auto;
-}
-
-.pageBg {
-  background: #fff5f5;
-  padding: 28px 0 56px 0;
-  min-height: 100vh;
-}
-
-.headerRow {
-  margin-bottom: 20px;
-}
-
-.backBtn {
-  background: transparent;
-  border: none;
-  color: #000;
-  font-size: 13px;
-  cursor: pointer;
-  margin-bottom: 8px;
-}
-
-.title {
-  color: #e45a57;
-  margin: 0 0 6px 0;
-  font-size: 20px;
-}
-
-.subtitle {
-  margin: 0 0 18px 0;
-  color: #6b7b86;
+  color: var(--text-primary);
 }
 
 .contentRow {
   display: flex;
   gap: 24px;
+  flex-direction: column;
 }
 
 .leftCol {
-  flex: 1 1 65%;
-}
-
-.rightCol {
-  width: 320px;
+  flex: 1 1 100%;
 }
 
 .card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: none;
-  border: 1px solid #f0eaea;
-  margin-bottom: 18px;
+  border: 1px solid var(--border-light);
+  margin-bottom: 16px;
 }
 
 .cardTitle {
-  margin: 0 0 6px 0;
-  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 20px;
+  color: var(--text-primary);
 }
 
 .cardNote {
-  margin: 0 0 12px 0;
-  color: #7b8a93;
-  font-size: 13px;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
 .detailBox {
-  background: #fff6f6; 
+  background: var(--bg-light);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 12px;
 }
 
 .detailLabel {
-  color: #c24d4a;
-  font-size: 13px;
+  color: var(--primary);
+  font-size: 14px;
   margin-bottom: 6px;
 }
 
 .detailValue {
   background: transparent;
+  color: var(--text-primary);
 }
 
 .tag {
   display: inline-block;
   margin-top: 8px;
-  background: #ffecec;
-  color: #c24d4a;
+  background: var(--bg-light);
+  color: var(--primary);
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 12px;
 }
 
 .address {
-  color: #6b7b86;
+  color: var(--text-secondary);
   margin-top: 6px;
   font-size: 13px;
 }
 
-
 .rowTwoUp {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .smallBox {
   flex: 1;
-  background: #e9eef3;
+  background: var(--bg-card-light);
   padding: 14px;
   border-radius: 8px;
+  margin-bottom: 12px;
 }
 
 .smallValue {
-  color: #22303b;
+  color: var(--text-primary);
 }
 
 .muted {
-  color: #8f9aa1;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
-.paymentCard {
-  margin-top: 8px;
-}
-
-.noCardBox {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #eef3f7;
-  padding: 12px;
-  border-radius: 8px;
-}
-
-.noCardIcon { font-size: 20px; }
-.noCardText { flex: 1; color: #22303b; }
-.addCardBtn {
-  background: transparent;
-  border: none;
-  color: #7a2a2a;
-  cursor: pointer;
-}
-
-.summaryCard {
-  background: #fff;
-  border-radius: 8px;
-  padding: 18px;
-  border: 1px solid #f0eaea;
-}
-
-.summaryHeader {
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #22303b;
-}
-
-.alertBox {
-  border: 1px solid #f4c5c5;
-  background: #fff6f6;
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  color: #b33d3d;
-  margin-bottom: 12px;
-}
-
-.alertIcon { font-weight: 700; }
-
-.totalsList { font-size: 14px; color: #22303b; }
-.row { display:flex; justify-content:space-between; padding:6px 0; }
-.hr { height:1px; background:#e7ebee; margin:8px 0; }
-.totalRow { display:flex; justify-content:space-between; align-items:center; padding-top:10px; font-weight:600; }
-.totalAmount { color:#e45a57; font-size:18px; }
-
 .bookBtn {
-  display:block;
-  width:100%;
+  display: block;
+  width: 100%;
   margin-top: 14px;
-  background: #e2352f;
-  color: #fff;
+  background: var(--primary);
+  color: var(--text-white);
   border: none;
   padding: 10px 14px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+
+  &:hover {
+    background: var(--secondary);
+  }
+  &:disabled {
+  background: var(--bg-disabled); // light gray or whatever theme color
+  cursor: not-allowed;
+  opacity: 0.6;
 }
-
-.summaryHeader { display:flex; align-items:center; gap:8px; }
-.dollarIcon { color:#c24d4a; font-weight:600 }
-
-.cardTitle { font-weight:600 }
-.detailLabel { font-size:13px; color:#c24d4a }
-
-.terms { text-align:center; color:#8f9aa1; font-size:12px; margin-top:10px; }
+}

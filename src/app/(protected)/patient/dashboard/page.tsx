@@ -1,10 +1,9 @@
  'use client'
-import React, { useEffect, useState, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { auth } from "@/lib//firebase"; 
+import React, {useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+
 import { logoutUser } from "@/lib/auth";
-import { onAuthStateChanged, getIdTokenResult, signOut } from "firebase/auth";
-import toast from "react-hot-toast";
+import { LogOut } from 'lucide-react';
 import { NextPage } from 'next';
 import styles from './patientdashboard.module.scss';
 import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboardHeader/PatientDashboardHeader";
@@ -17,37 +16,6 @@ const PatientDashboardPage: NextPage = () => {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("Home");
     const toastShownRef = useRef(false);
-
-    useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/patient/login");
-        return;
-      }
-
-      try {
-        const tokenResult = await user.getIdTokenResult(true);
-        const role = tokenResult.claims.role;
-
-        if (role === "patient") {
-          setAuthorized(true);
-        } else {
-         if (!toastShownRef.current) {
-            toast.error(`You are logged in as ${role}. Only Patient can access this page.`);
-            toastShownRef.current = true;
-          }
-          router.push("/patient/login");
-        }
-      } catch (error) {
-        console.error("Error fetching token:", error);
-        router.push("/patient/login");
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
 
   // // Respect `?tab=...` query param so other pages can deep-link into a specific tab
   // const searchParams = useSearchParams();
@@ -71,6 +39,10 @@ const PatientDashboardPage: NextPage = () => {
   }
   if (!authorized) return null; 
     const handleTabClick = (tabLabel: string) => {
+    if (tabLabel === "Logout User") {
+    handleSignOut(); 
+    return; 
+  }
     setActiveTab(tabLabel);
     console.log("Active Tab:", tabLabel);
   };
@@ -81,26 +53,13 @@ const PatientDashboardPage: NextPage = () => {
   return (
 
   <div className={`${styles.patientDashboard} theme-patient`} style={{ background: 'var(--bg-page)' }}>
-       <div className={styles.dashboardHeaderSection}>
-        {/* <h1 className={styles.portalTitle}></h1> */}
-        <div style={{ marginLeft: 'auto' }}>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="btn btn-primary"
-            aria-label="Sign out"
-          >
-            Sign Out
-          </button>
-        </div>
-    </div>
     <PatientDashboardHeader 
       activeTab={activeTab}
       onTabClick={handleTabClick} 
     />
       <div className={styles.contentArea}>
-        {activeTab === "Home" && <PatientHome />}
-
+        {activeTab === "Home" && <PatientHome patientId={userId} />}
+        
         {activeTab === "My Profile" && <MyProfile />}
 
         {activeTab === "Appointment History" }

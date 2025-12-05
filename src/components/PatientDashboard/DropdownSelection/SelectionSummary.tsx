@@ -1,20 +1,23 @@
 "use client";
 import React from "react";
-
-type Props = {
-  selectedDoctor: string;
-  selectedFacility: string;
-  selectedSpecialty: string;
-};
-
+import { AllDoctorUI, AllFacilityUI, AllSpecialitiesRespUI } from "@/types/patient";
 import styles from "./SelectionSummary.module.scss";
+import { useDropdownSelection } from "./DropdownSelectionContext";
+import { useRouter } from 'next/navigation';
 
-export default function SelectionSummary({ selectedDoctor, selectedFacility, selectedSpecialty }: Props) {
-  // For demo purposes show richer details when a simple string is provided.
-  // In a real app these would be objects from API (doctor object, facility object, etc.)
-  const doctorName = selectedDoctor || "No doctor selected";
-  const facilityName = selectedFacility || "No facility selected";
-  const specialtyName = selectedSpecialty || "No specialty selected";
+export default function SelectionSummary(props: {
+  selectedDoctor?: AllDoctorUI | null;
+  selectedFacility?: AllFacilityUI | null;
+  selectedSpecialty?: AllSpecialitiesRespUI | null;
+}) {
+  const ctx = useDropdownSelection();
+  const router = useRouter();
+  const selectedDoctor = ctx?.selectedDoctor ?? props.selectedDoctor ?? null;
+  const selectedFacility = ctx?.selectedFacility ?? props.selectedFacility ?? null;
+  const selectedSpecialty = ctx?.selectedSpecialty ?? props.selectedSpecialty ?? null;
+  const doctorName = selectedDoctor?.name || "No doctor selected";
+  const facilityName = selectedFacility?.facilityName || "No facility selected";
+  const specialtyName = selectedSpecialty?.specialityName || "No specialty selected";
 
   return (
     <div className={styles.summaryWrapper}>
@@ -41,7 +44,39 @@ export default function SelectionSummary({ selectedDoctor, selectedFacility, sel
         </div>
 
         <div style={{ marginTop: 18 }}>
-          <button className={styles.ctaBtn}>Continue to Date &amp; Time Selection</button>
+          {(() => {
+            const doctorId = selectedDoctor?.doctorMasterId ?? null;
+            const facilityId = selectedFacility?.facilityID ?? null;
+            const specialityId = selectedSpecialty?.specialityMasterId ?? null;
+            // require all three selections before enabling continue
+            const enabled = doctorId !== null && facilityId !== null && specialityId !== null;
+
+            const handleClick = () => {
+              if (!enabled) return;
+              const payload = {
+                doctorId,
+                facilityId,
+                specialityId,
+                doctorName: selectedDoctor?.name ?? null,
+                facilityName: selectedFacility?.facilityName ?? null,
+                specialityName: selectedSpecialty?.specialityName ?? null,
+              };
+              console.log('Booking selection IDs:', payload.doctorId, payload.facilityId, payload.specialityId);
+              router.push('/patient/dashboard/appointmentbooking');
+            };
+
+            return (
+              <button
+                className={styles.ctaBtn}
+                onClick={handleClick}
+                disabled={!enabled}
+                aria-disabled={!enabled}
+                title={!enabled ? 'Select doctor, facility and specialty to continue' : undefined}
+              >
+                Continue to Date &amp; Time Selection
+              </button>
+            );
+          })()}
         </div>
       </div>
     </div>
