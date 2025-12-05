@@ -59,7 +59,7 @@ const PatientDashboardPage: NextPage = () => {
     />
       <div className={styles.contentArea}>
         {activeTab === "Home" && <PatientHome patientId={userId} />}
-
+        
         {activeTab === "My Profile" && <MyProfile />}
 
         {activeTab === "Appointment History" }

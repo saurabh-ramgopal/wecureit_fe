@@ -1,0 +1,250 @@
+.dateCard {
+  background: #ffffff;
+  border-radius: var(--radius-medium, 1.125rem);
+  padding: var(--space-large, 2rem);
+  border: 1px solid var(--border-light, rgba(239, 68, 68, 0.12));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-top: 1rem;
+  text-align: center;
+
+}
+
+.dateCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.headerIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--primary, #ef4444);
+}
+
+.dateCardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--dark, #1a1a1a);
+  margin: 0;
+}
+
+.dateCardDescription {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.fetchButton {
+  background: var(--primary, #ef4444);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+}
+
+.datesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.dateItem {
+  background: var(--bg-light, #f9fafb);
+  border: 2px solid var(--border-light, rgba(239, 68, 68, 0.12));
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary, #ef4444);
+    background: #fff6f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+
+  &.selected {
+    background: var(--primary, #ef4444);
+    border-color: var(--primary, #ef4444);
+    
+    .dateContent {
+      color: #ffffff;
+      font-weight: 600;
+    }
+  }
+}
+
+.dateContent {
+  font-size: 0.9375rem;
+  color: var(--dark, #1a1a1a);
+  font-weight: 500;
+  text-align: center;
+}
+
+.refreshButton {
+  background: transparent;
+  color: var(--primary, #ef4444);
+  border: 2px solid var(--primary, #ef4444);
+  border-radius: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background: var(--primary, #ef4444);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    border-color: #d1d5db;
+    color: #d1d5db;
+    cursor: not-allowed;
+  }
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-light, rgba(239, 68, 68, 0.12));
+  margin: 1.5rem 0;
+}
+
+.durationSection {
+  margin-top: 1rem;
+}
+
+.durationsGrid {
+   display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.durationItem {
+  background: var(--bg-light, #f9fafb);
+  border: 2px solid var(--border-light, rgba(239, 68, 68, 0.12));
+  border-radius: var(--radius-medium, 0.75rem);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary, #ef4444);
+    background: #fff6f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+
+  &.selected {
+    background: var(--primary, #ef4444);
+    border-color: var(--primary, #ef4444);
+    
+    .durationContent {
+      color: #ffffff;
+      font-weight: 600;
+    }
+  }
+}
+
+.durationContent {
+  font-size: 0.9375rem;
+  color: var(--dark, #1a1a1a);
+  font-weight: 500;
+  text-align: center;
+}
+
+.timeSlotsSection {
+  margin-top: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--dark, #1a1a1a);
+  margin: 0 0 1rem 0;
+}
+
+.loadingText {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  text-align: center;
+  padding: 1rem;
+}
+
+.noSlotsText {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  text-align: center;
+  padding: 1rem;
+}
+
+.timeSlotsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.timeSlotItem {
+  background: var(--bg-light, #f9fafb);
+  border: 2px solid var(--border-light, rgba(239, 68, 68, 0.12));
+  border-radius: var(--radius-medium, 0.75rem);
+  padding: 1.25rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9375rem;
+  color: var(--dark, #1a1a1a);
+  font-weight: 500;
+  text-align: center;
+
+  &:hover {
+    border-color: var(--primary, #ef4444);
+    background: #fff6f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+}
+.timeSlotSelected {
+  background: var(--primary, #ef4444);
+  border: 2px solid var(--primary, #ef4444);
+  color: var(--text-white, #ffffff);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+
+  &:hover {
+    background: var(--primary-light-hover, #ffe4e6);
+    border-color: var(--primary, #ef4444);
+  }
+}

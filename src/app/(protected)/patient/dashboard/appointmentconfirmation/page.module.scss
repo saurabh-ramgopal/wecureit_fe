@@ -1,0 +1,220 @@
+.pageWrapper {
+  min-height: 100vh;
+  background-color: var(--bg-page, #fff1f2);
+  padding: var(--space-md, 2rem);
+}
+
+.pageInner {
+  width: 80%;
+  margin: 0;
+  padding-left:5rem;
+  padding-right: 5rem;
+  box-sizing: border-box;
+}
+.backLink {
+  margin-top: 1rem;
+  color: var(--primary, #ef4444);
+  font-weight: var(--fw-medium, 500);
+  display: inline-flex;
+  align-items: center;
+
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  padding: 0; /* remove button padding */
+  margin-bottom: var(--space-xxs, 0.5rem);
+
+  font-size: 1rem;
+  text-decoration: none;
+
+  transition: opacity 0.2s ease;
+}
+
+.backLink:hover {
+  opacity: 0.7;
+}
+
+.titleBlock {
+  margin-top: 1rem;
+  margin-bottom: 0.1rem; 
+}
+.pageTitle {
+  font-size: var(--fs-h6, 1.875rem);
+  font-weight: var(--fw-medium, 800);
+  color: var(--primary, #EF4444);
+  margin: var(--space-large, 0.5rem) 0;
+  padding-left: var(--space-md, 1rem); 
+}
+
+.pageSubtitle {
+  color: var(--text-secondary, #4b5563);
+  padding-left: var(--space-md, 1rem); 
+}
+
+// .header {
+//   text-align: center;
+//   margin-bottom: 2rem;
+//   color: white;
+// }
+
+// .headerIcon {
+//   font-size: 3rem;
+//   margin-bottom: 1rem;
+//   color: #10b981;
+//   animation: bounce 0.6s ease-in-out;
+// }
+
+// @keyframes bounce {
+//   0%,
+//   100% {
+//     transform: translateY(0);
+//   }
+//   50% {
+//     transform: translateY(-10px);
+//   }
+// }
+
+// .pageTitle {
+//   font-size: 2rem;
+//   font-weight: 700;
+//   margin: 0 0 0.5rem;
+//   color: white;
+// }
+
+// .pageSubtitle {
+//   font-size: 1rem;
+//   color: rgba(255, 255, 255, 0.9);
+//   margin: 0;
+// }
+
+// .confirmationCard {
+//   background: white;
+//   border-radius: 1rem;
+//   padding: 2rem;
+//   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+// }
+
+// .section {
+//   margin-bottom: 1.5rem;
+
+//   &:last-of-type {
+//     margin-bottom: 0;
+//   }
+// }
+
+// .sectionTitle {
+//   font-size: 1.1rem;
+//   font-weight: 600;
+//   color: #333;
+//   margin-bottom: 1rem;
+//   padding-bottom: 0.5rem;
+//   border-bottom: 2px solid #f0f0f0;
+// }
+
+// .detailRow {
+//   display: flex;
+//   align-items: flex-start;
+//   gap: 1rem;
+//   margin-bottom: 1rem;
+//   padding: 0.75rem;
+//   background: #f9fafb;
+//   border-radius: 0.5rem;
+//   border-left: 4px solid #667eea;
+
+//   &:last-child {
+//     margin-bottom: 0;
+//   }
+// }
+
+// .icon {
+//   width: 1.5rem;
+//   height: 1.5rem;
+//   color: #667eea;
+//   flex-shrink: 0;
+//   margin-top: 0.25rem;
+// }
+
+// .detailContent {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 0.25rem;
+// }
+
+// .label {
+//   font-size: 0.85rem;
+//   font-weight: 600;
+//   color: #6b7280;
+//   text-transform: uppercase;
+//   letter-spacing: 0.5px;
+// }
+
+// .value {
+//   font-size: 1rem;
+//   font-weight: 500;
+//   color: #111;
+// }
+
+// .divider {
+//   height: 1px;
+//   background: #e5e7eb;
+//   margin: 1.5rem 0;
+// }
+
+// .actions {
+//   display: flex;
+//   gap: 1rem;
+//   justify-content: center;
+//   margin-top: 2rem;
+
+//   @media (max-width: 640px) {
+//     flex-direction: column;
+//   }
+// }
+
+// .editButton {
+//   padding: 0.75rem 1.5rem;
+//   background: #f3f4f6;
+//   color: #374151;
+//   border: 2px solid #e5e7eb;
+//   border-radius: 0.5rem;
+//   font-weight: 600;
+//   cursor: pointer;
+//   transition: all 0.2s ease;
+
+//   &:hover {
+//     background: #e5e7eb;
+//     border-color: #d1d5db;
+//   }
+
+//   &:active {
+//     transform: scale(0.98);
+//   }
+// }
+
+// .confirmButton {
+//   padding: 0.75rem 2rem;
+//   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//   color: white;
+//   border: none;
+//   border-radius: 0.5rem;
+//   font-weight: 600;
+//   font-size: 1rem;
+//   cursor: pointer;
+//   transition: all 0.2s ease;
+//   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+//   &:hover {
+//     transform: translateY(-2px);
+//     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+//   }
+
+//   &:active {
+//     transform: translateY(0);
+//   }
+
+//   &:disabled {
+//     opacity: 0.5;
+//     cursor: not-allowed;
+//   }
+// }

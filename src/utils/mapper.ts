@@ -1,6 +1,6 @@
 import { DoctorAPIResponse, Doctor, Speciality, DoctorScheduleAPIResponse, DoctorPastAppointmentsUI} from '@/types/doctor';
 import {formatPlainDate} from "../utils/utils"
-
+import {AllDoctorResponseAPI, AllDoctorUI, AllFacilityResponseAPI, AllFacilityUI} from "@/types/patient";
 export const mapDoctorAPIToDoctor = (apiDoctor: DoctorAPIResponse): Doctor => ({
   doctorId: apiDoctor.doctorMasterId,
   doctorName: apiDoctor.doctorName,
@@ -93,6 +93,35 @@ export const mapDoctorPastAppointments = (
       duration: `${appt.duration} min`,
       complaint: appt.appointmentNotes,
       location: appt.doctorFacilityAvailability.facilityMaster.facilityName,
+    };
+  });
+};
+
+export const mapAllDoctorResponse = (doctors: AllDoctorResponseAPI[]): AllDoctorUI[] => {
+  return doctors.map((doc) => {
+     const allSpecialities = (doc.stateDetails ?? []).flatMap((state) =>
+      (state.stateSpecialities ?? []).map((s) => s.specialityName)
+    );
+    const uniqueSpecialities = Array.from(new Set(allSpecialities));
+
+    return {
+      doctorMasterId: doc.doctorMasterId,
+      name: `Dr. ${doc.doctorName}`,
+      specialities: uniqueSpecialities,
+    };
+  });
+
+  
+};
+
+
+export const mapAllFacilityResponse = (facilities: AllFacilityResponseAPI[]): AllFacilityUI[] => {
+  return facilities.map((facility) => {
+    return {
+      facilityID: facility.facilityMasterId,
+      facilityName: facility.facilityName,
+      street: facility.facilityStreet,
+      state: facility.stateName,
     };
   });
 };

@@ -2,7 +2,7 @@ import { getAuth } from "firebase/auth";
 import { UnauthorizedError } from "./apiErrors";
 import router from "next/router";
 import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse } from "@/types/doctor"; 
-
+import { fetchL1Request, FacilityDocL1, FetchL1Response , FetchDatesResponse, FetchTimeSlotsRequest, FetchTimeSlotResponse, BookAppointmentRequest, BookAppointmentResponse} from "@/types/patient";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 async function getFirebaseToken(): Promise<string | null> {
@@ -209,4 +209,42 @@ export async function login(email: string, password: string) {
   const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
   const auth = getAuth();
   return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function fetchL1APICall(request: fetchL1Request): Promise<FetchL1Response> {
+  return apiCall<FetchL1Response>(`/patient/bookAppointment/fetchL1`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+
+export async function fetchL2APICall(request: fetchL1Request): Promise<FetchL1Response> {
+  return apiCall<FetchL1Response>(`/patient/bookAppointment/fetchL2`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+export async function fetchDates(request:fetchL1Request): Promise<FetchDatesResponse[]>{
+  return apiCall<FetchDatesResponse[]>(`/patient/bookAppointment/fetchDates`,{
+     method: 'POST',
+    body: JSON.stringify(request),
+  })
+}
+
+
+export async function fetchTimeSlots(request: FetchTimeSlotsRequest): Promise<FetchTimeSlotResponse[]> {
+  return apiCall<FetchTimeSlotResponse[]>(`/patient/bookAppointment/fetchSlots`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+
+export async function bookAppointment(request: BookAppointmentRequest): Promise<BookAppointmentResponse>{
+  return apiCall<BookAppointmentResponse>(`/patient/bookAppointment`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
 }
