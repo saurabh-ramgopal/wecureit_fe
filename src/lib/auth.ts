@@ -24,6 +24,7 @@ export async function registerPatient(data: {
   dob: string;
   gender: string;
   firebaseUid: string,
+  address: string;
 }) {
   const response = await fetch(`${API_BASE_URL}/patient/registration`, {
     method: 'POST',
@@ -36,7 +37,8 @@ export async function registerPatient(data: {
       phone: data.phone,
       dob: data.dob,
       gender: data.gender,
-      firebaseUid: data.firebaseUid
+      firebaseUid: data.firebaseUid,
+      address: data.address
     }),
   });
 

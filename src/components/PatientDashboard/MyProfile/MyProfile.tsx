@@ -24,6 +24,20 @@ const MyProfile: React.FC = () => {
     });
     const [cardEditing, setCardEditing] = useState(false);
     
+    // Card 
+    const formatCardNumber = (value: string) => {
+        const digitsOnly = value.replace(/\D/g, "");
+        return digitsOnly.replace(/(.{4})/g, "$1 ").trim();
+    };
+    const formatExpiry = (value: string) => {
+        const digits = value.replace(/\D/g, "").slice(0, 4); // max 4 digits
+        if (digits.length <= 2) return digits;
+        return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    };
+    const formatCVV = (value: string) => {
+        return value.replace(/\D/g, "").slice(0, 4);
+    };
+
 
     const getPatientId = async (): Promise<string | null> => {
         // 1) quick-local check (set this at login)
@@ -389,8 +403,13 @@ const MyProfile: React.FC = () => {
                                     <input
                                         className="value-input"
                                         placeholder="4242 4242 4242 4242"
-                                        value={card.ccNumber}
-                                        onChange={e => setCard(prev => ({ ...prev, ccNumber: e.target.value }))}
+                                        maxLength={19}
+                                        value={formatCardNumber(card.ccNumber)}
+
+                                        onChange={e => {
+                                            const raw = e.target.value.replace(/\D/g, "");
+                                            setCard(prev => ({ ...prev, ccNumber: raw }));  
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -401,8 +420,12 @@ const MyProfile: React.FC = () => {
                                     <input
                                         className="value-input"
                                         placeholder="MM/YY"
-                                        value={card.ccExpiry}
-                                        onChange={e => setCard(prev => ({ ...prev, ccExpiry: e.target.value }))}
+                                        maxLength={5}
+                                        value={formatExpiry(card.ccExpiry)}
+                                        onChange={e => {
+                                            const formatted = formatExpiry(e.target.value);
+                                            setCard(prev => ({ ...prev, ccExpiry: formatted }));
+                                        }}
                                     />
                                 </div>
                                 <div className="field">
@@ -410,8 +433,12 @@ const MyProfile: React.FC = () => {
                                     <input
                                         className="value-input"
                                         placeholder="123"
+                                        maxLength={4}
                                         value={card.cvv}
-                                        onChange={e => setCard(prev => ({ ...prev, cvv: e.target.value }))}
+                                        onChange={e => {
+                                            const raw = formatCVV(e.target.value);
+                                            setCard(prev => ({ ...prev, cvv: raw })); 
+                                        }}
                                     />
                                 </div>
                             </div>
