@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Mail, Lock, Phone, Calendar, User, Eye, EyeOff, ArrowRight, ArrowLeft, Footprints } from "lucide-react";
+import { Mail, Lock, Phone, Calendar, User, Eye, EyeOff, ArrowRight, ArrowLeft, Footprints, Home } from "lucide-react";
 import styles from "./RegisterCard.module.scss";
 
 interface RegisterCardProps {
@@ -20,6 +20,7 @@ interface RegisterFormData {
   dob: string;
   gender: string;
   name: string; 
+  address: string;
 }
 
 export default function RegisterCard({
@@ -42,6 +43,7 @@ export default function RegisterCard({
     dob: "",
     gender: "",
     name: "",
+    address: "",
   });
 
   const isValidEmail = (email: string) => {
@@ -291,6 +293,21 @@ const handleSubmit = (e: React.FormEvent) => {
                       <option value="female">Female</option>
                       <option value="other">Other</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className={styles.inputGroup}>
+                  <label>Residential Address</label>
+                  <div className={styles.inputWrapper}>
+                    <Home className={styles.icon} />
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Your residential address"
+                      value={formData.address}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
                 <div className={styles.buttonGroup}>
