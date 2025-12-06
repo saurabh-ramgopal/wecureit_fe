@@ -15,6 +15,7 @@ type RegisterFormData = {
   dob: string;
   gender: string;
   name: string;
+  address: string;
 }
 
 const PatientRegisterPage = () => {
@@ -34,14 +35,15 @@ const PatientRegisterPage = () => {
                                 phone: data.phone,
                                 dob: data.dob,
                                 gender: data.gender,
-                                firebaseUid: firebaseUid });
+                                firebaseUid: firebaseUid,
+                                address: data.address});
       console.log("Registration successful:");
       toast.success("Registration successful! Please Login");
       await signOut(auth);
       router.push("/patient/login"); // redirect to login page
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error.message || "Something went wrong");
+      toast.error((error as Error).message || "Something went wrong");
     } finally {
       setLoading(false);
     }
