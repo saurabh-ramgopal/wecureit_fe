@@ -1,5 +1,5 @@
 // components/NotePopup.tsx
-import React from 'react';
+import React , {useEffect} from 'react';
 import styles from './NotePopup.module.scss';
 import { Check , X} from 'lucide-react';
 import { DoctorPastAppointmentsUI } from '@/types/doctor';
@@ -7,15 +7,28 @@ interface NotePopupProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (id: string, s: string) => void;
-  patientDetails: DoctorPastAppointmentsUI
+  patientDetails: DoctorPastAppointmentsUI;
+  existingNote?: string;
 
 }
 
-const NotePopup = ({ isOpen, onClose, onSave, patientDetails }: NotePopupProps) => {
-  const [note, setNote] = React.useState('');
+const NotePopup = ({ isOpen, onClose, onSave, patientDetails , existingNote = ''}: NotePopupProps) => {
+  const [note, setNote] = React.useState(existingNote);
+  const NOTE_PLACEHOLDER = `Enter your clinical notes here...
+                            Example format:
+                            - Chief Complaint:
+                            - History of Present Illness:
+                            - Physical Examination:
+                            - Assessment:
+                            - Plan:`;
 
+
+  useEffect(() => {
+    if (isOpen) {
+      setNote(existingNote);
+    }
+  }, [isOpen]);
   if (!isOpen) return null;
-  
   const handleSave = () => {
     onSave(patientDetails.appointmentId, note);
     setNote('');
@@ -57,14 +70,7 @@ const NotePopup = ({ isOpen, onClose, onSave, patientDetails }: NotePopupProps) 
                         rows={8}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        placeholder={`Enter your clinical notes here...
-
-                    Example format:
-                    - Chief Complaint:
-                    - History of Present Illness:
-                    - Physical Examination:
-                    - Assessment:
-                    - Plan:`}
+                        placeholder={NOTE_PLACEHOLDER}
                         className={styles.textarea}
                     />
                     </div>

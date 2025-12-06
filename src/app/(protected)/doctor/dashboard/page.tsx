@@ -178,6 +178,7 @@ const handleSaveNotes= async (appointmentID: string,  notes: string ) => {
   try {
   await saveNotes(payload);
   toast.success("Notes Saved Successfully!");
+  await fetchPastAppointments(Number(userId));
 } catch (error) {
   console.error("Failed to save notes:", error);
   toast.error("Failed to save notes");

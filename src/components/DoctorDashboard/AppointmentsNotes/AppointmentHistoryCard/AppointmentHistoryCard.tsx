@@ -44,7 +44,9 @@ const AppointmentHistoryCard = ({ appointmentHistory, onSaveNotes }: Appointment
                 <span className={styles['appointmentHistory-card__duration']}>
                   {appointmentHistory.duration}
                 </span>
+
             </div>
+             <p className={styles['appointmentHistory-card__location']}>📍 {appointmentHistory.location}</p>
         </div>
        <div className={styles['appointmentHistory-card__complaint']}>
           <p className={styles['complaint-label']}>Notes</p>
@@ -58,18 +60,21 @@ const AppointmentHistoryCard = ({ appointmentHistory, onSaveNotes }: Appointment
                     : 'No clinical notes have been added for this appointment yet.'}
                 </p>
                         </div>
-        <p className={styles['appointmentHistory-card__location']}>📍 {appointmentHistory.location}</p>
+       
       </div>
       <button className={styles['appointmentHistory-card__addnote-btn']}
        onClick={handleOpenPopup} >
         <FileText className={styles['appointmentHistory-card__icon']} size={16} />
-        Add Note
+         {appointmentHistory.complaint && appointmentHistory.complaint.trim() !== '' 
+              ? 'Edit Note' 
+              : 'Add Note'}
       </button>
       <NotePopup
         patientDetails={appointmentHistory}
         isOpen={isPopupOpen}
         onClose={handleClosePopup}
         onSave={onSaveNotes}
+        existingNote={appointmentHistory.complaint || ''}
       />
     </div>
   );
