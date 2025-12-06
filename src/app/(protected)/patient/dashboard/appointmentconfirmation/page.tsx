@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDropdownSelection } from '@/components/PatientDashboard/DropdownSelection/DropdownSelectionContext';
 import styles from './page.module.scss';
@@ -11,6 +11,7 @@ import {bookAppointment} from "@/lib/api"
 export default function AppointmentConfirmationPage() {
   const ctx = useDropdownSelection();
   const router = useRouter();
+  const isBookingInProgress = useRef(false);
    const { authorized, loading, userId, role } = useRoleAuth({ allowedRoles: ['patient'] });
   if (!ctx) {
   throw new Error('BookingSummary must be used within a DropdownSelectionProvider');
@@ -25,6 +26,9 @@ export default function AppointmentConfirmationPage() {
   } = ctx;
   useEffect(() => {
     // Verify all required fields exist before showing confirmation
+      if (isBookingInProgress.current) {
+    return;
+  }
     if (
       !ctx?.selectedDoctor ||
       !ctx?.selectedFacility ||
@@ -51,15 +55,16 @@ export default function AppointmentConfirmationPage() {
 
   const handleConfirmBooking = async () => {
     try {
-      console.log('Confirming appointment booking:', {
-       doctorMasterId: ctx?.selectedDoctor?.doctorMasterId ?? null,
-            facilityMasterId: ctx?.selectedFacility?.facilityID ?? null,
-            specialityMasterId: ctx?.selectedSpecialty?.specialityMasterId ?? null,
-            date: ctx?.selectedDate ?? null,
-            startTime: ctx?.selectedTimeSlot?.start ?? null,
-            endTime: ctx?.selectedTimeSlot?.end ?? null,
-            duration: ctx?.selectedDuration ?? null,
-      });
+        isBookingInProgress.current = true;
+        console.log('Confirming appointment booking:', {
+        doctorMasterId: ctx?.selectedDoctor?.doctorMasterId ?? null,
+              facilityMasterId: ctx?.selectedFacility?.facilityID ?? null,
+              specialityMasterId: ctx?.selectedSpecialty?.specialityMasterId ?? null,
+              date: ctx?.selectedDate ?? null,
+              startTime: ctx?.selectedTimeSlot?.start ?? null,
+              endTime: ctx?.selectedTimeSlot?.end ?? null,
+              duration: ctx?.selectedDuration ?? null,
+        });
        const request: BookAppointmentRequest = {
           date: ctx.selectedDate ?? '',
           duration: String(ctx.selectedDuration ?? ''),
@@ -86,6 +91,7 @@ export default function AppointmentConfirmationPage() {
 
     } catch (error) {
       console.error('Error confirming appointment:', error);
+       isBookingInProgress.current = false;
     }
   };
 
