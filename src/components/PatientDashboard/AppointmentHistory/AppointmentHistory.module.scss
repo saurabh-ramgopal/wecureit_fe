@@ -272,3 +272,34 @@
   top: var(--space-xs, 0.75rem);
   right: var(--space-xs, 0.75rem);
 }
+.clinicalNotes {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ecfdf5, #f0fdfa);
+  border-left: 5px solid #e1754e; // medical green highlight
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+
+.clinicalHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #de6937;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  svg {
+    color: #dd875c;
+  }
+}
+
+.clinicalText {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #064e3b;
+  font-weight: 500;
+}

@@ -10,7 +10,7 @@ import PatientDashboardHeader from "@/components/PatientDashboard/PatientDashboa
 import MyProfile from "@/components/PatientDashboard/MyProfile/MyProfile";
 import { useRoleAuth } from "@/hooks/useRoleAuth";
 import PatientHome from '../../../../components/PatientDashboard/PatientHome/PatientHome';
-
+import AppointmentHistory from "@/components/PatientDashboard/AppointmentHistory/AppointmentHistory";
 
 const PatientDashboardPage: NextPage = () => {
     const router = useRouter();
@@ -62,7 +62,7 @@ const PatientDashboardPage: NextPage = () => {
         
         {activeTab === "My Profile" && <MyProfile />}
 
-        {activeTab === "Appointment History" }
+        {activeTab === "Appointment History" && <AppointmentHistory patientId={userId} />}
       </div>
   </div>
   )

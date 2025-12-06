@@ -5,26 +5,64 @@ import { Calendar, Clock, MapPin, UserCheck,AlertTriangle, X } from "lucide-reac
 import { getPatientById } from "@/lib/api";
 
 type Appointment = {
-  id: string;
+  id: number;
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   doctor: string;
-  location: string;
-  department?: string;
+  facility: string;
+  speciality: string;
   cancellationFeeNote?: string;
 };
+type BackendAppointment = {
+  appointmentId : number;
+  doctorName: string;
+  speciality: string;
+  appointmentDate: string; // "2025-12-07"
+  startTime: string;        // "08:30:00"
+  endTime: string;          // "08:45:00"
+  facilityName: string;
+  appointmentNotes: string | null;
+};
+const formatTime = (time24: string): string => {
+  const [hour, minute] = time24.split(":").map(Number);
+  const period = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minute.toString().padStart(2, "0")} ${period}`;
+};
 
-const sampleAppointments: Appointment[] = [
-  {
-    id: "1",
-    date: "Mon, Oct 27, 2025",
-    time: "10:00 AM - 10:30 AM",
-    doctor: "Dr. Sarah Johnson",
-    location: "Downtown Medical Center",
-    department: "Cardiology",
-    cancellationFeeNote: "Cancellation fee: $50 (within 24 hours of appointment)",
-  },
-];
+const formatDate = (dateStr: string): string => {
+  // Parsing "YYYY-MM-DD" as local date to avoid UTC offset issues
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "short", // Mon
+    month: "short",   // Oct
+    day: "2-digit",   // 27
+    year: "numeric",  // 2025
+  });
+};
+
+
+
+const mapBackendToFrontend = (
+  data: BackendAppointment[]
+): Appointment[] => {
+  return data.map((item) => ({
+    id: item.appointmentId,
+    date: formatDate(item.appointmentDate),
+    startTime: formatTime(item.startTime),
+    endTime: formatTime(item.endTime),
+    doctor: item.doctorName,
+    facility: item.facilityName,
+    speciality: item.speciality,
+    cancellationFeeNote: item.appointmentNotes ?? undefined,
+  }));
+};
+
+
+
 
 type PatientHomeProps ={
   patientId?: string;
@@ -34,7 +72,7 @@ type PatientHomeProps ={
 export default function PatientHome({ patientId }: PatientHomeProps)  {
   const router = useRouter();
   const handleBook = () => router.push("/patient/dashboard/dropdownselection");
-  const handleCancel = (id: string) => console.log("Cancel appointment", id);
+  const handleCancel = (id: number) => console.log("Cancel appointment", id);
 
   const getCardAvailability = async () : Promise<boolean> => {
     if (!patientId) {
@@ -58,6 +96,26 @@ export default function PatientHome({ patientId }: PatientHomeProps)  {
 
   const [hasCard, setHasCard] = useState<boolean | null>(null);
   const [patientData, setPatientData] = useState<unknown>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  const fetchUpcomingAppointments = async () => {
+      if (!patientId) return;
+
+      const apiBase = (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080").replace(/\/$/, "");
+      const url = `${apiBase}/patient/upcomingAppointments?patientId=${encodeURIComponent(patientId)}`;
+
+      const res = await fetch(url, { credentials: "include" });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch appointments: ${res.status}`);
+      }
+
+      const backendData: BackendAppointment[] = await res.json();
+      const formatted = mapBackendToFrontend(backendData);
+
+      setAppointments(formatted);
+  };
+
 
   useEffect(() => {
     let mounted = true;
@@ -73,6 +131,7 @@ export default function PatientHome({ patientId }: PatientHomeProps)  {
         // Check card availability
         const available = await getCardAvailability();
         if (mounted) setHasCard(available);
+        await fetchUpcomingAppointments();
       } catch (e) {
         console.error('Error fetching data', e);
         if (mounted) setHasCard(false);
@@ -82,6 +141,9 @@ export default function PatientHome({ patientId }: PatientHomeProps)  {
       mounted = false;
     };
   }, [patientId]);
+
+
+  // Upcoming Appointments
 
   return (
 
@@ -134,21 +196,22 @@ export default function PatientHome({ patientId }: PatientHomeProps)  {
               <h4 className={styles.upcomingTitle}>Upcoming Appointments</h4>
               <p className={styles.subtitle}>Your scheduled visits</p>
             </div>
-            <div className={styles.countBadge}>{sampleAppointments.length}</div>
+            <div className={styles.countBadge}>{appointments.length}</div>
           </div>
 
           <div className={styles.upcomingInner}>
             <div className={styles.upcomingCardInner}>
               <div className={styles.stackSpacing}>
-                {sampleAppointments.map((a) => (
+                {appointments.map((a) => (
                   <div key={a.id} className={styles.apptCard}>
                     <div className={styles.apptBody}>
                       <div className={styles.infoCol}>
                         {[
                           { icon: <Calendar size={18} />, label: a.date },
-                          { icon: <Clock size={18} />, label: a.time },
+                          { icon: <Clock size={18} />, label: `${a.startTime} - ${a.endTime}` },
+                          
                           { icon: <UserCheck size={18} />, label: a.doctor },
-                          { icon: <MapPin size={18} />, label: a.location },
+                          { icon: <MapPin size={18} />, label: a.facility },
                         ].map((item, idx) => (
                           <div key={idx} className={styles.infoRow}>
                             {item.icon}
@@ -158,7 +221,7 @@ export default function PatientHome({ patientId }: PatientHomeProps)  {
                       </div>
 
                       <div className={styles.rightText}>
-                        {a.department && <div className={styles.deptBadge}>{a.department}</div>}
+                        {a.speciality && <div className={styles.deptBadge}>{a.speciality}</div>}
                       </div>
                     </div>
 
