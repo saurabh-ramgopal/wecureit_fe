@@ -45,6 +45,13 @@ export default function RootLayout({
           position="top-right"
           toastOptions={{
             duration: 3000,
+             style: {
+            fontSize: "1.3rem",     
+            padding: "1rem 1.5rem",  
+            minWidth: "400px",     
+            maxWidth: "1800px",
+            borderRadius: "8px",   
+          },
           }}
         />
       </body>

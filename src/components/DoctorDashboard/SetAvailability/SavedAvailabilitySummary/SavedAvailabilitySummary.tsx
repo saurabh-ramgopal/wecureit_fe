@@ -1,13 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styles from './SavedAvailabilitySummary.module.scss';
-import { FacilityAvailabilityUI } from '@/types/doctor';
-import { Clock, MapPin } from 'lucide-react';
+import { FacilityAvailabilityUIEditable } from '@/types/doctor';
+import { Clock, MapPin, Pencil, Trash2 } from 'lucide-react';
 import { calculateDiffHours } from '@/utils/utils';
+import TimePickerPopup from "../TimePickerPopup/TimePickerPopup"
 type SavedAvailabilitySummaryProps = {
-    savedlist: FacilityAvailabilityUI[];  
+    savedlist: FacilityAvailabilityUIEditable[];  
+    onEditAvailability: (startTime: string, endTime: string, availabilityId: string) => void;
+    onDeleteAvailability: (availabilityId: string, isActive: boolean) => void;
 }
 
-const SavedAvailabilitySummary = ({ savedlist }: SavedAvailabilitySummaryProps) => {
+const SavedAvailabilitySummary = ({ savedlist, onEditAvailability , onDeleteAvailability}: SavedAvailabilitySummaryProps) => {
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [isTimePopupOpen, setIsTimePopupOpen] = useState(false);
  const parseLocalDate = (dateStr: string) => {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day); 
@@ -30,7 +35,6 @@ const SavedAvailabilitySummary = ({ savedlist }: SavedAvailabilitySummaryProps) 
     day: "numeric",  // 29
   });
 };
-
 
   return (
     <div>
@@ -71,11 +75,35 @@ const SavedAvailabilitySummary = ({ savedlist }: SavedAvailabilitySummaryProps) 
           <p className={styles['saved-hours']}>
             {calculateDiffHours(item.availableStartTime, item.availableEndTime).toFixed(1)} hours
           </p>
+          <div className={styles['saved-actions']}>
+                  <button 
+                    className={styles['icon-btn']} 
+                    disabled={!item.editable}
+                      onClick={() => {
+                    if (item.editable) {
+                      setEditingItemId(item.dfAvailabilityId); 
+                      setIsTimePopupOpen(true);
+                    }
+                  }}
+                  >
+                    <Pencil size={18}/>
+                  </button>
+                  <button 
+                    className={`${styles['icon-btn']} ${styles['icon-btn-delete']}`} 
+                    disabled={!item.editable}
+                    onClick={() => item.editable && onDeleteAvailability(item.dfAvailabilityId, item.editable)}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
         </div>
       ))}
     </div>
      ) : (
     <p>No saved availability.</p>
+     )}
+     {isTimePopupOpen && editingItemId !== null && (
+     <TimePickerPopup editingItemId={editingItemId} setIsTimePopupOpen={setIsTimePopupOpen}isTimePopupOpen={isTimePopupOpen} handleEditSubmit = {onEditAvailability}/>
      )}
     </div>
 );

@@ -1,31 +1,33 @@
 import React, { useState , useEffect} from 'react';
 import AvailabilityDayCard from '../AvailabilityDayCard/AvailabilityDayCard';
 import styles from './SelectDayCards.module.scss';
+import { ScheduleDayUI } from '@/types/doctor';
 
 interface Day {
-  dayName: string;   // "Wed"
-  dateNumber: string; // "17"
-  month: string;      // "Nov"
-  formattedDate: string; // "Wed, Nov 17"
+  dayName: string;   
+  dateNumber: string; 
+  month: string;      
+  formattedDate: string; 
   isoDate: string;
   
 }
 type SelectDayCardsProps = {
   onDateSelect: (date: string) => void;
+  pastAppointmentsList: ScheduleDayUI[];
 };
 const generateTwoWeeks = (): Day[] => {
   const today = new Date();
   const days: Day[] = [];
 
-  // Determine the upcoming Sunday (including today if it's Sunday)
-  const dayOfWeek = today.getDay(); // 0 = Sunday
+
+  const dayOfWeek = today.getDay();
    const thisWeekSunday = new Date(today);
   thisWeekSunday.setDate(today.getDate() - dayOfWeek);
   
   const startDate = new Date(thisWeekSunday);
   startDate.setDate(thisWeekSunday.getDate() + 7);
 
-  // Generate 14 days starting from Sunday
+
   for (let i = 0; i < 14; i++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
@@ -43,7 +45,7 @@ const generateTwoWeeks = (): Day[] => {
 };
 
 
-const SelectDayCards = ({onDateSelect} : SelectDayCardsProps) => {
+const SelectDayCards = ({onDateSelect, pastAppointmentsList} : SelectDayCardsProps) => {
     const weekDays = generateTwoWeeks();
     const [selectedDate, setSelectedDate] = useState<string>("");
     const handleDateSelect = (isoDate: string) => {
@@ -52,10 +54,24 @@ const SelectDayCards = ({onDateSelect} : SelectDayCardsProps) => {
   };
 
   return (
-  <div className={styles['setavailability-grid']}>
-      {weekDays.map((day, i) => (
-        <AvailabilityDayCard key={i} day={day} onDateSelect={() => handleDateSelect(day.isoDate)} selected={selectedDate === day.isoDate} />
-      ))}
+        <div className={styles['setavailability-grid']}>
+          {weekDays.map((day, i) => {
+          const isDisabled = pastAppointmentsList.some
+            (item => {
+        const itemIso = new Date(item.fullDate).toISOString().split('T')[0]; 
+        return itemIso === day.isoDate; 
+      });
+
+    return (
+      <AvailabilityDayCard
+        key={i}
+        day={day}
+        onDateSelect={() => handleDateSelect(day.isoDate)}
+        selected={selectedDate === day.isoDate}
+        disabled={isDisabled} 
+      />
+    );
+  })}
     </div>
   );
 };

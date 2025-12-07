@@ -169,3 +169,28 @@
 .rightCardWrapper { 
   display: block; 
 }
+
+.clearButtonWrapper {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+  }
+.clearButton {
+  background-color: var(--status-error, #EF4444);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--status-error, #EF4444);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

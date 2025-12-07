@@ -7,7 +7,7 @@ import DoctorSchedule from "@/components/DoctorDashboard/Schedule/DoctorSchedule
 import SetDoctorAvailability from '@/components/DoctorDashboard/SetAvailability/SetDoctorAvailabilityView/SetDoctorAvailabilityView';
 import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentNotesView/AppointmentNotesView';
 import { useRoleAuth } from "@/hooks/useRoleAuth";
-import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability, saveNotes } from '@/lib/api';
+import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability, saveNotes , editDoctorAvailability, deleteDoctorAvailability} from '@/lib/api';
 import { mapDoctorAPIToDoctor, mapDoctorPastAppointments, mapDoctorSchedule } from '@/utils/mapper';
 import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, ScheduleDayUI,FacilityAvailabilityUI, SaveAvailabilityResponse } from '@/types/doctor';
 import { logoutUser } from '@/lib/auth';
@@ -147,7 +147,6 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
       (item) => !(item.facilityId === selectedFacility.facilityId && item.availableDate === selectedDate)
     );
 
-       // Add new entry with facility name + speciality
   const updated: FacilityAvailabilityUI[] = [
     ...filtered,
     {
@@ -159,10 +158,11 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
       speciality: selectedFacility.speciality,
       facilityStreet: selectedFacility.facilityStreet || "",
       stateName: selectedFacility.stateName || "",
+
     },
   ];
 
-    console.log("Updated availability list (inside setState):", updated); // ✅ log correctly
+    console.log("Updated availability list (inside setState):", updated); 
     return updated;
   });
 
@@ -170,12 +170,40 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
 
 }
 
+  const handleEditAvailabilitySubmit = async (startTime: string, endTime: string, availabilityId: string) => {
+   try {
+    await editDoctorAvailability({
+      dfAvailabilityId: availabilityId,
+      availableStartTime: convertTo24HourWithSeconds(startTime),
+      availableEndTime: convertTo24HourWithSeconds(endTime),
+    });
+    await fetchSavedAvailability(Number(doctor.doctorId));
+    toast.success("Successfully updated the availability");
+  } catch (error) {
+    console.error("Failed to edit availability:", error);
+  }
+}
+
+const handleDeleteAvailabilitySubmit = async(availabilityId: string, isActive: boolean) => {
+ try {
+    await deleteDoctorAvailability({
+      dfAvailabilityId: availabilityId,
+      isActive: false
+    });
+    console.log(availabilityId, isActive);
+    await fetchSavedAvailability(Number(doctor.doctorId));
+    toast.success("Successfully deleted the availability");
+  } catch (error) {
+    console.error("Failed to delete availability:", error);
+  }
+}
+
 const handleSaveNotes= async (appointmentID: string,  notes: string ) => {
     const payload = {
     appointmentId: appointmentID,
     appointmentNote: notes,
   };
-  try {
+  try { 
   await saveNotes(payload);
   toast.success("Notes Saved Successfully!");
   await fetchPastAppointments(Number(userId));
@@ -262,7 +290,7 @@ const handleSaveAvailability = async () => {
     />
       <div>
         {activeTab === "My Schedule" && <DoctorSchedule doctorScheduleList = {doctorSchedule}/>}
-        {activeTab === "Set Availability" && <SetDoctorAvailability onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} savedAvailabilityList={savedAvailability?.facilityList || []}  />}
+        {activeTab === "Set Availability" && <SetDoctorAvailability handleEditAvailabilitySubmit={handleEditAvailabilitySubmit} pastAppointmentsList={doctorSchedule} onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} savedAvailabilityList={savedAvailability?.facilityList || []}  handleDeleteAvailabilitySubmit={handleDeleteAvailabilitySubmit}/>}
         {activeTab === "Appointments & Notes" && <AppointmentNotesView doctorPastAppointments={doctorPastAppointments} onSaveNotes={handleSaveNotes} />}
       </div>
   </div>

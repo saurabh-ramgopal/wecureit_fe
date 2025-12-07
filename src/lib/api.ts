@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { UnauthorizedError } from "./apiErrors";
 import router from "next/router";
-import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse } from "@/types/doctor"; 
+import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse, EditDoctorAvailability, DeleteDoctorAvailability } from "@/types/doctor"; 
 import { fetchL1Request, FacilityDocL1, FetchL1Response , FetchDatesResponse, FetchTimeSlotsRequest, FetchTimeSlotResponse, BookAppointmentRequest, BookAppointmentResponse} from "@/types/patient";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -244,6 +244,21 @@ export async function fetchTimeSlots(request: FetchTimeSlotsRequest): Promise<Fe
 
 export async function bookAppointment(request: BookAppointmentRequest): Promise<BookAppointmentResponse>{
   return apiCall<BookAppointmentResponse>(`/patient/bookAppointment`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+
+export async function editDoctorAvailability( request: EditDoctorAvailability): Promise<EditDoctorAvailability>{
+  return apiCall<EditDoctorAvailability>(`/doctor/availability/edit`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+export async function deleteDoctorAvailability( request: DeleteDoctorAvailability): Promise<DeleteDoctorAvailability>{
+  return apiCall<DeleteDoctorAvailability>(`/doctor/availability/delete`, {
     method: 'POST',
     body: JSON.stringify(request),
   });

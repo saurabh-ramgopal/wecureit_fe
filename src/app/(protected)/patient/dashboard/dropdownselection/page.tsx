@@ -15,7 +15,6 @@ export default function SelectDocFacSpecPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
-  // selections are stored in the global DropdownSelection context
 
   const ctx = useDropdownSelection();
 
@@ -66,10 +65,21 @@ export default function SelectDocFacSpecPage() {
         console.error("Failed to fetch speciality:", error);
       } 
   }
+
+  const handleDropdownClearSelection = async() =>{
+    try{
+       await fetchAllDoctors(); 
+        await fetchAllFacilities();
+        await fetchAllSpecialitites();
+    }
+    catch(err){
+       console.error("Failed to clear the options", err);
+    }
+  }
    useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        router.push('/404');
+        router.push('/');
         return;
       }
 
@@ -81,13 +91,12 @@ export default function SelectDocFacSpecPage() {
           await fetchAllDoctors(); 
           await fetchAllFacilities();
           await fetchAllSpecialitites();
-          console.log("Selected Doctor (ctx):", ctx?.selectedDoctor);
         } else {
-          router.push('/404');
+          router.push('/');
         }
       } catch (err) {
         console.error('Error checking auth role', err);
-        router.push('/404');
+        router.push('/');
       } finally {
         setLoading(false);
       }
@@ -96,7 +105,6 @@ export default function SelectDocFacSpecPage() {
     return () => unsubscribe();
   }, [router]);
 
-  // selection handlers are handled inside DropdownSelection using context
 
   if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   if (!authorized) return null;
@@ -117,9 +125,11 @@ export default function SelectDocFacSpecPage() {
               <h3>Appointment Details</h3>
               <p>Choose your preferences below</p>
               <p className="text-sm text-gray-400 mb-6">Selecting any option (doctor, facility, or specialty) will automatically filter the other dropdowns to show only compatible choices.</p>
+            
             </div>
-              <DropdownSelection />
+              <DropdownSelection handleClearSelection={handleDropdownClearSelection}/>
             </div>
+    
 
             <div className="md:col-span-1">
               <SelectionSummary />
