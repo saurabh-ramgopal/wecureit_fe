@@ -90,6 +90,40 @@
   font-style: italic;
 }
 
+.saved-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.action-btn,
+.icon-btn {
+ display: inline-flex;   /* keeps icon aligned without creating a big box */
+  align-items: center;
+  justify-content: center;
+  color: var(--primary, #0891B2);
+  gap: 4px;
+  background: none;   
+  border: none;        
+  padding: 0;         
+  box-shadow: none;      
+  cursor: pointer;
+}
+
+.icon-btn-delete {
+  color: #EF4444;
+
+  &:hover {
+    color: darken(#EF4444, 10%);
+  }
+}
+.icon-btn:disabled
+ {
+  // background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
 // Responsive adjustments
 @media (max-width: 768px) {

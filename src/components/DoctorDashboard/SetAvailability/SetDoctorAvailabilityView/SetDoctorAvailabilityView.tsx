@@ -3,7 +3,7 @@ import SetAvailabilityHeader from '../../MainCardHeader/MainCardHeader';
 import styles from './SetDoctorAvailabilityView.module.scss';
 import SelectDayCards from '../SelectDayCards/SelectDayCards';
 import SelectFacilityCards from '../SelectFacilityCards/SelectFacilityCards';
-import { Doctor, FacilityAvailability, FacilityAvailabilityUI, FacilitySpeciality } from "@/types/doctor";
+import { Doctor, FacilityAvailability, FacilityAvailabilityUI, FacilityAvailabilityUIEditable, ScheduleDayUI } from "@/types/doctor";
 import WorkingHoursDropdown from '../WorkingHoursDropdown/WorkingHoursDropdown';
 import DraftAvailabilitySummary from '../DraftAvailabilitySummary/DraftAvailabilitySummary';
 import SavedAvailabilitySummary from '../SavedAvailabilitySummary/SavedAvailabilitySummary';
@@ -18,17 +18,20 @@ type SetDoctorAvailabilityProps = {
     onDelete: (index: number) => void;
     availabilityList: FacilityAvailabilityUI[];
     handleSaveAvailabilitySubmit: () => void;
-    savedAvailabilityList: FacilityAvailabilityUI[];
+    savedAvailabilityList: FacilityAvailabilityUIEditable[];
+    pastAppointmentsList: ScheduleDayUI[];
+    handleEditAvailabilitySubmit: (startTime: string, endTime: string) => void;
+    handleDeleteAvailabilitySubmit: (facilityId: string, isActive: boolean) => void;
 
 }
 
-const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate, selectedFacilityId, onDateChange, handleFacilityChange, onDelete, availabilityList, handleSaveAvailabilitySubmit, savedAvailabilityList} : SetDoctorAvailabilityProps) => {
+const SetDoctorAvailability= ({doctor,pastAppointmentsList, handleSetAvailabilitySubmit, selectedDate, selectedFacilityId, onDateChange, handleFacilityChange, onDelete, availabilityList, handleSaveAvailabilitySubmit, savedAvailabilityList, handleEditAvailabilitySubmit, handleDeleteAvailabilitySubmit} : SetDoctorAvailabilityProps) => {
   return (
     <>
     <div className={styles['setavailability-card']}>
      <SetAvailabilityHeader title='Set Your Availability'
      subtitle='Choose dates, facilities, and working hours. Minimum 4 hours per day, one facility per day.'/>
-     <SelectDayCards onDateSelect={onDateChange}  />
+     <SelectDayCards onDateSelect={onDateChange} pastAppointmentsList={pastAppointmentsList} />
        {selectedDate && (
         <>
           <SetAvailabilityHeader title={`Set Facility for ${selectedDate}`} />
@@ -51,7 +54,7 @@ const SetDoctorAvailability= ({doctor, handleSetAvailabilitySubmit, selectedDate
     <div className={styles['setavailability-card']}>
        <SetAvailabilityHeader title = 'Saved Availability Summary'
        subtitle='Review your saved availability' />
-       <SavedAvailabilitySummary savedlist={savedAvailabilityList}  />
+       <SavedAvailabilitySummary savedlist={savedAvailabilityList} onEditAvailability={handleEditAvailabilitySubmit} onDeleteAvailability={handleDeleteAvailabilitySubmit}/>
     </div>
     </>
   );

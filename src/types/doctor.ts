@@ -88,6 +88,7 @@ export interface FacilityAvailabilityUI extends FacilityAvailability {
   facilityStreet?: string; 
   stateName?: string;   
   stateCode?: string;
+  
 }
 
 
@@ -183,10 +184,13 @@ export interface SaveNotesRequest{
 appointmentId: string;
 appointmentNote: string;
 }
-
+export interface FacilityAvailabilityUIEditable
+  extends FacilityAvailabilityUI {
+  editable: boolean;
+}
 export interface SaveAvailabilityResponse {
   doctorId: number;
-  facilityList: FacilityAvailabilityUI[];
+  facilityList: FacilityAvailabilityUIEditable[];
 }
 
 export interface FormattedDate{

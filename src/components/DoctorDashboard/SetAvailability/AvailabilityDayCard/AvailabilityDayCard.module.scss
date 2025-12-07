@@ -1,6 +1,6 @@
 .setavailability-day-card {
     width: 100%;
- background-color: var(--bg-card-light, #f8fafc);
+  background-color: var(--bg-card-light, #f8fafc);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xlarge);
   padding: 1rem;
@@ -59,5 +59,25 @@
   .date-number,
   .month {
     color: var(--text-white);
+  }
+}
+
+
+/* Disabled state */
+.setavailability-day-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+
+  &:hover {
+    background: var(--bg-card-light, #f8fafc); // prevent hover color
+    color: var(--text-secondary); // maintain normal text color
+  }
+
+  .date-number,
+  .month,
+  h4,
+  p,
+  span {
+    color: var(--text-secondary); // gray out text
   }
 }

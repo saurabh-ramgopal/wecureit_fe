@@ -20,6 +20,7 @@ type DropDownSelectionProps = {
     specialityMasterId: string | null;
     facilityMasterId: string | null;
   }) => Promise<void>;
+  handleClearSelection?: () => void;
 };
 
 export default function DropDownSelectionProps(props: DropDownSelectionProps) {
@@ -37,12 +38,9 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
   const selectedSpecialty = ctx?.selectedSpecialty ?? props.selectedSpecialty ?? null;
   const setSelectedSpecialty = ctx?.setSelectedSpecialty ?? props.setSelectedSpecialty ?? (() => {});
   const fetchCascadingOptions = ctx?.fetchCascadingOptions ?? props.fetchCascadingOptions ?? (async () => {}); 
+
    const handleDoctorChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-
-    if (value === "__CLEAR__") {
-      setSelectedDoctor(null);
-    } else {
       const doctor = allDoctors.find((d) => d.doctorMasterId.toString() === value);
       if (doctor) {
         setSelectedDoctor(doctor);
@@ -53,14 +51,10 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
       });
       }
     }
-  };
+
 
   const handleFacilityChange = async (e: React.ChangeEvent<HTMLSelectElement>)=> {
     const value = e.target.value;
-
-    if (value === "__CLEAR__") {
-      setSelectedFacility(null);
-    } else {
       const facility = allFacilities.find((f) => f.facilityID.toString() === value);
       if (facility) {
         setSelectedFacility(facility);
@@ -71,13 +65,10 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
       });
       }
     }
-  };
+
     const handleSpecialtyChange = async(e: React.ChangeEvent<HTMLSelectElement>)=> {
     const value = e.target.value;
 
-    if (value === "__CLEAR__") {
-      setSelectedSpecialty(null);
-    } else {
       const specialty = allSpecialities.find((s) => s.specialityMasterId.toString() === value);
       if (specialty) {
         setSelectedSpecialty(specialty);
@@ -88,7 +79,7 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
       });
       }
     }
-  };
+
   return (
       <div className={styles.selectionGrid}>
   <div className={styles.field}>
@@ -102,7 +93,6 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
        className={styles.selectInput}
     >
       <option value="" disabled hidden>Choose a doctor</option>
-      <option value="__CLEAR__">Clear selection</option>
         {allDoctors.map((doctor) => (
             <option key={doctor.doctorMasterId} value={doctor.doctorMasterId} hidden={!!selectedDoctor && doctor.doctorMasterId !== selectedDoctor.doctorMasterId}>
               {doctor.name}
@@ -125,7 +115,6 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
       className={styles.selectInput}
     >
      <option value="" disabled hidden>Choose a facility</option>
-       <option value="__CLEAR__">Clear selection</option>
         {allFacilities.map((facility) => (
             <option key={facility.facilityID} value={facility.facilityID} hidden={!!selectedFacility && facility.facilityID !== selectedFacility.facilityID} >
               {facility.facilityName}
@@ -148,7 +137,6 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
       className={styles.selectInput}
     >
     <option value="" disabled hidden>Choose a specialty</option>
-       <option value="__CLEAR__">Clear selection</option>
         {allSpecialities.map((speciality) => (
             <option key={speciality.specialityMasterId} value={speciality.specialityMasterId}  hidden={!!selectedSpecialty && speciality.specialityMasterId !== selectedSpecialty.specialityMasterId} >
               {speciality.specialityName}
@@ -159,6 +147,25 @@ export default function DropDownSelectionProps(props: DropDownSelectionProps) {
     ? `${allSpecialities.length} Specialit${allSpecialities.length > 1 ? "ies" : "y"} available`
     : "No Specialities available"}</div>
   </div>
+           <div className={styles.clearButtonWrapper}>
+            <button
+              type="button"
+              className={styles.clearButton}
+               disabled={
+                  !selectedDoctor?.doctorMasterId &&
+                  !selectedFacility?.facilityID &&
+                  !selectedSpecialty?.specialityMasterId
+                }
+               onClick={async () => {
+                    setSelectedDoctor?.(null);
+                    setSelectedFacility?.(null);
+                    setSelectedSpecialty?.(null);
+                    await props.handleClearSelection?.();
+                  }}
+            >
+              Clear Selection
+            </button>
+          </div>
 </div>
 
   );

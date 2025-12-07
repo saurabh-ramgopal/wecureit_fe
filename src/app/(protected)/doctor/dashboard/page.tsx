@@ -147,7 +147,6 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
       (item) => !(item.facilityId === selectedFacility.facilityId && item.availableDate === selectedDate)
     );
 
-       // Add new entry with facility name + speciality
   const updated: FacilityAvailabilityUI[] = [
     ...filtered,
     {
@@ -159,10 +158,11 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
       speciality: selectedFacility.speciality,
       facilityStreet: selectedFacility.facilityStreet || "",
       stateName: selectedFacility.stateName || "",
+
     },
   ];
 
-    console.log("Updated availability list (inside setState):", updated); // ✅ log correctly
+    console.log("Updated availability list (inside setState):", updated); 
     return updated;
   });
 
@@ -170,12 +170,21 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
 
 }
 
+  const handleEditAvailabilitySubmit = async (startTime: string, endTime: string) => {
+    console.log("Handle Edit Availability Clicked");
+    toast.success("Successfully updated the availability" );
+}
+
+const handleDeleteAvailabilitySubmit = async(facilityID: string, isActive: boolean) => {
+      console.log("Handle Delete Availability Clicked", facilityID);
+}
+
 const handleSaveNotes= async (appointmentID: string,  notes: string ) => {
     const payload = {
     appointmentId: appointmentID,
     appointmentNote: notes,
   };
-  try {
+  try { 
   await saveNotes(payload);
   toast.success("Notes Saved Successfully!");
   await fetchPastAppointments(Number(userId));
@@ -262,7 +271,7 @@ const handleSaveAvailability = async () => {
     />
       <div>
         {activeTab === "My Schedule" && <DoctorSchedule doctorScheduleList = {doctorSchedule}/>}
-        {activeTab === "Set Availability" && <SetDoctorAvailability onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} savedAvailabilityList={savedAvailability?.facilityList || []}  />}
+        {activeTab === "Set Availability" && <SetDoctorAvailability handleEditAvailabilitySubmit={handleEditAvailabilitySubmit} pastAppointmentsList={doctorSchedule} onDelete={handleDeleteDraft} selectedDate = {selectedDate} selectedFacilityId = {selectedFacility.facilityId} onDateChange = {onDateChange} doctor={doctor} handleFacilityChange={handleSelectFacility} handleSetAvailabilitySubmit={handleSetAvailabilitySubmit} availabilityList = {availabilityList} handleSaveAvailabilitySubmit={handleSaveAvailability} savedAvailabilityList={savedAvailability?.facilityList || []}  handleDeleteAvailabilitySubmit={handleDeleteAvailabilitySubmit}/>}
         {activeTab === "Appointments & Notes" && <AppointmentNotesView doctorPastAppointments={doctorPastAppointments} onSaveNotes={handleSaveNotes} />}
       </div>
   </div>

@@ -19,10 +19,10 @@ const WorkingHoursDropdown = ({ handleSubmit }: WorkingHoursDropdownProps) => {
 
   const [fromTime, setFromTime] = useState(timeOptions[0].value);
   const [toTime, setToTime] = useState(() => {
-  // Default end time: first option after fromTime
+
   const fromIndex = timeOptions.findIndex(opt => opt.value === timeOptions[0].value);
   const options = timeOptions.slice(fromIndex + 1);
-  // Ensure 12 AM is included
+
   if (!options.find(opt => opt.value === "12:00 AM")) {
     options.push({ value: "12:00 AM", label: "12:00 AM" });
   }
@@ -30,14 +30,13 @@ const WorkingHoursDropdown = ({ handleSubmit }: WorkingHoursDropdownProps) => {
 });
 
   
-    // Filter End Time options based on selected From Time
    const filteredEndOptions = useMemo(() => {
     if (!fromTime) return timeOptions;
 
     const fromIndex = timeOptions.findIndex(opt => opt.value === fromTime);
     const options = timeOptions.slice(fromIndex + 1);
 
-    // Ensure 12 AM is included if not already
+
     if (!options.find(opt => opt.value === "12:00 AM")) {
       options.push({ value: "12:00 AM", label: "12:00 AM" });
     }

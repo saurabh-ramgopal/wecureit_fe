@@ -12,12 +12,13 @@ type SetAvailabilityDayCardProps = {
   day: Day;
   onDateSelect: (date: string) => void;
   selected?: boolean; 
+  disabled?: boolean;
 };
 
-const AvailabilityDayCard = ({ day, onDateSelect, selected} : SetAvailabilityDayCardProps) => {
+const AvailabilityDayCard = ({ day, onDateSelect, selected, disabled} : SetAvailabilityDayCardProps) => {
 
   return (
-    <div className={`${styles['setavailability-day-card']} ${selected ? styles['selected'] : ''}`}  onClick={() => onDateSelect(day.formattedDate)}>
+    <div className={`${styles['setavailability-day-card']} ${selected ? styles['selected'] : ''} ${disabled ? styles.disabled : ''}`}  onClick={() => !disabled && onDateSelect(day.formattedDate)}>
       <div className={styles['setavailability-day-card__header']}>
         <h4>{day.dayName}</h4>
         <p className={styles['setavailability-day-card__date']}>
