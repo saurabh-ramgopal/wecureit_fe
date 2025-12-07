@@ -5,15 +5,17 @@ import toast from "react-hot-toast";
 import { calculateDiffHours } from "@/utils/utils";
 
 interface TimePickerPopupProps {
-   handleEditSubmit: (fromTime: string, toTime: string) => void;
+    handleEditSubmit: (fromTime: string, toTime: string, availabilityId: string) => void;
    isTimePopupOpen: boolean;
     setIsTimePopupOpen: (value: boolean) => void;
+    editingItemId: string;
 }
 
 const TimePickerPopup: React.FC<TimePickerPopupProps> = ({
   isTimePopupOpen,
   setIsTimePopupOpen,
   handleEditSubmit,
+  editingItemId
 
 }) => {
     
@@ -68,7 +70,7 @@ const TimePickerPopup: React.FC<TimePickerPopupProps> = ({
             return;
         } 
         else{
-             handleEditSubmit(startTime, endTime);
+             handleEditSubmit(startTime, endTime, editingItemId);
             setIsTimePopupOpen(false);
         }
   };

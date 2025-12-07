@@ -7,7 +7,7 @@ import DoctorSchedule from "@/components/DoctorDashboard/Schedule/DoctorSchedule
 import SetDoctorAvailability from '@/components/DoctorDashboard/SetAvailability/SetDoctorAvailabilityView/SetDoctorAvailabilityView';
 import AppointmentNotesView from '@/components/DoctorDashboard/AppointmentsNotes/AppointmentNotesView/AppointmentNotesView';
 import { useRoleAuth } from "@/hooks/useRoleAuth";
-import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability, saveNotes } from '@/lib/api';
+import { getDoctorById, setDoctorAvailability, getDoctorSchedule, getDoctorPastAppointments,getSavedDoctorAvailability, saveNotes , editDoctorAvailability, deleteDoctorAvailability} from '@/lib/api';
 import { mapDoctorAPIToDoctor, mapDoctorPastAppointments, mapDoctorSchedule } from '@/utils/mapper';
 import { Doctor, DoctorAvailability, DoctorPastAppointmentsUI, ScheduleDayUI,FacilityAvailabilityUI, SaveAvailabilityResponse } from '@/types/doctor';
 import { logoutUser } from '@/lib/auth';
@@ -170,13 +170,32 @@ const handleSelectFacility = (facility: FacilityAvailabilityUI) => {
 
 }
 
-  const handleEditAvailabilitySubmit = async (startTime: string, endTime: string) => {
-    console.log("Handle Edit Availability Clicked");
-    toast.success("Successfully updated the availability" );
+  const handleEditAvailabilitySubmit = async (startTime: string, endTime: string, availabilityId: string) => {
+   try {
+    await editDoctorAvailability({
+      dfAvailabilityId: availabilityId,
+      availableStartTime: convertTo24HourWithSeconds(startTime),
+      availableEndTime: convertTo24HourWithSeconds(endTime),
+    });
+    await fetchSavedAvailability(Number(doctor.doctorId));
+    toast.success("Successfully updated the availability");
+  } catch (error) {
+    console.error("Failed to edit availability:", error);
+  }
 }
 
-const handleDeleteAvailabilitySubmit = async(facilityID: string, isActive: boolean) => {
-      console.log("Handle Delete Availability Clicked", facilityID);
+const handleDeleteAvailabilitySubmit = async(availabilityId: string, isActive: boolean) => {
+ try {
+    await deleteDoctorAvailability({
+      dfAvailabilityId: availabilityId,
+      isActive: false
+    });
+    console.log(availabilityId, isActive);
+    await fetchSavedAvailability(Number(doctor.doctorId));
+    toast.success("Successfully deleted the availability");
+  } catch (error) {
+    console.error("Failed to delete availability:", error);
+  }
 }
 
 const handleSaveNotes= async (appointmentID: string,  notes: string ) => {

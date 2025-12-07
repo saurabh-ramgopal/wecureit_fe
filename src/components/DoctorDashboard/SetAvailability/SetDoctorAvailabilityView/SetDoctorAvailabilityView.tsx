@@ -20,8 +20,8 @@ type SetDoctorAvailabilityProps = {
     handleSaveAvailabilitySubmit: () => void;
     savedAvailabilityList: FacilityAvailabilityUIEditable[];
     pastAppointmentsList: ScheduleDayUI[];
-    handleEditAvailabilitySubmit: (startTime: string, endTime: string) => void;
-    handleDeleteAvailabilitySubmit: (facilityId: string, isActive: boolean) => void;
+    handleEditAvailabilitySubmit: (startTime: string, endTime: string, availabilityId: string) => void;
+    handleDeleteAvailabilitySubmit: (availabilityId: string, isActive: boolean) => void;
 
 }
 

@@ -187,6 +187,7 @@ appointmentNote: string;
 export interface FacilityAvailabilityUIEditable
   extends FacilityAvailabilityUI {
   editable: boolean;
+  dfAvailabilityId: string;
 }
 export interface SaveAvailabilityResponse {
   doctorId: number;
@@ -196,4 +197,15 @@ export interface SaveAvailabilityResponse {
 export interface FormattedDate{
  shortDate: string; // e.g., "Mon, Jan 1"
   fullDate: string;  // e.g., "January 1, 2024"
+}
+
+export interface EditDoctorAvailability{
+  availableStartTime: string;
+  availableEndTime: string;
+  dfAvailabilityId: string;
+}
+
+export interface DeleteDoctorAvailability{
+    dfAvailabilityId: string;
+    isActive: boolean
 }

@@ -6,8 +6,8 @@ import { calculateDiffHours } from '@/utils/utils';
 import TimePickerPopup from "../TimePickerPopup/TimePickerPopup"
 type SavedAvailabilitySummaryProps = {
     savedlist: FacilityAvailabilityUIEditable[];  
-    onEditAvailability: (startTime: string, endTime: string) => void;
-    onDeleteAvailability: (facilityId: string, isActive: boolean) => void;
+    onEditAvailability: (startTime: string, endTime: string, availabilityId: string) => void;
+    onDeleteAvailability: (availabilityId: string, isActive: boolean) => void;
 }
 
 const SavedAvailabilitySummary = ({ savedlist, onEditAvailability , onDeleteAvailability}: SavedAvailabilitySummaryProps) => {
@@ -81,7 +81,7 @@ const SavedAvailabilitySummary = ({ savedlist, onEditAvailability , onDeleteAvai
                     disabled={!item.editable}
                       onClick={() => {
                     if (item.editable) {
-                      setEditingItemId(item.facilityId); 
+                      setEditingItemId(item.dfAvailabilityId); 
                       setIsTimePopupOpen(true);
                     }
                   }}
@@ -91,7 +91,7 @@ const SavedAvailabilitySummary = ({ savedlist, onEditAvailability , onDeleteAvai
                   <button 
                     className={`${styles['icon-btn']} ${styles['icon-btn-delete']}`} 
                     disabled={!item.editable}
-                    onClick={() => item.editable && onDeleteAvailability(item.facilityId, item.editable)}
+                    onClick={() => item.editable && onDeleteAvailability(item.dfAvailabilityId, item.editable)}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -103,7 +103,7 @@ const SavedAvailabilitySummary = ({ savedlist, onEditAvailability , onDeleteAvai
     <p>No saved availability.</p>
      )}
      {isTimePopupOpen && editingItemId !== null && (
-     <TimePickerPopup setIsTimePopupOpen={setIsTimePopupOpen}isTimePopupOpen={isTimePopupOpen} handleEditSubmit = {onEditAvailability}/>
+     <TimePickerPopup editingItemId={editingItemId} setIsTimePopupOpen={setIsTimePopupOpen}isTimePopupOpen={isTimePopupOpen} handleEditSubmit = {onEditAvailability}/>
      )}
     </div>
 );
