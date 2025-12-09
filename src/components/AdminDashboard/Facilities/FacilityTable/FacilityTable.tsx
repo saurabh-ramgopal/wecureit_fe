@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import { MapPin, Pencil, Trash2 } from "lucide-react";
 import styles from "@/app/(protected)/admin/dashboard/AdminDashboard.module.scss";
 import localStyles from "./FacilityTable.module.scss";
@@ -38,7 +38,6 @@ const FacilityTable = () => {
           const facilitySpecs = Array.isArray(ff['speciality']) ? (ff['speciality'] as Record<string, unknown>[]) : [];
           const facilitySpecIds = facilitySpecs.map((s) => String(s['specialityMasterId'] ?? s['speciality_master_id'] ?? '')).filter(Boolean);
           const facilitySpecNames = facilitySpecs.map((s) => String(s['specialityName'] ?? s['speciality_name'] ?? s['name'] ?? '')).filter(Boolean);
-
           
           let parsedRooms: unknown[] = [];
           if (Array.isArray(ff['roomDetails'])) {
@@ -163,9 +162,9 @@ const FacilityTable = () => {
             specialties: specialtiesNormalized,
             roomDetails: parsedRooms as unknown[],
             facilityMasterId: id ? String(id) : undefined,
-
             stateCode: rawStateCode !== null && rawStateCode !== undefined ? String(rawStateCode) : undefined,
             stateName: rawStateName !== null && rawStateName !== undefined ? String(rawStateName) : undefined,
+            isDeletable: ff['isDeletable'] !== false,
           } as unknown as AddFacilityType;
 
           return normalizedFacility;
@@ -185,7 +184,34 @@ const FacilityTable = () => {
     void refreshFacilities();
   }, [refreshFacilities]);
 
-  
+  useEffect(() => {
+    console.log('Facilities updated:', facilities);
+  }, [facilities]);
+
+  // Debug: Log raw getFacilities response
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const rawRes = await getFacilities();
+        if (mounted) {
+          console.log("FACILITIES RAW RESPONSE FOR DEBUG:");
+          console.log("Raw response:", rawRes);
+          console.log("Total facilities:", Array.isArray(rawRes) ? rawRes.length : "not an array");
+          if (Array.isArray(rawRes) && rawRes.length > 0) {
+            console.log("First facility:", rawRes[0]);
+            console.log("First facility keys:", Object.keys(rawRes[0] as Record<string, unknown>));
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching raw facilities for debug", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const [specialityMaster, setSpecialityMaster] = useState<Array<Record<string, unknown>>>([]);
   useEffect(() => {
     let mounted = true;
@@ -257,10 +283,12 @@ const FacilityTable = () => {
         </div>
       )}
 
-      
       <div className={localStyles.grid}>
-        {facilities.map((f, i) => (
-          <div key={i} className={localStyles.card}>
+        {facilities.map((f, i) => {
+          const isDeletable = (f as any).isDeletable !== false;
+
+          return (
+            <div key={i} className={localStyles.card}>
             
             <div className={localStyles.cardTop}>
               <div>
@@ -286,31 +314,33 @@ const FacilityTable = () => {
                 >
                   <Pencil className={styles.iconEdit} size={16} />
                 </button>
-                <button
-                  className={styles.iconButton}
-                  onClick={async () => {
-                    const _displayName = String((f.name ?? ((typeof f.address === 'string' && f.address.split(',')[0]) || (f as Record<string, unknown>)['facilityMasterId'])) ?? '');
-                    if (!confirm(`Delete facility ${_displayName}?`)) return;
-                    try {
-                      
-                      const ff = f as Record<string, unknown>;
-                      const id = ff['facilityMasterId'] ?? ff['facility_master_id'] ?? undefined;
-                      if (!id) {
-                        alert('Cannot delete facility: missing id');
-                        return;
+                {isDeletable && (
+                  <button
+                    className={styles.iconButton}
+                    onClick={async () => {
+                      const _displayName = String((f.name ?? ((typeof f.address === 'string' && f.address.split(',')[0]) || (f as Record<string, unknown>)['facilityMasterId'])) ?? '');
+                      if (!confirm(`Delete facility ${_displayName}?`)) return;
+                      try {
+                        
+                        const ff = f as Record<string, unknown>;
+                        const id = ff['facilityMasterId'] ?? ff['facility_master_id'] ?? undefined;
+                        if (!id) {
+                          alert('Cannot delete facility: missing id');
+                          return;
+                        }
+                        
+                        await deleteFacility({ facilityMasterId: id, isActive: false });
+                        
+                        await refreshFacilities();
+                      } catch (err) {
+                        console.error('deleteFacility failed', err);
+                        alert('Failed to delete facility');
                       }
-                      
-                      await deleteFacility({ facilityMasterId: id, isActive: false });
-                      
-                      await refreshFacilities();
-                    } catch (err) {
-                      console.error('deleteFacility failed', err);
-                      alert('Failed to delete facility');
-                    }
-                  }}
-                >
-                  <Trash2 className={styles.iconDelete} size={16} />
-                </button>
+                    }}
+                  >
+                    <Trash2 className={styles.iconDelete} size={16} />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -366,7 +396,8 @@ const FacilityTable = () => {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       
