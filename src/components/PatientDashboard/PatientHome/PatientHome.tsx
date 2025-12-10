@@ -72,7 +72,32 @@ type PatientHomeProps ={
 export default function PatientHome({ patientId }: PatientHomeProps)  {
   const router = useRouter();
   const handleBook = () => router.push("/patient/dashboard/dropdownselection");
-  const handleCancel = (id: number) => console.log("Cancel appointment", id);
+  const handleCancel = async (id: number) => {
+    //Implement cancellation logic here
+    alert(`Cancel appointment with ID: ${id}`);
+    try{
+      const response  = await fetch (`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080'}/doctor/appointments/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          appointmentId: id,
+          isActive: false}),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+  
+      // Refresh appointments after cancellation
+      // await fetchUpcomingAppointments();    
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+    }
+  }
+    
 
   const getCardAvailability = async () : Promise<boolean> => {
     if (!patientId) {
