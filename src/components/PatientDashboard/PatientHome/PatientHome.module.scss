@@ -272,3 +272,26 @@
   top: var(--space-xs, 0.75rem);
   right: var(--space-xs, 0.75rem);
 }
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: 12px;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.tabBtn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.activeTab {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
