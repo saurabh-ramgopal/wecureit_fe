@@ -156,6 +156,17 @@ const DoctorTable = () => {
     };
   }, []);
 
+  // Debug: Log doctorsList whenever it changes
+  useEffect(() => {
+    console.log("=== DOCTORS LIST DEBUG ===");
+    console.log("doctorsList:", doctorsList);
+    console.log("Total doctors:", doctorsList.length);
+    if (doctorsList.length > 0) {
+      console.log("First doctor:", doctorsList[0]);
+      console.log("First doctor keys:", Object.keys(doctorsList[0]));
+    }
+  }, [doctorsList]);
+
 
   const handleDelete = async (doc: unknown) => {
     const rec = (doc as Record<string, unknown>) || {};
@@ -231,6 +242,7 @@ const DoctorTable = () => {
         {doctorsList.map((doc, i) => {
           const displayName = safeStr(doc?.doctorName ?? doc?.name);
           const displayEmail = safeStr(doc?.doctorEmail ?? doc?.email);
+          const isDeletable = doc?.isDeletable;
 
           return (
             <div key={i} className={localStyles.card}>
@@ -249,13 +261,14 @@ const DoctorTable = () => {
                     <Pencil size={18} className={styles.iconEdit} />
                   </button>
 
-                
+                  {isDeletable !== false && (
                   <button
                     className={styles.iconButton}
                     onClick={() => handleDelete(doc)}
                   >
                     <Trash2 size={18} className={styles.iconDelete} />
                   </button>
+                  )}
                 </div>
               </div>
 
