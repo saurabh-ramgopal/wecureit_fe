@@ -65,3 +65,24 @@ export const formatTime = (t: string) => {
 
   return `${String(hour12).padStart(2, '0')}:${String(mm).padStart(2, '0')} ${ampm}`;
 };
+
+
+
+export const toAMPM = (input: string | number) => {
+          let h: number, m: number;
+
+          if (typeof input === 'string') {
+            // input like "07:15:00"
+            [h, m] = input.split(':').map(Number);
+          } else {
+            // input is total minutes
+            h = Math.floor(input / 60);
+            m = input % 60;
+          }
+
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          let hour12 = h % 12;
+          if (hour12 === 0) hour12 = 12;
+
+          return `${hour12}:${m.toString().padStart(2, '0')} ${ampm}`;
+};

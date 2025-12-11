@@ -21,7 +21,14 @@ const DayCard = ({ schedule }: DayCardProps) => {
               </p>
               <p className={styles['day-card__total-hours']}>
                 <Clock size={16} style={{ marginRight: '0.5rem' }} />
-                {schedule.totalHours} total
+                 {/* <span style={{ marginRight: '0.5rem' }}>Schedule:</span> */}
+                  <span style={{ 
+                   backgroundColor: 'var(--light, #bcf4f9)', 
+                     color: 'var(--text-secondary)', 
+                        padding: '0.25rem 0.5rem', 
+                        borderRadius: '4px',
+                        fontWeight: '500'
+                      }}>{schedule.totalHours}</span>     
               </p>
             </div>
       <div className={styles['day-card__appointments']}>
