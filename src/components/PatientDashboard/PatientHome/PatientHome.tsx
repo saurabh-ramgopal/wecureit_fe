@@ -115,7 +115,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
 
       if (!response.ok) throw new Error(`Server returned ${response.status}`);
 
-      // Remove it from upcoming list instantly
+      // Remove from upcoming appointments
       setAppointments((prev) => prev.filter((a) => a.id !== id));
 
       // Refresh cancelled list
@@ -125,7 +125,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
     }
   };
 
-  // Check card availability
+  // Check credit card availability
   const getCardAvailability = async (): Promise<boolean> => {
     if (!patientId) return false;
 
@@ -139,7 +139,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
     return cardData.length > 0;
   };
 
-  // Fetch upcoming
+  // Fetch upcoming appointments
   const fetchUpcomingAppointments = async () => {
     if (!patientId) return;
 
@@ -153,7 +153,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
     setAppointments(mapBackendToFrontend(backendData));
   };
 
-  // Fetch cancelled
+  // Fetch cancelled appointments
   const fetchCancelledAppointments = async () => {
     if (!patientId) return;
 
@@ -181,6 +181,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
         const cardAvailable = await getCardAvailability();
         if (mounted) setHasCard(cardAvailable);
 
+        //refresh appointments
         await fetchUpcomingAppointments();
         await fetchCancelledAppointments();
       } catch (e) {
@@ -193,7 +194,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
     };
   }, [patientId]);
 
-  // Pick correct list based on active tab -> default to upcoming
+  // Default tab is Upcoming
   const listToDisplay = activeTab === "Upcoming" ? appointments : cancelledAppointments;
 
   return (
@@ -261,6 +262,7 @@ export default function PatientHome({ patientId }: PatientHomeProps) {
                           { icon: <Calendar size={18} />, label: a.date },
                           { icon: <Clock size={18} />, label: `${a.startTime} - ${a.endTime}` },
                           { icon: <UserCheck size={18} />, label: a.doctor },
+                          // { icon: <Clock size={18} />, label: a.speciality },
                           { icon: <MapPin size={18} />, label: a.facility },
                         ].map((item, idx) => (
                           <div key={idx} className={styles.infoRow}>
