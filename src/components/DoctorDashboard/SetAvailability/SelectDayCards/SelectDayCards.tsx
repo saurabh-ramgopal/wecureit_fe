@@ -58,10 +58,16 @@ const SelectDayCards = ({onDateSelect, pastAppointmentsList} : SelectDayCardsPro
           {weekDays.map((day, i) => {
           const isDisabled = pastAppointmentsList.some
             (item => {
-        const itemIso = new Date(item.fullDate).toISOString().split('T')[0]; 
-        return itemIso === day.isoDate; 
-      });
+              const itemDate = new Date(item.fullDate);
+              const dayDate = new Date(day.isoDate);
+                return (
+                itemDate.getFullYear() === dayDate.getFullYear() &&
+                itemDate.getMonth() === dayDate.getMonth() &&
+                itemDate.getDate() === dayDate.getDate()
+              );
 
+      });
+      console.log("Disabled date", isDisabled);
     return (
       <AvailabilityDayCard
         key={i}

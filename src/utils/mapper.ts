@@ -1,5 +1,5 @@
 import { DoctorAPIResponse, Doctor, Speciality, DoctorScheduleAPIResponse, DoctorPastAppointmentsUI} from '@/types/doctor';
-import {formatPlainDate} from "../utils/utils"
+import {formatPlainDate, toAMPM} from "../utils/utils"
 import {AllDoctorResponseAPI, AllDoctorUI, AllFacilityResponseAPI, AllFacilityUI} from "@/types/patient";
 export const mapDoctorAPIToDoctor = (apiDoctor: DoctorAPIResponse): Doctor => ({
   doctorId: apiDoctor.doctorMasterId,
@@ -42,15 +42,62 @@ export const mapDoctorSchedule = (apiData: DoctorScheduleAPIResponse) => {
       // Sort appointments by startTime
       appts.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
+      const [firstAppt] = appts;
+
       // Calculate total hours
       const totalHours = appts.reduce((sum, a) => sum + a.duration / 60, 0);
 
-      // Format appointments for UI
+      const dayStart = firstAppt.startTime;                      
+      const dayEnd = appts[appts.length - 1].endTime;     
+      
+      const availableStart = firstAppt.doctorFacilityAvailability.availableStartTime;
+      const availableEnd = firstAppt.doctorFacilityAvailability.availableEndTime;
+
+        const toMinutes = (t: string) => {
+        const [h, m] = t.split(":").map(Number);
+        return h * 60 + m;
+      };
+
+     
+      const startMin = toMinutes(dayStart);
+      const endMin = toMinutes(dayEnd);
+
+      const availStartMin = toMinutes(availableStart);
+      const availEndMin = toMinutes(availableEnd);
+
+      const totalAppointmentMinutes = endMin - startMin;
+      const FOUR_HOURS = 240;
+
+      let windowStart: number;
+      let windowEnd: number;
+
+      if (totalAppointmentMinutes > FOUR_HOURS) {
+      
+        windowStart = startMin;
+        windowEnd = endMin;
+      } else {
+
+        const fourHrEnd = startMin + FOUR_HOURS;
+
+        if (fourHrEnd <= availEndMin) {
+
+          windowStart = startMin;
+          windowEnd = fourHrEnd;
+        } else {
+
+          windowEnd = availEndMin;
+          windowStart = availEndMin - FOUR_HOURS;
+        }
+      }
+
+      const displayWindow = `${toAMPM(windowStart)} - ${toAMPM(windowEnd)}`;
+
       const appointments = appts.map(a => ({
         id: a.appointmentId,
         patientName: a.patientMaster.patientName,
+        patientMasterId: a.patientMaster.patientMasterId,
         duration: `${a.duration} min`,
-        time: `${a.startTime.slice(0,5)} - ${a.endTime.slice(0,5)}`,
+        time: `${toAMPM(a.startTime)} - ${toAMPM(a.endTime)}`,
       }));
 
      const { shortDate, fullDate } = formatPlainDate(dateStr);
@@ -58,8 +105,8 @@ export const mapDoctorSchedule = (apiData: DoctorScheduleAPIResponse) => {
       return {
         shortDate,
         fullDate,
-        location: appts[0].doctorFacilityAvailability.facilityMaster.facilityName,
-        totalHours: `${totalHours.toFixed(1)} hours`,
+        location: firstAppt.doctorFacilityAvailability.facilityMaster.facilityName,
+        totalHours:displayWindow,
         appointments
       };
     });

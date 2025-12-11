@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { UnauthorizedError } from "./apiErrors";
 import router from "next/router";
-import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse, EditDoctorAvailability, DeleteDoctorAvailability } from "@/types/doctor"; 
+import { DoctorAPIResponse, DoctorAvailability, FacilityAPIResponse, DoctorScheduleAPIResponse, SaveNotesRequest, SaveAvailabilityResponse, EditDoctorAvailability, DeleteDoctorAvailability, PatientHistiryDetailsAPIResponse } from "@/types/doctor"; 
 import { fetchL1Request, FacilityDocL1, FetchL1Response , FetchDatesResponse, FetchTimeSlotsRequest, FetchTimeSlotResponse, BookAppointmentRequest, BookAppointmentResponse} from "@/types/patient";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -263,3 +263,10 @@ export async function deleteDoctorAvailability( request: DeleteDoctorAvailabilit
     body: JSON.stringify(request),
   });
 }
+
+export async function getPatientHistoryDetails(patientId: number): Promise<PatientHistiryDetailsAPIResponse>{
+  return apiCall<PatientHistiryDetailsAPIResponse>(`/doctor/patientHistory?patientId=${patientId}`, {
+     method: 'GET',
+  });
+}
+
