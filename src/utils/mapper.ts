@@ -95,6 +95,7 @@ export const mapDoctorSchedule = (apiData: DoctorScheduleAPIResponse) => {
       const appointments = appts.map(a => ({
         id: a.appointmentId,
         patientName: a.patientMaster.patientName,
+        patientMasterId: a.patientMaster.patientMasterId,
         duration: `${a.duration} min`,
         time: `${toAMPM(a.startTime)} - ${toAMPM(a.endTime)}`,
       }));

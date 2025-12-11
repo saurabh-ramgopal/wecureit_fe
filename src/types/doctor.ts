@@ -4,14 +4,7 @@ export interface Appointment {
   time: string;
   duration: string;
   reason?: string;
-}
-
-export interface Day {
-  shortDate: string;
-  fullDate: string;
-  location: string;
-  totalHours: string;
-  appointments: Appointment[];
+  patientMasterId: number;
 }
 
 // Speciality type
@@ -208,4 +201,19 @@ export interface EditDoctorAvailability{
 export interface DeleteDoctorAvailability{
     dfAvailabilityId: string;
     isActive: boolean
+}
+
+export interface PatientHistoryItem {
+  doctorName: string;
+  specialityName: string;
+  appointmentDate: string;  
+  facilityName: string;
+  appointmentNote: string;
+}
+
+export interface PatientHistiryDetailsAPIResponse {
+  patientName: string;
+  patientAge: number;
+  patientGender: 'male' | 'female' | 'other';
+  history: PatientHistoryItem[];
 }

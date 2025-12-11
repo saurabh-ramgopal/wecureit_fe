@@ -4,12 +4,13 @@ import styles from './DayCard.module.scss';
 import {ScheduleDayUI} from "../../../../types/doctor"
 import { Clock ,MapPin} from 'lucide-react';
 interface DayCardProps {
-  schedule: ScheduleDayUI; // now expects your UI-friendly schedule object
+  schedule: ScheduleDayUI; 
+  onPatientApptCardClick: (patientMasterId: number) => void;
 }
 
-const DayCard = ({ schedule }: DayCardProps) => {
+const DayCard = ({ schedule, onPatientApptCardClick }: DayCardProps) => {
   return (
-     <div className={styles['day-card']}>
+     <div className={styles['day-card']} >
       <div className={styles['day-card__header']}>
         <h3 className={styles['day-card__short-date']}>{schedule.shortDate}</h3>
         <p className={styles['day-card__full-date']}>{schedule.fullDate}</p>
@@ -31,9 +32,9 @@ const DayCard = ({ schedule }: DayCardProps) => {
                       }}>{schedule.totalHours}</span>     
               </p>
             </div>
-      <div className={styles['day-card__appointments']}>
+      <div className={styles['day-card__appointments']} >
         {schedule.appointments.map((appt) => (
-          <div key={appt.id} className={styles['appointment-card']}>
+          <div key={appt.id} className={styles['appointment-card']}onClick={() => onPatientApptCardClick(appt.patientMasterId)} >
             <div className={styles['appointment-header']}>
               <p className={styles['appointment-name']}>{appt.patientName}</p>
               <span className={styles['appointment-duration']}>{appt.duration}</span>

@@ -1,0 +1,198 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 62.5rem; // 1000px
+  padding: 1rem;
+}
+
+.modalContent {
+  background-color: var(--bg-card, #ffffff);
+  border-radius: 0.75rem; // 12px
+  max-width: 37.5rem; // 600px
+  width: 100%;
+  max-height: 75vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  padding: 1rem;
+  border-bottom: 0.0625rem solid var(--border-default, #e2e8f0); // 1px
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-card-light, #f8fafc);
+
+  .patientHeaderRow {
+    display: flex;
+    align-items: center;
+  }
+
+  .patientName {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-primary, #1e293b);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ageBadge,
+  .genderBadge {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem; // 6px
+    text-transform: capitalize;
+  }
+
+  .ageBadge {
+    background-color: var(--status-light-info, #e0f2fe);
+    color: var(--text-secondary, #6B7280);
+  }
+
+  .genderBadge {
+    background-color: var(--light, #f3e8ff);
+    color: var(--text-secondary, #6B7280);
+  }
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem; // 8px
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: var(--bg-hover, #f1f5f9);
+  }
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+
+  h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary, #1e293b);
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+}
+
+.noHistory {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted, #94a3b8);
+
+  svg {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .historyCard {
+    padding: 1.25rem;
+    background-color: var(--bg-card-light, #f8fafc);
+    border-radius: 0.75rem; // 12px
+    border: 0.0625rem solid var(--border-default, #e2e8f0); // 1px
+
+    .historyHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+
+      .doctorInfo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .doctorAvatar {
+          width: 2.5rem; // 40px
+          height: 2.5rem; // 40px
+          border-radius: 50%;
+          background-color: var(--primary, #3b82f6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-white, #ffffff);
+          font-weight: 600;
+        }
+
+        h4 {
+          margin: 0;
+          color: var(--text-primary, #1e293b);
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 0.125rem 0 0 0; // 2px
+          color: var(--text-secondary, #64748b);
+          font-size: 0.875rem;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+      }
+
+      .appointmentDate {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--text-secondary, #64748b);
+        font-size: 0.75rem;
+        background-color: var(--status--info, #e0f2fe);
+        padding: 0.375rem 0.625rem;
+        border-radius: 0.375rem; // 6px
+      }
+    }
+
+    .facilityInfo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-secondary, #64748b);
+      font-size: 0.875rem;
+    }
+
+    .note {
+      margin-top: 0.75rem;
+      padding: 0.875rem;
+      background-color: var(--bg-card, #ffffff);
+      border-radius: 0.5rem; // 8px
+      border: 0.0625rem solid var(--border-default, #e2e8f0); // 1px
+
+      p {
+        margin: 0;
+        color: var(--text-primary, #475569);
+        line-height: 1.6;
+        font-size: 0.9375rem;
+
+        strong {
+          color: var(--text-primary, #1e293b);
+        }
+      }
+    }
+  }
+}
