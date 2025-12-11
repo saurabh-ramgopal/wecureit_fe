@@ -350,14 +350,14 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
       const roomSpecNames = hasNonGpInRoom ? namesForIds.filter((n) => String(n) !== DEFAULT_SPECIALITY) : namesForIds;
 
       roomDetailsStructured.push({ roomNumber, roomLabel: `Room ${roomNumber}`, specialityList: roomSpecIds, specialityNames: roomSpecNames });
-      // If the room only has General Practice, add the GP id/code once for this room.
+      
       if (roomSpecNames.length === 1 && String(roomSpecNames[0]) === DEFAULT_SPECIALITY) {
         if (gpId) specialityListOrdered.push(String(gpId));
         else specialityListOrdered.push(DEFAULT_SPECIALITY);
         continue;
       }
 
-      // Otherwise, pick the first non-default speciality for this room and add its id/code.
+      
       const nonDefault = ids.find((id) => {
         const foundSp = specialities.find((sp) => extractId(sp) === id);
         const label = foundSp ? extractName(foundSp) : id;
@@ -507,15 +507,6 @@ const AddFacility: React.FC<AddFacilityProps> = ({ onClose, onSubmit, facility }
                     </select>
                   </div>
                 )}
-              <div className={styles.field}>
-                <label>Number of Rooms *</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={numRooms}
-                  onChange={(e) => setNumRooms(Number(e.target.value))}
-                />
-              </div>
             </div>
           </div>
 
