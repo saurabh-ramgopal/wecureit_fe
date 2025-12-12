@@ -120,6 +120,9 @@ export default function HomeView() {
           <p className={styles.footerText}>
             &copy; 2025 WeCureIT. All rights reserved.
           </p>
+          <p className={styles.footerText}>
+            &copy; THE SOFTWARE IS NOT HIPAA COMPLIANT OR ANY OTHER COMPLIANCE REQUIREMENT.
+          </p>
           <div className={styles.footerLinks}>
             <a href="#" className={styles.footerLink}>Privacy Policy</a>
             <a href="#" className={styles.footerLink}>Terms of Service</a>
