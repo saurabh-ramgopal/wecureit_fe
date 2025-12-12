@@ -7,6 +7,7 @@ import { Doctor, FacilityAvailability, FacilityAvailabilityUI, FacilityAvailabil
 import WorkingHoursDropdown from '../WorkingHoursDropdown/WorkingHoursDropdown';
 import DraftAvailabilitySummary from '../DraftAvailabilitySummary/DraftAvailabilitySummary';
 import SavedAvailabilitySummary from '../SavedAvailabilitySummary/SavedAvailabilitySummary';
+import { formatPlainDate } from '@/utils/utils';
 
 type SetDoctorAvailabilityProps = {
     doctor: Doctor;
@@ -26,6 +27,7 @@ type SetDoctorAvailabilityProps = {
 }
 
 const SetDoctorAvailability= ({doctor,pastAppointmentsList, handleSetAvailabilitySubmit, selectedDate, selectedFacilityId, onDateChange, handleFacilityChange, onDelete, availabilityList, handleSaveAvailabilitySubmit, savedAvailabilityList, handleEditAvailabilitySubmit, handleDeleteAvailabilitySubmit} : SetDoctorAvailabilityProps) => {
+    const {shortDate, fullDate} = formatPlainDate(selectedDate);
   return (
     <>
     <div className={styles['setavailability-card']}>
@@ -34,7 +36,7 @@ const SetDoctorAvailability= ({doctor,pastAppointmentsList, handleSetAvailabilit
      <SelectDayCards onDateSelect={onDateChange} pastAppointmentsList={pastAppointmentsList} />
        {selectedDate && (
         <>
-          <SetAvailabilityHeader title={`Set Facility for ${selectedDate}`} />
+          <SetAvailabilityHeader title={`Set Facility for ${fullDate}`} />
           <SelectFacilityCards selectedFacilityId={selectedFacilityId} doctor={doctor} onSelectFacility={handleFacilityChange} />
           {selectedFacilityId && (
             <>
