@@ -8,7 +8,7 @@ interface Day {
   dateNumber: string; 
   month: string;      
   formattedDate: string; 
-  isoDate: string;
+  formattedISODate: string;
   
 }
 type SelectDayCardsProps = {
@@ -36,9 +36,16 @@ const generateTwoWeeks = (): Day[] => {
     const month = date.toLocaleDateString('en-US', { month: 'short' });
     const dateNumber = date.getDate().toString();
     const formattedDate = `${dayName}, ${month} ${dateNumber}`;
-    const isoDate = date.toISOString().split("T")[0];
 
-    days.push({ dayName, month, dateNumber, formattedDate, isoDate });
+    const monthMap = {
+            Jan: "01", Feb: "02", Mar: "03", Apr: "04",
+            May: "05", Jun: "06", Jul: "07", Aug: "08",
+            Sep: "09", Oct: "10", Nov: "11", Dec: "12"
+          } as const;
+    const monthNumber = monthMap[month as keyof typeof monthMap];
+
+    const formattedISODate = `${date.getFullYear()}-${monthNumber}-${dateNumber.toString().padStart(2, '0')}`;
+    days.push({ dayName, month, dateNumber, formattedDate, formattedISODate });
   }
 
   return days;
@@ -59,7 +66,7 @@ const SelectDayCards = ({onDateSelect, pastAppointmentsList} : SelectDayCardsPro
           const isDisabled = pastAppointmentsList.some
             (item => {
               const itemDate = new Date(item.fullDate);
-              const dayDate = new Date(day.isoDate);
+              const dayDate = new Date(day.formattedISODate);
                 return (
                 itemDate.getFullYear() === dayDate.getFullYear() &&
                 itemDate.getMonth() === dayDate.getMonth() &&
@@ -72,8 +79,8 @@ const SelectDayCards = ({onDateSelect, pastAppointmentsList} : SelectDayCardsPro
       <AvailabilityDayCard
         key={i}
         day={day}
-        onDateSelect={() => handleDateSelect(day.isoDate)}
-        selected={selectedDate === day.isoDate}
+        onDateSelect={() => handleDateSelect(day.formattedISODate)}
+        selected={selectedDate === day.formattedISODate}
         disabled={isDisabled} 
       />
     );
