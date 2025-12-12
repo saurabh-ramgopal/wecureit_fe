@@ -16,10 +16,19 @@ const DayCard = ({ schedule, onPatientApptCardClick }: DayCardProps) => {
         <p className={styles['day-card__full-date']}>{schedule.fullDate}</p>
         </div>
         <div className={styles['day-card__details']}>
-              <p className={styles['day-card__location']}>
-                <MapPin size={16} style={{ marginRight: '0.5rem', color:'var(--primary)' }} />
-                {schedule.location}
-              </p>
+               <p className={styles['day-card__location']} style={{ alignItems: 'flex-start' }}>
+                  <MapPin size={16} style={{ marginRight: '0.5rem', color:'var(--primary)', flexShrink: 0, marginTop: '0.2rem' }} />
+                  <span style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                    <span>{schedule.location}</span>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      color: 'var(--text-tertiary, #999)', 
+                      fontWeight: '400'
+                    }}>
+                      {schedule.facilityStreet}, {schedule.stateName}
+                    </span>
+                  </span>
+                </p>
               <p className={styles['day-card__total-hours']}>
                 <Clock size={16} style={{ marginRight: '0.5rem' }} />
                  {/* <span style={{ marginRight: '0.5rem' }}>Schedule:</span> */}
@@ -32,9 +41,9 @@ const DayCard = ({ schedule, onPatientApptCardClick }: DayCardProps) => {
                       }}>{schedule.totalHours}</span>     
               </p>
             </div>
-      <div className={styles['day-card__appointments']} >
+        <div className={styles['day-card__appointments']} >
         {schedule.appointments.map((appt) => (
-          <div key={appt.id} className={styles['appointment-card']}onClick={() => onPatientApptCardClick(appt.patientMasterId)} >
+          <div key={appt.id} className={styles['appointment-card']} style={{ cursor: 'pointer' }} title="Click to view patient history" onClick={() => onPatientApptCardClick(appt.patientMasterId)} >
             <div className={styles['appointment-header']}>
               <p className={styles['appointment-name']}>{appt.patientName}</p>
               <span className={styles['appointment-duration']}>{appt.duration}</span>

@@ -44,8 +44,6 @@ export const mapDoctorSchedule = (apiData: DoctorScheduleAPIResponse) => {
 
       const [firstAppt] = appts;
 
-      // Calculate total hours
-      const totalHours = appts.reduce((sum, a) => sum + a.duration / 60, 0);
 
       const dayStart = firstAppt.startTime;                      
       const dayEnd = appts[appts.length - 1].endTime;     
@@ -107,6 +105,8 @@ export const mapDoctorSchedule = (apiData: DoctorScheduleAPIResponse) => {
         fullDate,
         location: firstAppt.doctorFacilityAvailability.facilityMaster.facilityName,
         totalHours:displayWindow,
+        facilityStreet: firstAppt.doctorFacilityAvailability.facilityMaster.facilityStreet,
+        stateName: firstAppt.doctorFacilityAvailability.facilityMaster.stateCode.stateName,
         appointments
       };
     });

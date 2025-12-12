@@ -152,10 +152,12 @@ export type DoctorScheduleAPIResponse = DoctorScheduleAPIAppointment[];
 
 
 export interface ScheduleDayUI {
-  shortDate: string;      // e.g., "Thu, Dec 01"
-  fullDate: string;       // e.g., "December 1, 2025"
-  location: string;       // e.g., "Bethesda Health Center"
-  totalHours: string;     // e.g., "1.0 hours"
+  shortDate: string;      
+  fullDate: string;     
+  location: string;     
+  totalHours: string; 
+  facilityStreet: string;
+  stateName: string; 
   appointments: Appointment[];
 }
 
